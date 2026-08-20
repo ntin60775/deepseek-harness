@@ -202,6 +202,33 @@ export type PresetTrust = 'system' | 'user'
 
 Source: [`packages/preset/agent-presets/src/preset.ts:52`](../packages/preset/agent-presets/src/preset.ts)
 
+<a id="deepseek-aidsh-agent-rules"></a>
+
+## `@deepseek-ai/dsh-agent-rules`
+
+Requires: `agents` · `tools`
+
+```ts config-catalog
+/** User-facing agent rules loader configuration. */
+export interface Config {
+  /**
+   * omp user agent directory holding `rules/` and `RULES.md`; defaults to
+   * `PI_CODING_AGENT_DIR` when set, otherwise `~/.omp/agent`. `~` prefixes expand.
+   */
+  ompAgentDir?: string
+  /** Directory entries that identify the project root while walking upward from the session cwd. */
+  projectRootMarkers?: string[]
+  /** UTF-8 byte cap for one rendered rule context message; non-positive or non-finite disables loading. */
+  maxBytes: number
+  /** Maximum UTF-8 bytes read from one rule file; larger files are ignored. */
+  maxSourceBytes?: number
+  /** Maximum normalized description length rendered per rulebook entry; minimum 3. */
+  catalogDescriptionMaxLength?: number
+}
+```
+
+Source: [`packages/context/agent-rules/src/config.ts:20`](../packages/context/agent-rules/src/config.ts)
+
 <a id="deepseek-aidsh-agent-spine-demo"></a>
 
 ## `@deepseek-ai/dsh-agent-spine-demo`

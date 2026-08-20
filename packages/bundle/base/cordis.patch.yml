@@ -234,6 +234,11 @@
       config:
         maxBytes: 65536
 
+    - id: agent-rules
+      name: '@deepseek-ai/dsh-agent-rules'
+      config:
+        maxBytes: 65536
+
     - id: skill
       name: '@deepseek-ai/dsh-skill'
 
