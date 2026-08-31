@@ -131,6 +131,7 @@ export function launchAcpTestAgent(options: AcpTestLaunchOptions): LaunchedAcpTe
       ...options.env,
       DSH_HOME: join(cwd, '.dsh'),
       DSH_AGENTS_HOME: join(cwd, '.agents'),
+      PI_CODING_AGENT_DIR: join(cwd, '.omp-agent'),
     },
   })
   const child = spawn(

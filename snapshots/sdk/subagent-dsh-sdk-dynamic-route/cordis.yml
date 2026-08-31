@@ -34,6 +34,7 @@
         model: mock-routed
         env:
           DSH_TELEMETRY_DISABLED: '1'
+          DSH_SNAPSHOT: !!js process.env.DSH_SNAPSHOT ?? 'replay'
 
     - id: subagent-model-selection-settings
       name: '@deepseek-ai/dsh-tool-subagent/model-selection-settings'

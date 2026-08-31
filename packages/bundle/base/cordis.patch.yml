@@ -280,6 +280,10 @@
       name: '@deepseek-ai/dsh-agent-rules'
       config:
         maxBytes: 65536
+      # The upstream snapshot corpus was recorded without this fork-local plugin;
+      # its `rule` tool would change every recorded request header. DSH_SNAPSHOT is
+      # set by all snapshot harnesses (replay and record), keeping fixtures stable.
+      disabled: !!js process.env.DSH_SNAPSHOT !== undefined
 
     - id: skill
       name: '@deepseek-ai/dsh-skill'

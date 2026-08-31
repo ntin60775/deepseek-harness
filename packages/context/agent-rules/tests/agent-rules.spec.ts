@@ -6,7 +6,7 @@ import { Context } from '@deepseek-ai/cordis'
 import Loader from '@deepseek-ai/cordis-plugin-loader'
 import AgentRegistry, { agentEvents, Inbox, type Agent } from '@deepseek-ai/dsh-agent'
 import LocalFileSystem from '@deepseek-ai/dsh-fs-local'
-import { CallId } from '@deepseek-ai/dsh-llm'
+import { ToolCallId } from '@deepseek-ai/dsh-llm'
 import { Session, SessionId, SESSION_FORMAT_VERSION, type UserMessage } from '@deepseek-ai/dsh-session'
 import SystemPrompt from '@deepseek-ai/dsh-system-prompt'
 import ToolRuntime from '@deepseek-ai/dsh-tools'
@@ -376,7 +376,7 @@ describe('agent-rules plugin', () => {
     const agent = agentForCwd(root)
     const hit = await ctx.tools.execute({
       signal: testSignal,
-      callId: CallId('rule-hit'),
+      callId: ToolCallId('rule-hit'),
       name: 'rule',
       arguments: { name: 'db' },
       agent,
@@ -386,7 +386,7 @@ describe('agent-rules plugin', () => {
     expect(JSON.stringify(hit.content)).toContain('.omp/rules/db.md')
     const missed = await ctx.tools.execute({
       signal: testSignal,
-      callId: CallId('rule-miss'),
+      callId: ToolCallId('rule-miss'),
       name: 'rule',
       arguments: { name: 'nope' },
       agent,

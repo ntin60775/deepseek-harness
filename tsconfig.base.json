@@ -257,6 +257,8 @@
       "@deepseek-ai/dsh-agent-loop-testkit/invariant": ["./packages/test-support/agent-loop-testkit/src/invariant.ts"],
       "@deepseek-ai/dsh-agent-presets": ["./packages/preset/agent-presets/src"],
       "@deepseek-ai/dsh-agent-presets/invariant": ["./packages/preset/agent-presets/src/invariant.ts"],
+      "@deepseek-ai/dsh-agent-rules": ["./packages/context/agent-rules/src"],
+      "@deepseek-ai/dsh-agent-rules/invariant": ["./packages/context/agent-rules/src/invariant.ts"],
       "@deepseek-ai/dsh-agent-spine-demo": ["./packages/examples/agent-spine-demo/src"],
       "@deepseek-ai/dsh-agent-spine-demo/invariant": ["./packages/examples/agent-spine-demo/src/invariant.ts"],
       "@deepseek-ai/dsh-agent-tool-presentation": ["./packages/core/agent-tool-presentation/src"],

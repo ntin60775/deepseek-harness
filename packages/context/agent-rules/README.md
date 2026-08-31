@@ -1,10 +1,79 @@
+---
+description: "oh-my-pi-compatible .omp rule loading for users and maintainers enabling, sizing, or debugging rule discovery, injection, and the rule tool."
+kind: "package-reference"
+---
+
 # @deepseek-ai/dsh-agent-rules
 
 English | [中文](README.zh.md)
 
-oh-my-pi-compatible rule loading for `.omp` rule files. The plugin discovers project and user rules, injects always-apply rule bodies into durable history as one rule context message, and lists description-carrying rules in an on-demand catalog whose bodies the `rule` tool serves.
+## Summary
 
-## Discovery
+`dsh-agent-rules` loads oh-my-pi-compatible rules from `.omp` rule files into model context: it discovers project and user rules, injects always-apply rule bodies into durable history as one rule context message, and lists description-carrying rules in an on-demand catalog whose bodies the `rule` tool serves. It ships in the base bundle with a 65,536-byte budget. Everything is bounded by that budget: always-apply bodies that do not fit are omitted broadest-first before the most specific body is truncated, and an empty rule set contributes nothing. Discovery rereads rule files every eligible step; publication is digest-gated so an unchanged rule set costs no tokens.
+
+## Table of Contents
+
+- [Use this package](#use-this-package)
+- [Understand the implementation](#understand-the-implementation)
+- [Further Exploration](#further-exploration)
+- [Model Experience](#model-experience)
+- [Known Limitations and Deferred Work](#known-limitations-and-deferred-work)
+- [Dev Note](#dev-note)
+
+-----
+
+<a id="use-this-package"></a>
+## Use this package
+
+Mount this plugin when agents should follow oh-my-pi rule files. The base bundle already includes it with a 65,536-byte budget, so most compositions only adjust `maxBytes`; providerless trees load nothing until a filesystem provider is present.
+
+### What the agent gets
+
+The first eligible `agent/pre-step` publishes one durable rule context message: always-apply rule bodies as `Rules from: <path>` sections (broadest scope first, most specific last), then the `<available_rules>` catalog of description-carrying rules, then the instruction to load rule bodies through the `rule` tool. A changed rule set appends one complete replacement message; a rule set that disappears earns an explicit empty replacement that retires every earlier rule.
+
+### Configuration
+
+Only `maxBytes` is required — it caps the complete rendered rule context message so each deployment chooses its prompt budget explicitly.
+
+```yaml
+- name: '@deepseek-ai/dsh-agent-rules'
+  config:
+    maxBytes: 65536
+```
+
+| Key | Default | Effect |
+|---|---|---|
+| `maxBytes` | — (required) | UTF-8 byte cap for one rendered rule context message; non-positive or non-finite disables loading. |
+| `maxSourceBytes` | 1 MiB | Maximum UTF-8 bytes read from one rule file; larger files are ignored. |
+| `ompAgentDir` | `$PI_CODING_AGENT_DIR`, else `~/.omp/agent` | omp user agent directory holding `rules/` and `RULES.md`; `~` prefixes expand. |
+| `projectRootMarkers` | `['.git']` | Directory entries that identify the project root while walking upward from the session cwd. |
+| `catalogDescriptionMaxLength` | 500 | Maximum normalized description length rendered per catalog entry; minimum 3. |
+
+The generated [configuration catalog](../../../docs/config-catalog.md#deepseek-aidsh-agent-rules) is the exhaustive source of truth for every supported field and its source declaration.
+
+### Tool: `rule`
+
+| Arg | Type | Notes |
+|---|---|---|
+| `name` | string (required) | Exact rule name from the session rule catalog. |
+
+Execution rediscovers the rule set for the calling agent's session cwd and returns the canonical `{ name, path, content }` of the exact-name match among always-apply and rulebook rules. An unknown name fails with the list of currently available rule names.
+
+### Budgeting and bounded reads
+
+Each rule file is read under `maxSourceBytes`. The rendered message is capped at `maxBytes`: always-apply sections that do not fit are omitted broadest-first, the most specific surviving body is truncated to fit, and every omission and truncation is named in a notice line inside the message. When even the framing and catalog exceed the budget, the message degrades to the compact budget notice.
+
+-----
+
+<a id="understand-the-implementation"></a>
+## Understand the implementation
+
+<details>
+<summary>Implementation details — click to expand</summary>
+
+This section explains the design decisions behind the plugin; observable behavior lives in [Use this package](#use-this-package).
+
+### Discovery
 
 Four sources feed one name-deduplicated rule set, in merge order with first-wins deduplication, so a project rule shadows a user rule of the same name:
 
@@ -17,36 +86,38 @@ Empty files contribute nothing. A rule's name is its file basename without the `
 
 Discovery reads use the optional `ctx.fs` provider. The plugin does not statically inject `fs`, so providerless product trees still boot and rule loading becomes a no-op until a provider is present.
 
-## Lifecycle
+### Lifecycle
 
 Every eligible `agent/pre-step` rediscovers the rule set for the session cwd and digests the published records — catalog entries plus always-apply name, path, and content digests. When the digest matches the visible publication, the batch proceeds untouched. A changed digest appends one complete replacement message; a rule set that disappears after publishing earns an explicit empty replacement that retires every earlier rule. When compaction hides the visible publication, the next observation re-establishes the current context. The context is emitted only when the calling agent resolves this plugin's exact `rule` tool registration, so a restricted or shadowed tool removes both the schema and the catalog pointing at it.
 
-## Prompt Shape
+### Source map
 
-The rule context is a durable user-role message framed with the system-reminder pattern: always-apply bodies as `Rules from: <path>` sections, broadest scope first and most specific last, then the `<available_rules>` catalog of `- \`name\` (\`glob\`, ...): description` lines, then the instruction to load rule bodies through the `rule` tool. Display paths are project-root-relative for project rules and home-anchored (`~/.omp/agent/...`) for user rules.
+| File | Responsibility |
+|---|---|
+| [`src/index.ts`](src/index.ts) | Plugin entry: pre-step listener, `rule` tool registration, context emission |
+| [`src/config.ts`](src/config.ts) | `Config` schema and budget resolution |
+| [`src/discovery.ts`](src/discovery.ts) | Four-source rule discovery, frontmatter parsing, deduplication |
+| [`src/render.ts`](src/render.ts) | Rule context rendering, budget omission and truncation, notices |
+| [`src/rule.ts`](src/rule.ts) | Rule record types and name/path canonicalization |
+| [`src/state.ts`](src/state.ts) | Published-record digests and reconciliation against visible history |
+| [`src/invariant.ts`](src/invariant.ts) | Durable-context convention invariant companion plugin |
 
-## Configuration
+</details>
 
-| Key | Default | Effect |
-|---|---|---|
-| `maxBytes` | — (required) | UTF-8 byte cap for one rendered rule context message; non-positive or non-finite disables loading. |
-| `maxSourceBytes` | 1 MiB | Maximum UTF-8 bytes read from one rule file; larger files are ignored. |
-| `ompAgentDir` | `$PI_CODING_AGENT_DIR`, else `~/.omp/agent` | omp user agent directory holding `rules/` and `RULES.md`; `~` prefixes expand. |
-| `projectRootMarkers` | `['.git']` | Directory entries that identify the project root while walking upward from the session cwd. |
-| `catalogDescriptionMaxLength` | 500 | Maximum normalized description length rendered per catalog entry; minimum 3. |
+-----
 
-## Budgeting And Bounded Reads
+<a id="further-exploration"></a>
+## Further Exploration
 
-Each rule file is read under `maxSourceBytes`. The rendered message is capped at `maxBytes`: always-apply sections that do not fit are omitted broadest-first, the most specific surviving body is truncated to fit, and every omission and truncation is named in a notice line inside the message. When even the framing and catalog exceed the budget, the message degrades to the compact budget notice.
+Read these pages when the package-level contract is not enough. They move from the rule-file format to the design decision and the exhaustive configuration.
 
-## Tool: `rule`
+- [oh-my-pi compatibility decision record](../../../.agents/notes/implemented/feature/2026-08-20-agent-rules-omp-compat.md) — discovery and injection rationale.
+- [Context group map](../README.md) — sibling request-context packages.
+- [Generated configuration catalog](../../../docs/config-catalog.md#deepseek-aidsh-agent-rules) — every accepted config field and its source declaration.
 
-| Arg | Type | Notes |
-|---|---|---|
-| `name` | string (required) | Exact rule name from the session rule catalog. |
+-----
 
-Execution rediscovers the rule set for the calling agent's session cwd and returns the canonical `{ name, path, content }` of the exact-name match among always-apply and rulebook rules. An unknown name fails with the list of currently available rule names.
-
+<a id="model-experience"></a> <a id="prompt-shape"></a>
 ## Model Experience
 
 ### Session rule context
@@ -85,9 +156,23 @@ The unchanged context is append-only and prefix-stable. A replacement message ap
 
 ## Known Limitations and Deferred Work
 
+<a id="known-limitations-and-deferred-work"></a>
+
+These limits define when rule loading is a poor fit or needs operational awareness. They are current package constraints, not a task backlog.
+
 - **No TTSR enforcement** — rules declaring `condition`, `astCondition`, `scope`, or `interruptMode` load with a discovery warning and bucket by their remaining metadata; stream interruption requires agent-loop support and is a separate feature.
 - **No `@` import expansion** — oh-my-pi expands `@path` tokens inside context files; rule bodies here are injected verbatim.
 - **No `.omp/AGENTS.md` context files** — only the rule surfaces (`rules/` directories and `RULES.md`) are read; workspace instruction files remain the `dsh-agent-instructions` package's contract.
 - **No other tools' rule formats** — Cursor `.mdc` rules load only when placed under `.omp/rules/`; `.cursor/rules/`, `.clinerules`, and `.github/instructions/` directories are not discovered.
 - **No cross-prompt deduplication** — an always-apply rule whose body already appears in the system prompt or a loaded instruction file is injected again; oh-my-pi omits such rules.
 - **Discovery rereads rule files every step** — publication is digest-gated so unchanged rules cost no tokens, but the filesystem reads are not cached across steps.
+
+<a id="dev-note"></a>
+### Dev Note
+
+<details>
+<summary>Working context for maintainers — click to expand</summary>
+
+None.
+
+</details>
