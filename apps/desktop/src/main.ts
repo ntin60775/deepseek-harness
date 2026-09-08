@@ -45,6 +45,9 @@ protocol.registerSchemesAsPrivileged([{
 // (deepseek-harness-desktop.desktop), and the PNG gives X11 a window icon.
 if (!app.isPackaged) {
   app.setName('deepseek-harness-desktop')
+  // Wayland app_id comes from the desktop name; it selects the taskbar icon
+  // through the matching desktop file.
+  app.setDesktopName('deepseek-harness-desktop')
 }
 
 const MIME: Readonly<Record<string, string>> = {
