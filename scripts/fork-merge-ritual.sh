@@ -206,8 +206,9 @@ PY
 log "github actions: e2e workflow stays disabled"
 if command -v gh >/dev/null 2>&1; then
   # gh's {owner}/{repo} placeholders resolve only with a matching host
-  # credential; derive the slug from the origin remote instead.
-  ORIGIN_SLUG="$(git remote get-url origin | sed -E 's#^.*[:/]([^/]+/[^/]+?)(\.git)?$#\1#')"
+  # credential; derive the slug from the origin remote instead. POSIX sed
+  # has no lazy quantifiers, so strip .git and take the last two fields.
+  ORIGIN_SLUG="$(git remote get-url origin | sed 's/\.git$//' | awk -F'[/:]' '{print $(NF-1) "/" $NF}')"
   STATE="$(gh api "repos/$ORIGIN_SLUG/actions/workflows/$E2E_WORKFLOW_ID" \
     --jq .state 2>/dev/null || echo unknown)"
   echo "e2e.yml state ($ORIGIN_SLUG): $STATE"
