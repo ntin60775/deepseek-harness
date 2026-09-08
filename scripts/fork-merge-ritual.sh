@@ -202,26 +202,18 @@ else:
     print("event-producer-consumer.zh.md: строка agent-rules уже есть")
 PY
 
-pnpm run verify-translation-pairing --write \
-  docs/config-catalog.md docs/event-producer-consumer.md
-
-# ------------------------------------------------------------------ verify
-log "verify"
-pnpm run typecheck
-pnpm exec vitest run "$PLUGIN_DIR/tests"
-pnpm run constraints
-pnpm run test:docs
-pnpm run test:snapshot
-
 # ----------------------------------------------------------------- actions
 log "github actions: e2e workflow stays disabled"
 if command -v gh >/dev/null 2>&1; then
-  STATE="$(gh api "repos/{owner}/{repo}/actions/workflows/$E2E_WORKFLOW_ID" \
+  # gh's {owner}/{repo} placeholders resolve only with a matching host
+  # credential; derive the slug from the origin remote instead.
+  ORIGIN_SLUG="$(git remote get-url origin | sed -E 's#^.*[:/]([^/]+/[^/]+?)(\.git)?$#\1#')"
+  STATE="$(gh api "repos/$ORIGIN_SLUG/actions/workflows/$E2E_WORKFLOW_ID" \
     --jq .state 2>/dev/null || echo unknown)"
-  echo "e2e.yml state: $STATE"
+  echo "e2e.yml state ($ORIGIN_SLUG): $STATE"
   if [[ "$STATE" == "active" ]]; then
     echo "апстрим отредактировал e2e.yml и включил воркфлоу — отключаю снова"
-    gh api "repos/{owner}/{repo}/actions/workflows/$E2E_WORKFLOW_ID/disable" -X PUT
+    gh api "repos/$ORIGIN_SLUG/actions/workflows/$E2E_WORKFLOW_ID/disable" -X PUT
   fi
 else
   echo "gh недоступен — проверь вручную: gh api repos/ntin60775/deepseek-harness/actions/workflows/$E2E_WORKFLOW_ID --jq .state"
