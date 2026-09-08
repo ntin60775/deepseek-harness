@@ -29,9 +29,16 @@ PLUGIN_PKG="@deepseek-ai/dsh-agent-rules"
 
 # Generated documents this fork consumes: take upstream's side on conflict and
 # regenerate; the fork's own rows return through the generators, not by hand.
+# The pair (zh + i18n) files of the two fork-row catalogs resolve the same way:
+# the docs phase re-adds the fork's zh rows from the regenerated English and
+# re-records the pairing hashes.
 GENERATED_CONFLICTS=(
   docs/config-catalog.md
+  docs/config-catalog.zh.md
+  docs/config-catalog.i18n.yaml
   docs/event-producer-consumer.md
+  docs/event-producer-consumer.zh.md
+  docs/event-producer-consumer.i18n.yaml
   docs/capability-seams.md
   docs/agent-lifecycle.md
   docs/tool-execution-pipeline.md
@@ -88,6 +95,9 @@ if [[ "$MERGE_IN_PROGRESS" == 1 ]]; then
     resolution_guide
     die "остались конфликты, которые скрипт не разрешает — почини и запусти снова"
   fi
+  # The full pre-commit lane regenerates third-party notices from node_modules;
+  # a merge that changed manifests fails that hook until the new graph is installed.
+  pnpm install
   git commit --no-edit
   echo "merge-коммит создан"
   MERGED_NOW=1
@@ -106,6 +116,7 @@ else
       resolution_guide
       die "остались конфликты, которые скрипт не разрешает — почини и запусти снова"
     fi
+    pnpm install
     git commit --no-edit
     echo "merge-коммит создан"
     MERGED_NOW=1
