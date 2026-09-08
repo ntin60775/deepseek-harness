@@ -9,7 +9,7 @@
  */
 
 import type { Agent } from '@deepseek-ai/dsh-agent'
-import type { UserMessage } from '@deepseek-ai/dsh-session'
+import { SessionSeq, type UserMessage } from '@deepseek-ai/dsh-session'
 import {
   digestAgentRulesContent,
   type AgentRulesAlwaysApplyRecord,
@@ -93,13 +93,15 @@ export function agentRulesSourceDigest(source: unknown): string | undefined {
  * @returns the visible digest when one survives, and whether any publication exists.
  */
 export function agentRulesHistory(agent: Agent): { visibleDigest?: string; published: boolean } {
-  const visible = new Set(agent.session.surface.nodes)
-  const events = agent.session.events
+  const session = agent.session
+  const visible = new Set(session.surface.nodes)
   let published = false
-  for (let index = events.length - 1; index >= 0; index -= 1) {
-    // The loop bounds prove the read-only event view contains this index.
+  // The full log is scanned, not the surface: a publication that compaction
+  // hid still counts as published, so only its visibility is per-surface.
+  for (let seq = session.seq - 1; seq >= 0; seq -= 1) {
+    // The descending bounds prove this log position exists.
     // oxlint-disable-next-line typescript/no-non-null-assertion
-    const event = events[index]!
+    const event = session.eventAt(SessionSeq(seq))!
     if (event.type !== 'user/message' || event.data.source.kind !== 'agent-rules') continue
     const digest = agentRulesSourceDigest(event.data.source)
     if (digest === undefined) continue
