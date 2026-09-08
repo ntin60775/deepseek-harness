@@ -100,7 +100,7 @@ kind: "package-reference"
 | [`src/render.ts`](src/render.ts) | 规则上下文渲染、预算省略与截断、通知 |
 | [`src/rule.ts`](src/rule.ts) | 规则记录类型与名称/路径规范化 |
 | [`src/state.ts`](src/state.ts) | 已发布记录 digest 与可见历史的对账 |
-| [`src/invariant.ts`](src/invariant.ts) | 持久上下文约定的不变式伴生插件 |
+| — | 不发布运行时不变式伴生入口；回放会容忍未知或格式错误的 agent-rules source，发布转换由聚焦的 discovery 与 rendering 测试覆盖。 |
 
 </details>
 

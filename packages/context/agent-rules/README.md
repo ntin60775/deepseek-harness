@@ -100,7 +100,7 @@ Every eligible `agent/pre-step` rediscovers the rule set for the session cwd and
 | [`src/render.ts`](src/render.ts) | Rule context rendering, budget omission and truncation, notices |
 | [`src/rule.ts`](src/rule.ts) | Rule record types and name/path canonicalization |
 | [`src/state.ts`](src/state.ts) | Published-record digests and reconciliation against visible history |
-| [`src/invariant.ts`](src/invariant.ts) | Durable-context convention invariant companion plugin |
+| — | No runtime invariant companion is published; replay intentionally tolerates unknown or malformed agent-rules sources, while focused discovery and rendering tests own the publication transitions. |
 
 </details>
 
