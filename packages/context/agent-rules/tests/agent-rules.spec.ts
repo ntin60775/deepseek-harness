@@ -7,7 +7,7 @@ import Loader from '@deepseek-ai/cordis-plugin-loader'
 import AgentRegistry, { agentEvents, type Agent } from '@deepseek-ai/dsh-agent'
 import LocalFileSystem from '@deepseek-ai/dsh-fs-local'
 import { ToolCallId } from '@deepseek-ai/dsh-llm'
-import { Session, SessionId, SessionSeq, SESSION_FORMAT_VERSION, type UserMessage } from '@deepseek-ai/dsh-session'
+import { Session, SessionId, SESSION_FORMAT_VERSION, type UserMessage } from '@deepseek-ai/dsh-session'
 import { createInboxStub } from '@deepseek-ai/dsh-agent-loop-testkit'
 import SystemPrompt from '@deepseek-ai/dsh-system-prompt'
 import ToolRuntime from '@deepseek-ai/dsh-tools'
@@ -274,7 +274,7 @@ describe('renderAgentRulesContext', () => {
 
 function agentForCwd(cwd: string): Agent {
   const id = SessionId('agent-rules-test')
-  const session = Session.create(id, [], { version: SESSION_FORMAT_VERSION, id, createdAt: 0, isSeeded: false, cwd })
+  const session = Session.create(id, [], { version: SESSION_FORMAT_VERSION, id, createdAt: 0, cwd, isSeeded: false })
   return {
     ctx: new Context(),
     id,
@@ -307,16 +307,9 @@ async function fireStep(ctx: Context, agent: Agent): Promise<void> {
 }
 
 function ruleContextMessages(agent: Agent): UserMessage[] {
-  const session = agent.session
-  const messages: UserMessage[] = []
-  for (let seq = session.seq - 1; seq >= 0; seq -= 1) {
-    // The descending bounds prove this log position exists.
-    // oxlint-disable-next-line typescript/no-non-null-assertion
-    const event = session.eventAt(SessionSeq(seq))!
-    if (event.type !== 'user/message' || event.data.source.kind !== 'agent-rules') continue
-    messages.unshift(event.data)
-  }
-  return messages
+  return agent.session.snapshotEvents()
+    .filter(event => event.type === 'user/message' && event.data.source.kind === 'agent-rules')
+    .map(event => (event as Extract<typeof event, { type: 'user/message' }>).data)
 }
 
 function messageText(message: UserMessage): string {

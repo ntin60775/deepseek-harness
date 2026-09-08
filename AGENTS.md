@@ -153,3 +153,7 @@ Docs accompany every code change: update affected README and JSDoc contracts tog
 ## Vendoring policy
 
 `vendor/` packages are pinned source copies (manifest with upstream SHAs in [vendor/README.md](vendor/README.md)). Update via the sync procedure there; re-apply or retire the logged local modifications; rerun `pnpm run test && pnpm run build`.
+
+## Fork maintenance
+
+This checkout is a fork of `deepseek-ai/deepseek-harness`. Fork-local surfaces: the `packages/context/agent-rules` plugin, its bundle/tsconfig/lock/snapshot wiring, generated-catalog rows (en+zh), the `Fork-local`-marked dev icon patch in `apps/desktop/src/main.ts`, and the GitHub-side disable of `.github/workflows/e2e.yml`. Incorporate upstream with `scripts/fork-merge-ritual.sh` (phases: merge → re-add → install → docs → verify → actions; never pushes). Deploy the Desktop app from this checkout per [running-the-desktop-app](docs/cookbook/running-the-desktop-app.md). The real-API E2E workflow must stay disabled here: `gh api repos/ntin60775/deepseek-harness/actions/workflows/338747924/disable -X PUT` — any edit to its file re-enables it on GitHub ([ritual note](.agents/notes/implemented/process/2026-09-08-fork-merge-ritual.md)).

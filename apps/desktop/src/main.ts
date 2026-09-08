@@ -39,6 +39,17 @@ protocol.registerSchemesAsPrivileged([{
   },
 }])
 
+// Fork-local (dev only): the packaged application carries its own bundle icon.
+// Unpackaged, Electron's app name is the npm package id, so the window manager
+// shows a placeholder. The name below matches the installed desktop file
+// (deepseek-harness-desktop.desktop), and the PNG gives X11 a window icon.
+if (!app.isPackaged) {
+  app.setName('deepseek-harness-desktop')
+  // Wayland app_id comes from the desktop name; it selects the taskbar icon
+  // through the matching desktop file.
+  app.setDesktopName('deepseek-harness-desktop')
+}
+
 const MIME: Readonly<Record<string, string>> = {
   '.css': 'text/css; charset=utf-8',
   '.html': 'text/html; charset=utf-8',
@@ -86,6 +97,8 @@ function createWindow(preload: string): BrowserWindow {
     minWidth: 880,
     minHeight: 600,
     show: false,
+    // Fork-local (dev only): X11 window icon; packaged builds use the bundle icon.
+    ...app.isPackaged ? {} : { icon: join(app.getAppPath(), 'build', 'icon.png') },
     webPreferences: {
       preload,
       nodeIntegration: false,
