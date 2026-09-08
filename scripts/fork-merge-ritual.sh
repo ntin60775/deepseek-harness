@@ -202,6 +202,21 @@ else:
     print("event-producer-consumer.zh.md: строка agent-rules уже есть")
 PY
 
+# The zh rows above were rewritten from the regenerated English text, so their
+# recorded pairing hashes are stale until re-recorded. Stale records pass the
+# text gates and fail doc-sync pairing checks later — record, then verify.
+log "docs: re-record pairing"
+pnpm run verify-translation-pairing --write docs/config-catalog.md docs/event-producer-consumer.md
+pnpm run verify-translation-pairing docs/config-catalog.md docs/event-producer-consumer.md
+
+# ------------------------------------------------------------------- verify
+log "verify: typecheck, plugin tests, constraints, doc gates, snapshots"
+pnpm run typecheck
+pnpm exec vitest run "$PLUGIN_DIR/tests/agent-rules.spec.ts"
+pnpm run constraints
+pnpm run test:docs
+pnpm run test:snapshot
+
 # ----------------------------------------------------------------- actions
 log "github actions: e2e workflow stays disabled"
 if command -v gh >/dev/null 2>&1; then
