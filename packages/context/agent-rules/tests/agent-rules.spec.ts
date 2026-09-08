@@ -4,7 +4,7 @@ import { tmpdir } from 'node:os'
 import { describe, expect, it } from 'vitest'
 import { Context } from '@deepseek-ai/cordis'
 import Loader from '@deepseek-ai/cordis-plugin-loader'
-import AgentRegistry, { agentEvents, Inbox, type Agent } from '@deepseek-ai/dsh-agent'
+import AgentRegistry, { agentEvents, type Agent } from '@deepseek-ai/dsh-agent'
 import LocalFileSystem from '@deepseek-ai/dsh-fs-local'
 import { ToolCallId } from '@deepseek-ai/dsh-llm'
 import { Session, SessionId, SESSION_FORMAT_VERSION, type UserMessage } from '@deepseek-ai/dsh-session'
@@ -273,13 +273,13 @@ describe('renderAgentRulesContext', () => {
 
 function agentForCwd(cwd: string): Agent {
   const id = SessionId('agent-rules-test')
-  const session = Session.create(id, [], { version: SESSION_FORMAT_VERSION, id, createdAt: 0, cwd })
+  const session = Session.create(id, [], { version: SESSION_FORMAT_VERSION, id, createdAt: 0, cwd, isSeeded: false })
   return {
     ctx: new Context(),
     id,
     options: {},
     session,
-    inbox: new Inbox(session, { inserted: () => {}, discarded: () => {}, claimed: () => {} }),
+    inbox: { nextTurn: [], nextStep: [] } as never,
     status: 'idle',
     send: () => {},
     followup: () => {},
@@ -306,7 +306,7 @@ async function fireStep(ctx: Context, agent: Agent): Promise<void> {
 }
 
 function ruleContextMessages(agent: Agent): UserMessage[] {
-  return agent.session.events
+  return agent.session.snapshotEvents()
     .filter(event => event.type === 'user/message' && event.data.source.kind === 'agent-rules')
     .map(event => (event as Extract<typeof event, { type: 'user/message' }>).data)
 }

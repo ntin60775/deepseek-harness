@@ -94,7 +94,7 @@ export function agentRulesSourceDigest(source: unknown): string | undefined {
  */
 export function agentRulesHistory(agent: Agent): { visibleDigest?: string; published: boolean } {
   const visible = new Set(agent.session.surface.nodes)
-  const events = agent.session.events
+  const events = agent.session.snapshotEvents()
   let published = false
   for (let index = events.length - 1; index >= 0; index -= 1) {
     // The loop bounds prove the read-only event view contains this index.
