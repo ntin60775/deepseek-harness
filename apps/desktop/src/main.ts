@@ -356,7 +356,7 @@ async function main(): Promise<void> {
   const createMainWindow = (): BrowserWindow => {
     const window = createWindow(appPreload)
     mainWindow = window
-    window.once('ready-to-show', () => { if (!window.isDestroyed()) window.show() })
+    window.once('ready-to-show', () => { if (!window.isDestroyed()) { window.maximize(); window.show() } })
     window.on('closed', () => { if (mainWindow === window) mainWindow = undefined })
     return window
   }
