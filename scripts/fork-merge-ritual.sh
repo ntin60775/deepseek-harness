@@ -9,7 +9,7 @@
 #   4. install     — pnpm install + full build
 #   5. docs        — regenerate catalogs, sync the fork's zh doc rows, re-record pairing
 #   6. verify      — typecheck, plugin tests, doc gates, workspace constraints, snapshots
-#   7. actions     — ensure the real-API E2E workflow stays disabled on GitHub
+#   7. actions     — ensure the fork-disabled workflows stay disabled on GitHub
 #
 # The script never pushes. An unknown conflict stops the run with the remaining
 # file list and the resolution guide.
@@ -24,6 +24,8 @@ UPSTREAM_REMOTE="${UPSTREAM_REMOTE:-upstream}"
 UPSTREAM_URL="${UPSTREAM_URL:-git@github.com:deepseek-ai/deepseek-harness.git}"
 UPSTREAM_BRANCH="${UPSTREAM_BRANCH:-master}"
 E2E_WORKFLOW_ID="${E2E_WORKFLOW_ID:-338747924}"   # .github/workflows/e2e.yml
+CI_MASTER_WORKFLOW_ID="${CI_MASTER_WORKFLOW_ID:-339387441}" # .github/workflows/ci-master.yml
+SANDBOX_WORKFLOW_ID="${SANDBOX_WORKFLOW_ID:-338747938}"     # .github/workflows/sandbox.yml
 PLUGIN_DIR="packages/context/agent-rules"
 PLUGIN_PKG="@deepseek-ai/dsh-agent-rules"
 
@@ -229,21 +231,25 @@ pnpm run test:docs
 pnpm run test:snapshot
 
 # ----------------------------------------------------------------- actions
-log "github actions: e2e workflow stays disabled"
+log "github actions: fork-disabled workflows stay disabled"
 if command -v gh >/dev/null 2>&1; then
   # gh's {owner}/{repo} placeholders resolve only with a matching host
   # credential; derive the slug from the origin remote instead. POSIX sed
   # has no lazy quantifiers, so strip .git and take the last two fields.
   ORIGIN_SLUG="$(git remote get-url origin | sed 's/\.git$//' | awk -F'[/:]' '{print $(NF-1) "/" $NF}')"
-  STATE="$(gh api "repos/$ORIGIN_SLUG/actions/workflows/$E2E_WORKFLOW_ID" \
-    --jq .state 2>/dev/null || echo unknown)"
-  echo "e2e.yml state ($ORIGIN_SLUG): $STATE"
-  if [[ "$STATE" == "active" ]]; then
-    echo "апстрим отредактировал e2e.yml и включил воркфлоу — отключаю снова"
-    gh api "repos/$ORIGIN_SLUG/actions/workflows/$E2E_WORKFLOW_ID/disable" -X PUT
-  fi
+  # The fork targets Linux x64 only: any edit to these workflow files
+  # re-enables the workflow on GitHub, so re-disable each one that is active.
+  for WORKFLOW_ID in "$E2E_WORKFLOW_ID" "$CI_MASTER_WORKFLOW_ID" "$SANDBOX_WORKFLOW_ID"; do
+    STATE="$(gh api "repos/$ORIGIN_SLUG/actions/workflows/$WORKFLOW_ID" \
+      --jq .state 2>/dev/null || echo unknown)"
+    echo "workflow $WORKFLOW_ID state ($ORIGIN_SLUG): $STATE"
+    if [[ "$STATE" == "active" ]]; then
+      echo "апстрим отредактировал файл воркфлоу $WORKFLOW_ID и включил его — отключаю снова"
+      gh api "repos/$ORIGIN_SLUG/actions/workflows/$WORKFLOW_ID/disable" -X PUT
+    fi
+  done
 else
-  echo "gh недоступен — проверь вручную: gh api repos/ntin60775/deepseek-harness/actions/workflows/$E2E_WORKFLOW_ID --jq .state"
+  echo "gh недоступен — проверь вручную: gh api repos/ntin60775/deepseek-harness/actions/workflows/<id> --jq .state (id: $E2E_WORKFLOW_ID, $CI_MASTER_WORKFLOW_ID, $SANDBOX_WORKFLOW_ID)"
 fi
 
 # ------------------------------------------------------------------ commit
