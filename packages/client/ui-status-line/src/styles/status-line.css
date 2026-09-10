@@ -1,0 +1,94 @@
+/* Status band under the composer.
+ *
+ * The dock is the band: `[data-slot="conversation.composer.dock"]` is the
+ * addressable wrapper the renderer publishes for every slot, and styling it —
+ * rather than only this plugin's own row — lets these segments and the shipped
+ * statistics pills read as one line. The pills keep their markup, their figures
+ * and their click-to-open detail panels; nothing is hidden.
+ *
+ * Plain global class names, mounted by the plugin's own effect. */
+
+/* The renderer's slot anchor carries an inline `display: contents` so it stays
+   out of the shell's layout. Turning it into a box is what lets this plugin's
+   segments and the shipped pills share one band; the override is scoped to this
+   one slot and documented in the package README. */
+[data-slot='conversation.composer.dock'] {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  box-sizing: border-box;
+  max-width: var(--dsh-chat-content-width, 100%);
+  width: 100%;
+  margin: 0 auto;
+  padding: 4px 12px 5px;
+  border-radius: 8px;
+  background: var(--dsw-alias-markdown-code-block);
+  color: var(--dsw-alias-label-tertiary);
+  font-size: var(--dsh-content-font-size, 14px);
+  font-weight: 500;
+  line-height: calc(22px + var(--dsh-content-font-delta, 0px));
+}
+
+/* This plugin's own row is a transparent group inside that band. */
+.dsh-status-line {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+/* The shipped pills row keeps its markup and behavior, flattened to sit inline
+   in the band: its own chrome, padding and type step aside. */
+[data-slot='conversation.composer.dock'] [data-composer-stats] {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  width: auto;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+  font-size: inherit;
+  line-height: inherit;
+}
+
+.dsh-status-line__seg {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.dsh-status-line__glyph {
+  opacity: 0.9;
+}
+
+.dsh-status-line__dim {
+  color: var(--dsw-alias-label-dimmed);
+}
+
+.dsh-status-line__sep {
+  color: var(--dsw-alias-label-dimmed);
+}
+
+.dsh-status-line__context {
+  color: var(--dsw-alias-link);
+}
+
+.dsh-status-line__warn {
+  color: var(--dsw-alias-state-warn-primary);
+}
+
+.dsh-status-line__critical {
+  color: var(--dsw-alias-state-error-primary);
+}
+
+.dsh-status-line__input {
+  color: var(--dsw-alias-label-secondary);
+}
+
+.dsh-status-line__output {
+  color: var(--dsw-alias-link);
+}

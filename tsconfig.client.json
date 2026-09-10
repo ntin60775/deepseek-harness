@@ -104,6 +104,8 @@
     { "path": "./packages/session-query/session-log-export/tsconfig.client.json" },
     { "path": "./packages/client/ui-open-in-app" },
     { "path": "./packages/client/ui-theme" },
+    { "path": "./packages/client/ui-theme-gruvbox" },
+    { "path": "./packages/client/ui-status-line" },
     { "path": "./packages/client/ui-settings" },
     { "path": "./packages/client/ui-settings-general" },
     { "path": "./packages/client/ui-settings-models" },

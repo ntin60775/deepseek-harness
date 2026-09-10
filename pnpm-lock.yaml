@@ -1891,12 +1891,18 @@ importers:
       '@deepseek-ai/dsh-client-ui-skill':
         specifier: workspace:^
         version: link:../../client/ui-skill
+      '@deepseek-ai/dsh-client-ui-status-line':
+        specifier: workspace:^
+        version: link:../../client/ui-status-line
       '@deepseek-ai/dsh-client-ui-subagent':
         specifier: workspace:^
         version: link:../../client/ui-subagent
       '@deepseek-ai/dsh-client-ui-theme':
         specifier: workspace:^
         version: link:../../client/ui-theme
+      '@deepseek-ai/dsh-client-ui-theme-gruvbox':
+        specifier: workspace:^
+        version: link:../../client/ui-theme-gruvbox
       '@deepseek-ai/dsh-client-ui-tool':
         specifier: workspace:^
         version: link:../../client/ui-tool
@@ -4061,6 +4067,45 @@ importers:
         specifier: ~18.3.1
         version: 18.3.31
 
+  packages/client/ui-status-line:
+    devDependencies:
+      '@deepseek-ai/cordis':
+        specifier: workspace:^
+        version: link:../../../vendor/cordis
+      '@deepseek-ai/dsh-api-session-controller':
+        specifier: workspace:^
+        version: link:../../api/session-controller
+      '@deepseek-ai/dsh-client-locale':
+        specifier: workspace:^
+        version: link:../locale
+      '@deepseek-ai/dsh-client-test-runtime':
+        specifier: workspace:^
+        version: link:../../test-support/client-runtime
+      '@deepseek-ai/dsh-client-ui-conversation':
+        specifier: workspace:^
+        version: link:../ui-conversation
+      '@deepseek-ai/dsh-client-ui-renderer':
+        specifier: workspace:^
+        version: link:../ui-renderer
+      '@deepseek-ai/dsh-client-ui-session':
+        specifier: workspace:^
+        version: link:../ui-session
+      '@deepseek-ai/dsh-client-ui-slots':
+        specifier: workspace:^
+        version: link:../ui-slots
+      '@deepseek-ai/dsh-session-stats':
+        specifier: workspace:^
+        version: link:../../session/session-stats
+      '@deepseek-ai/dsh-token-meter':
+        specifier: workspace:^
+        version: link:../../llm/token-meter
+      '@types/react':
+        specifier: ~18.3.1
+        version: 18.3.31
+      react:
+        specifier: ^18.2.0
+        version: 18.3.1
+
   packages/client/ui-subagent:
     devDependencies:
       '@deepseek-ai/cordis':
@@ -4169,6 +4214,15 @@ importers:
       react:
         specifier: ^18.2.0
         version: 18.3.1
+
+  packages/client/ui-theme-gruvbox:
+    devDependencies:
+      '@deepseek-ai/cordis':
+        specifier: workspace:^
+        version: link:../../../vendor/cordis
+      '@deepseek-ai/dsh-client-ui-theme':
+        specifier: workspace:^
+        version: link:../ui-theme
 
   packages/client/ui-tool:
     devDependencies:

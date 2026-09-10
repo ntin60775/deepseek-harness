@@ -4,12 +4,15 @@
     ".agents/notes/implemented/AGENTS.md",
     ".agents/notes/implemented/CLAUDE.md",
     ".agents/notes/implemented/process/2026-09-10-fork-linux-x64-validation-lanes.md",
+    ".agents/notes/implemented/architecture/2026-09-10-fork-web-ui-gruvbox-skin.md",
     ".github/review-ownership/README.md",
     "docs/AGENTS.md",
     "docs/cookbook/running-the-desktop-app.md",
     "docs/cordis-api/inherited.md",
     "docs/i18n/style-samples.md",
     "docs/i18n/terminology.md",
-    "docs/i18n/translation-prompt.md"
+    "docs/i18n/translation-prompt.md",
+    "packages/client/ui-theme-gruvbox/README.md",
+    "packages/client/ui-status-line/README.md"
   ]
 }
