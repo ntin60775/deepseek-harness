@@ -373,6 +373,46 @@ describe('ToolRow', () => {
     expect(failed.queryByText('+2')).toBeNull()
   })
 
+  it('closes a collapsed row with what its card holds: file lines, matches, shell output', () => {
+    const read = render(
+      <ToolRow
+        {...rowProps}
+        variant="read"
+        title="Read"
+        read={{ label: 'src/a.ts', lines: [{ number: 1, text: 'x' }], totalLines: 128, lang: 'ts' }}
+      />,
+    )
+    expect(read.getByText('128 行')).toBeTruthy()
+    read.unmount()
+
+    const search = render(
+      <ToolRow
+        {...rowProps}
+        variant="search"
+        title="Search"
+        search={{
+          card: {
+            kind: 'matches',
+            truncated: false,
+            total: 2,
+            files: [{ path: 'a.ts', matches: [{ lineNumber: 1, line: 'x' }, { lineNumber: 2, line: 'y' }] }],
+          },
+          recovery: undefined,
+        }}
+      />,
+    )
+    expect(search.getByText('2 处匹配')).toBeTruthy()
+    search.unmount()
+
+    const shell = render(
+      <ToolRow
+        {...rowProps}
+        terminal={{ card: { cwd: '/w', running: false, output: 'a\nb\nc' }, copy: { kind: 'shell', command: 'ls', description: undefined } }}
+      />,
+    )
+    expect(shell.getByText('3 行')).toBeTruthy()
+  })
+
   it('an error file row drops the open-file link (the summary is failure prose, not the path)', () => {
     const open = vi.fn()
     const view = render(

@@ -108,6 +108,28 @@ function stateStatus(state: ToolRowState, t: TranslateNS<'conversation'>): strin
   }
 }
 
+/**
+ * Count the results a search card holds: matched lines for a grep card, paths
+ * for a glob card.
+ * @param card - the search card's locale-neutral props.
+ * @returns the retained result count.
+ */
+function searchResultCount(card: SearchCardModel['card']): number {
+  return card.kind === 'paths'
+    ? card.paths.length
+    : card.files.reduce((total, file) => total + file.matches.length, 0)
+}
+
+/**
+ * Count the non-empty lines a terminal card holds.
+ * @param output - the card's captured output, if any.
+ * @returns the line count.
+ */
+function outputLineCount(output: string | undefined): number {
+  if (output === undefined || output === '') return 0
+  return output.split('\n').filter(line => line !== '').length
+}
+
 export function ToolRow({
   t,
   variant,
@@ -171,7 +193,23 @@ export function ToolRow({
     const { added, removed } = diffTotals(diffBody.card.diffs)
     return `+${added} -${removed}`
   }, [diffBody])
-  const suffix = failureLine === null ? summarySuffix ?? diffStat : null
+  // A collapsed row closes with a count of what it holds — the reading the omp
+  // tool frame prints for the same reason: a read window's file, a search's
+  // retained results, a shell run's output. Cards without a total (image, web,
+  // question, generic body) keep the bare summary the shipped row had.
+  const cardStat = useMemo(() => {
+    if (diffBody !== null) return null
+    if (readBody !== null) return t('tool.meta.lines', { count: readBody.totalLines })
+    if (searchBody !== null) {
+      const count = searchResultCount(searchBody.card)
+      return count > 0 ? t('tool.meta.matches', { count }) : null
+    }
+    if (terminalBody === null) return null
+    const count = outputLineCount(terminalBody.card.output)
+    return count > 0 ? t('tool.meta.lines', { count }) : null
+  }, [diffBody, readBody, searchBody, terminalBody, t])
+  const stat = diffStat ?? cardStat
+  const suffix = failureLine === null ? summarySuffix ?? stat : null
   const fileLink = filePath !== undefined && onOpenFile !== undefined && failureLine === null
   const toggleExpand = () => {
     setExpanded(v => !v)
@@ -229,7 +267,7 @@ export function ToolRow({
               </span>
             )}
             {suffix !== null && (
-              <span className={clsx(css.summarySuffix, suffix === diffStat && css.diffStat)}>{suffix}</span>
+              <span className={clsx(css.summarySuffix, stat !== null && suffix === stat && css.stat)}>{suffix}</span>
             )}
           </>
         )}

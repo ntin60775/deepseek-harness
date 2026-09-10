@@ -103,14 +103,16 @@
   color: var(--dsw-alias-label-tertiary);
 }
 
-/* Diff-row +/- totals: the code font, matching the diff body the numbers
-   summarize; a wider gap keeps the digits from reading as part of the path.
-   Two px under the secondary tier (still riding the axis): mono digits read
-   optically larger than the sans path at the same size. Caption, one step
-   dimmer than the suffix's tertiary, so the digits stay behind the path. The
-   half-pixel nudge closes the baseline gap the size difference leaves under
-   the row's box-centering (a transform, so flex layout is untouched). */
-.diffStat {
+/* Trailing row statistic — a diff's +/- totals, a read window's file lines, a
+   search's retained results, a shell run's output lines: the code font,
+   matching the body the numbers summarize; a wider gap keeps the digits from
+   reading as part of the path. Two px under the secondary tier (still riding
+   the axis): mono digits read optically larger than the sans path at the same
+   size. Caption, one step dimmer than the suffix's tertiary, so the digits
+   stay behind the path. The half-pixel nudge closes the baseline gap the size
+   difference leaves under the row's box-centering (a transform, so flex layout
+   is untouched). */
+.stat {
   margin-left: 10px;
   font-family: var(--ds-font-family-code);
   font-size: calc(var(--dsh-content-font-size-secondary, 13px) - 2px);
