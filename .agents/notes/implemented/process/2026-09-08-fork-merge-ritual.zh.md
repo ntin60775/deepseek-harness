@@ -10,7 +10,7 @@ Status: implemented
 
 ## 决策
 
-`scripts/fork-merge-ritual.sh` 把整个并入过程作为有序阶段运行：preflight（干净工作树，或续跑进行中的合并）、merge（仅对本 fork 会重新生成的文件自动 `--theirs` 解冲突）、re-add（校验插件的 `tsconfig.host.json` 引用、base-bundle 区块、snapshot 测试框架的 `PI_CODING_AGENT_DIR` 行是否幸存；把插件版本对齐根版本——`check-workspace-constraints` 的要求）、install + build、docs（运行 `gen-tsconfig-paths`、`gen-doc-graphs`、`gen-config-catalog`，从英文生成文本同步插件的中文目录小节与事件矩阵行，重录 pairing 哈希）、verify（`typecheck`、插件测试、`constraints`、`test:docs`、`test:snapshot`），最后一步检查 GitHub Actions：若上游编辑重新激活了 `e2e.yml` 就再次禁用。脚本提交修复轮，但从不 push。它不拥有的冲突会终止运行，列出文件清单并给出内联解决指南。
+`scripts/fork-merge-ritual.sh` 把整个并入过程作为有序阶段运行：preflight（干净工作树，或续跑进行中的合并）、merge（仅对本 fork 会重新生成的文件自动 `--theirs` 解冲突）、re-add（校验插件的 `tsconfig.host.json` 引用、base-bundle 区块、snapshot 测试框架的 `PI_CODING_AGENT_DIR` 行是否幸存；把插件版本对齐根版本——`check-workspace-constraints` 的要求）、install + build、docs（运行 `gen-tsconfig-paths`、`gen-doc-graphs`、`gen-config-catalog`，从英文生成文本同步插件的中文目录小节与事件矩阵行，重录 pairing 哈希）、verify（`typecheck`、插件测试、`constraints`、`test:docs`、`test:snapshot`），最后一步检查 GitHub Actions：若上游编辑重新激活了 fork 已禁用的工作流（`e2e.yml`、`ci-master.yml`、`sandbox.yml`）中的任何一个，就再次禁用（[验证通道](2026-09-10-fork-linux-x64-validation-lanes.md)）。脚本提交修复轮，但从不 push。它不拥有的冲突会终止运行，列出文件清单并给出内联解决指南。
 
 fork 本地表面都带标记，便于脚本和人类定位：`apps/desktop/src/main.ts` 里的 `Fork-local` 注释、`packages/bundle/base/cordis.patch.yml` 里的 `DSH_SNAPSHOT` 禁用注释、以及每个被检查文件中的插件名。
 
@@ -23,4 +23,4 @@ fork 本地表面都带标记，便于脚本和人类定位：`apps/desktop/src/
 
 ## 后果
 
-每次上游并入变成一条命令，外加至多脚本点名的冲突。仪式对人工拥有的表面（`tsconfig.host.json`、bundle 区块、桌面图标补丁）是断言而非修复：它大声失败并给出说明，绝不猜测。插件版本对齐每次仪式都执行，fork 无需发布流程即可跟随发布列车。E2E 工作流的禁用是仓库状态而非文件状态；仪式最后一步是唯一能防止上游编辑静默重新启用夜间真实 API 运行的关口。
+每次上游并入变成一条命令，外加至多脚本点名的冲突。仪式对人工拥有的表面（`tsconfig.host.json`、bundle 区块、桌面图标补丁）是断言而非修复：它大声失败并给出说明，绝不猜测。插件版本对齐每次仪式都执行，fork 无需发布流程即可跟随发布列车。三个被禁用工作流的禁用是仓库状态而非文件状态；仪式最后一步是唯一能防止上游编辑静默重新启用夜间真实 API 运行或非 Linux 通道的关口（禁用集合由[验证通道](2026-09-10-fork-linux-x64-validation-lanes.md)拥有）。
