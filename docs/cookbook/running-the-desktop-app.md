@@ -158,7 +158,7 @@ Run `update-desktop-database ~/.local/share/applications` after creating it.
 
 ## Fork-local patches
 
-`apps/desktop/src/main.ts` carries two `Fork-local`-marked dev-only blocks: `app.setName`/`app.setDesktopName('deepseek-harness-desktop')` and the `BrowserWindow` `icon` option. Packaged builds are unaffected (`app.isPackaged` guards). After an upstream merge, keep these blocks (see [the merge ritual](../../scripts/fork-merge-ritual.sh)).
+`apps/desktop/src/main.ts` carries two `Fork-local`-marked dev-only blocks: `app.setName`/`app.setDesktopName('deepseek-harness-desktop')` and the `BrowserWindow` `icon` option. Packaged builds are unaffected (`app.isPackaged` guards). After an upstream merge, re-apply these blocks — upstream restructures `main.ts` on every merge.
 
 ## Failure modes
 
