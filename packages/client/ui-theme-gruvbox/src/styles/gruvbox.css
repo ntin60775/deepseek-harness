@@ -1,0 +1,215 @@
+/* OMP gruvbox surfaces: the parts of the omp look that alias tokens cannot
+ * reach, because the shipped markup carries no token for them.
+ *
+ * Selector notes, so the next reader does not re-derive them:
+ * - `[class*="_markdown_"]` and `[class*="_tableScroll_"]` match the CSS-module
+ *   class names MarkdownText.module.css emits; the built names keep the source
+ *   name (`._markdown_1wejo_28`), so a substring selector lands on the markdown
+ *   surface without touching the settings headings.
+ * - `[data-tool][data-state]` is ToolRow's own published state; the four values
+ *   are running, ok, error and stopped.
+ * - `[data-composer-stats]` is the StatsPills row under the composer.
+ *
+ * Every color is a theme token, so both palettes keep working. */
+
+body {
+  /* The shipped shell forces grayscale antialiasing, which thins monospace
+   * stems; the terminal look needs the platform default. */
+  -webkit-font-smoothing: auto;
+  font-weight: 500;
+}
+
+/* ── Markdown accents (omp mdHeading, mdCode, mdListBullet) ───────────────── */
+
+[class*='_markdown'] h1,
+[class*='_markdown'] h2,
+[class*='_markdown'] h3,
+[class*='_markdown'] h4,
+[class*='_markdown'] h5,
+[class*='_markdown'] h6 {
+  color: var(--dsw-alias-state-warn-label);
+}
+
+[class*='_markdown'] :not(pre) > code {
+  color: var(--dsw-alias-link);
+}
+
+body[data-ds-dark-theme] [class*='_markdown'] :not(pre) > code {
+  color: #d3869b;
+}
+
+[class*='_markdown'] li::marker {
+  color: var(--dsw-alias-brand-primary);
+}
+
+/* ── Tables: omp's full boxSharp grid ─────────────────────────────────────── */
+
+[class*='_tableScroll'] {
+  margin: 16px 0;
+  background: var(--dsw-alias-markdown-code-block);
+  border-radius: 6px;
+}
+
+[class*='_tableScroll'] table {
+  width: 100%;
+  max-width: none;
+  border: 0.5px solid var(--dsw-alias-border-l2);
+  border-collapse: collapse;
+  border-radius: 6px;
+}
+
+[class*='_tableScroll'] th,
+[class*='_tableScroll'] td {
+  padding: 9px 14px;
+  border: 0.5px solid var(--dsw-alias-border-l2);
+}
+
+[class*='_tableScroll'] th {
+  background: var(--dsw-alias-bg-layer-2);
+  color: var(--dsw-alias-state-warn-label);
+}
+
+[class*='_tableScroll'] th:first-child,
+[class*='_tableScroll'] td:first-child {
+  padding-left: 14px;
+}
+
+[class*='_tableScroll'] th:last-child,
+[class*='_tableScroll'] td:last-child {
+  padding-right: 14px;
+}
+
+[class*='_tableScroll'] table code {
+  font-size: 0.9em;
+}
+
+/* ── Tool panels: omp frames the call and colors the frame by state ───────── */
+
+/* The bash row draws through its own component (`data-sample="bash"`), so the
+   frame names both hooks; every other tool row is a ToolRow with `data-tool`. */
+[data-tool],
+[data-sample='bash'] {
+  padding: 3px 10px;
+  border: 0.5px solid var(--dsw-alias-border-l1);
+  border-radius: 10px;
+  background: var(--dsw-alias-bg-layer-1);
+}
+
+[data-tool][data-state='running'],
+[data-sample='bash'][data-state='running'] {
+  border-color: var(--dsw-alias-brand-primary);
+}
+
+[data-tool][data-state='ok'],
+[data-sample='bash'][data-state='ok'] {
+  border-color: var(--dsw-alias-border-l2);
+  background: var(--dsw-alias-markdown-code-block);
+}
+
+[data-tool][data-state='error'],
+[data-sample='bash'][data-state='error'] {
+  border-color: var(--dsw-alias-state-error-primary);
+  background: color-mix(in srgb, var(--dsw-alias-state-error-primary) 14%, var(--dsw-alias-bg-base));
+}
+
+[data-tool][data-state='stopped'],
+[data-sample='bash'][data-state='stopped'] {
+  border-color: var(--dsw-alias-border-l1);
+  background: var(--dsw-alias-bg-base);
+}
+
+[data-tool] [class*='_title'],
+[data-sample='bash'] [class*='_title'] {
+  font-weight: 600;
+}
+
+/* ── Diff: omp frames the card and tints whole changed lines ─────────────── */
+
+[data-diff] {
+  border: 0.5px solid var(--dsw-alias-border-l2);
+}
+
+/* The body's own padding becomes the line padding, so a tint reaches the
+   card's edges the way omp's painted rows do. */
+[data-diff] [class*='_line'] {
+  margin-inline: -14px;
+  padding-inline: 14px;
+}
+
+[data-diff] [class*='_add'] {
+  background: color-mix(in srgb, var(--dsw-alias-state-success-primary) 10%, transparent);
+}
+
+[data-diff] [class*='_del'] {
+  background: color-mix(in srgb, var(--dsw-alias-state-error-primary) 10%, transparent);
+}
+
+[data-diff] [class*='_path'] {
+  color: var(--dsw-alias-label-primary);
+  font-weight: 600;
+}
+
+/* ── Reasoning: omp italics on the muted tone, with a live pulse ─────────── */
+
+[data-variant='think'] [class*='_thinkBody'] {
+  font-style: italic;
+  color: var(--dsw-alias-label-caption);
+}
+
+/* The reasoning glyph carries the live thinking level, the ladder the
+   reference terminal colors from thinkingOff to thinkingXhigh. The level is
+   published as a body attribute by the status-line plugin; a page without that
+   plugin keeps the muted glyph the shipped row draws. */
+[data-reasoning-level='off'] [data-variant='think'] [class*='_leading'],
+[data-reasoning-level='minimal'] [data-variant='think'] [class*='_leading'] {
+  color: #7c6f64;
+}
+
+[data-reasoning-level='low'] [data-variant='think'] [class*='_leading'] {
+  color: #458588;
+}
+
+[data-reasoning-level='medium'] [data-variant='think'] [class*='_leading'] {
+  color: #83a598;
+}
+
+[data-reasoning-level='high'] [data-variant='think'] [class*='_leading'] {
+  color: #b16286;
+}
+
+[data-reasoning-level='xhigh'] [data-variant='think'] [class*='_leading'],
+[data-reasoning-level='max'] [data-variant='think'] [class*='_leading'] {
+  color: #d3869b;
+}
+
+[data-variant='think'][data-state='running'] [class*='_leading'] {
+  animation: dsh-omp-think-pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes dsh-omp-think-pulse {
+  0%, 100% { opacity: 0.55; }
+  50% { opacity: 1; }
+}
+
+/* ── Status band icons: the band itself is drawn by ui-status-line, which owns
+      the dock surface and keeps the shipped pills inside it ────────────────── */
+
+[data-composer-stats] > [class*='_anchor']:nth-child(1) svg {
+  color: var(--dsw-alias-link);
+}
+
+[data-composer-stats] > [class*='_anchor']:nth-child(2) svg {
+  color: var(--dsw-alias-state-business-primary);
+}
+
+[data-composer-stats] [class*='_pill'] {
+  color: var(--dsw-alias-label-secondary);
+}
+
+[data-composer-stats] [class*='_pill']:hover {
+  color: var(--dsw-alias-label-primary);
+}
+
+[data-composer-stats] [class*='_sep'] {
+  color: var(--dsw-alias-label-dimmed);
+}

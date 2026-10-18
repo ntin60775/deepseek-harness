@@ -255,6 +255,9 @@ function createWindow(preload: string, show = false, primary = false): BrowserWi
     if (['http:', 'https:'].includes(new URL(url).protocol)) void shell.openExternal(url)
     return { action: 'deny' }
   })
+  // Fork-local (dev only): the unpackaged primary window opens maximized; packaged
+  // builds keep the session-restored bounds Electron manages itself.
+  if (!app.isPackaged && primary) window.maximize()
   if (process.platform === 'darwin' || process.platform === 'win32') {
     // Fullscreen hides native window controls; overlays drop their caption clearance.
     const sendFullscreen = (): void => {

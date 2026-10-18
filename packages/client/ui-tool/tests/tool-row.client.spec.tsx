@@ -371,6 +371,46 @@ describe('ToolRow', () => {
     expect(view.queryByRole('button', { name: /展开其余/ })).toBeNull()
   })
 
+  it('closes a collapsed row with what its card holds: file lines, matches, shell output', () => {
+    const read = render(
+      <ToolRow
+        {...rowProps}
+        variant="read"
+        title="Read"
+        read={{ label: 'src/a.ts', lines: [{ number: 1, text: 'x' }], totalLines: 128, lang: 'ts' }}
+      />,
+    )
+    expect(read.getByText('128 行')).toBeTruthy()
+    read.unmount()
+
+    const search = render(
+      <ToolRow
+        {...rowProps}
+        variant="search"
+        title="Search"
+        search={{
+          card: {
+            kind: 'matches',
+            truncated: false,
+            total: 2,
+            files: [{ path: 'a.ts', matches: [{ lineNumber: 1, line: 'x' }, { lineNumber: 2, line: 'y' }] }],
+          },
+          recovery: undefined,
+        }}
+      />,
+    )
+    expect(search.getByText('2 处匹配')).toBeTruthy()
+    search.unmount()
+
+    const shell = render(
+      <ToolRow
+        {...rowProps}
+        terminal={{ card: { cwd: '/w', running: false, output: 'a\nb\nc' }, copy: { kind: 'shell', command: 'ls', description: undefined } }}
+      />,
+    )
+    expect(shell.getByText('3 行')).toBeTruthy()
+  })
+
   it('formats the argument body only while expanding it', () => {
     const stringify = vi.spyOn(JSON, 'stringify')
     const bodyFormatCalls = () => stringify.mock.calls.filter(
