@@ -116,28 +116,6 @@ function stateStatus(state: ToolRowState, t: TranslateNS<'conversation'>): strin
 }
 
 /**
- * Count the results a search card holds: matched lines for a grep card, paths
- * for a glob card.
- * @param card - the search card's locale-neutral props.
- * @returns the retained result count.
- */
-function searchResultCount(card: SearchCardModel['card']): number {
-  return card.kind === 'paths'
-    ? card.paths.length
-    : card.files.reduce((total, file) => total + file.matches.length, 0)
-}
-
-/**
- * Count the non-empty lines a terminal card holds.
- * @param output - the card's captured output, if any.
- * @returns the line count.
- */
-function outputLineCount(output: string | undefined): number {
-  if (output === undefined || output === '') return 0
-  return output.split('\n').filter(line => line !== '').length
-}
-
-/**
  * Render one localized tool summary and lazily mounted result card.
  * Preparation retains the icon, title, and optional tool-name summary without disclosure.
  * @param props - tool state, summary, output, and navigation callbacks.
@@ -208,24 +186,9 @@ export const ToolRow = memo(function ToolRow({
   const summaryText = failureLine ?? normalSummary
   // Diff totals remain visible after the optional summary suffix.
   const diffStat = useMemo(() => diffBody === null ? null : diffTotals(diffBody.card.diffs), [diffBody])
-  // A collapsed row closes with a count of what it holds — the reading the omp
-  // tool frame prints for the same reason: a read window's file, a search's
-  // retained results, a shell run's output. Cards without a total (image, web,
-  // question, generic body) keep the bare summary the shipped row had.
-  const cardStat = useMemo(() => {
-    if (diffBody !== null) return null
-    if (readBody !== null) return t('tool.meta.lines', { count: readBody.totalLines })
-    if (searchBody !== null) {
-      const count = searchResultCount(searchBody.card)
-      return count > 0 ? t('tool.meta.matches', { count }) : null
-    }
-    if (terminalBody === null) return null
-    const count = outputLineCount(terminalBody.card.output)
-    return count > 0 ? t('tool.meta.lines', { count }) : null
-  }, [diffBody, readBody, searchBody, terminalBody, t])
   const settledWithCue = state === 'error' || state === 'stopped'
   const suffix = settledWithCue ? null : summarySuffix ?? null
-  const totals = settledWithCue ? null : diffStat ?? cardStat
+  const totals = settledWithCue ? null : diffStat
   const openFile = useMemo(() => filePath !== undefined && onOpenFile !== undefined && !settledWithCue
     ? (event: MouseEvent<HTMLButtonElement>) => {
       event.stopPropagation()
@@ -286,13 +249,9 @@ export const ToolRow = memo(function ToolRow({
         <TextShimmer className={css.summarySuffix}>{suffix}</TextShimmer>
       )}
       {totals !== null && (
-        typeof totals === 'string' ? (
-          <TextShimmer className={clsx(css.summarySuffix, css.stat)}>{totals}</TextShimmer>
-        ) : (
-          <TextShimmer className={clsx(css.summarySuffix, css.stat)}>
-            <span className={css.diffAdded}>{`+${totals.added}`}</span>{' '}<span className={css.diffRemoved}>{`-${totals.removed}`}</span>
-          </TextShimmer>
-        )
+        <TextShimmer className={clsx(css.summarySuffix, css.diffStat)}>
+          <span className={css.diffAdded}>{`+${totals.added}`}</span>{' '}<span className={css.diffRemoved}>{`-${totals.removed}`}</span>
+        </TextShimmer>
       )}
     </>
   ), [summaryLinkKeyDown, linkHref, openFile, state, suffix, totals, summaryText, exitLabel])

@@ -54,7 +54,7 @@ resolution_guide() {
   cat >&2 <<'GUIDE'
 Типовые разрешения:
   pnpm-lock.yaml                — возьми --theirs, затем `pnpm install` перегенерирует
-  docs/*.zh.md, docs/*.i18n.yaml — см. фазу docs (скрипт синхронизирует zh-строки форка)
+  docs/*.zh.md, docs/*.i18n.yaml — см. фазу docs (регенерация + перезапись pairing)
   apps/desktop/src/main.ts      — сохрани блоки с маркером "Fork-local"
 GUIDE
 }

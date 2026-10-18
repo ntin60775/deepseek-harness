@@ -152,8 +152,6 @@
     { "path": "./packages/api/workspace-files/tsconfig.client.json" },
     { "path": "./packages/client/web" },
     { "path": "./packages/context/file-reference" },
-    { "path": "./packages/client/ui-status-line" },
-    { "path": "./packages/client/ui-theme-gruvbox" },
     { "path": "./apps/web" }
   ]
 }
