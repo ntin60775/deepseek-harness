@@ -143,17 +143,6 @@ protocol.registerSchemesAsPrivileged([{
   },
 }])
 
-// Fork-local (dev only): the packaged application carries its own bundle icon.
-// Unpackaged, Electron's app name is the npm package id, so the window manager
-// shows a placeholder. The name below matches the installed desktop file
-// (deepseek-harness-desktop.desktop), and the PNG gives X11 a window icon.
-if (!app.isPackaged) {
-  app.setName('deepseek-harness-desktop')
-  // Wayland app_id comes from the desktop name; it selects the taskbar icon
-  // through the matching desktop file.
-  app.setDesktopName('deepseek-harness-desktop')
-}
-
 interface RuntimeResources {
   readonly nodeBin: string
   readonly node: string
@@ -223,8 +212,6 @@ function createWindow(preload: string, show = false, primary = false): BrowserWi
     minWidth: 520,
     minHeight: 600,
     show,
-    // Fork-local (dev only): X11 window icon; packaged builds use the bundle icon.
-    ...app.isPackaged ? {} : { icon: join(app.getAppPath(), 'build', 'icon.png') },
     ...(process.platform === 'win32' && primary ? {
       titleBarStyle: 'hidden' as const,
       titleBarOverlay: { height: WINDOWS_TITLEBAR_HEIGHT, color: chromeFallbackFill(),
@@ -255,9 +242,6 @@ function createWindow(preload: string, show = false, primary = false): BrowserWi
     if (['http:', 'https:'].includes(new URL(url).protocol)) void shell.openExternal(url)
     return { action: 'deny' }
   })
-  // Fork-local (dev only): the unpackaged primary window opens maximized; packaged
-  // builds keep the session-restored bounds Electron manages itself.
-  if (!app.isPackaged && primary) window.maximize()
   if (process.platform === 'darwin' || process.platform === 'win32') {
     // Fullscreen hides native window controls; overlays drop their caption clearance.
     const sendFullscreen = (): void => {

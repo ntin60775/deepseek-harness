@@ -186,6 +186,6 @@ Docs accompany every code change: update affected README and JSDoc contracts tog
 
 ## Fork maintenance
 
-This checkout is a fork of `deepseek-ai/deepseek-harness`. Fork-local surfaces: the `Fork-local` blocks in `apps/desktop/src/main.ts`, `apps/desktop/build/icon.png`; and `scripts/fork-merge-ritual.sh`, which merges `upstream/master`, regenerates the catalogs, re-records their pairing, and re-disables the fork's workflows ([rationale](.agents/notes/implemented/process/2026-09-08-fork-merge-ritual.md)). Linux x64 only: keep `e2e.yml` (338747924), `ci-master.yml` (339387441), `sandbox.yml` (338747938) disabled via `gh api repos/ntin60775/deepseek-harness/actions/workflows/<id>/disable -X PUT`; editing their files re-enables them.
+This checkout forks `deepseek-ai/deepseek-harness`. Its one fork-local surface, `scripts/fork-merge-ritual.sh`, merges `upstream/master`, regenerates catalogs, re-records pairing, re-disables the fork's workflows, and never pushes ([rationale](.agents/notes/implemented/process/2026-09-08-fork-merge-ritual.md)).
 
-**Chinese documentation is not maintained in this fork.** `.zh.md` files arrive through upstream merges only; fork-local documents are English-only (exclusions in `scripts/translation-pairing.manifest.json`).
+**Chinese documentation is not maintained here.** `.zh.md` files arrive through upstream merges; fork-local documents are English-only (see `scripts/translation-pairing.manifest.json`).

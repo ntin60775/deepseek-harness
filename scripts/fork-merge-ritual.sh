@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Fork merge ritual: incorporate upstream/master into this fork and restore the
-# fork-local surfaces that the merge disturbs. Run after every upstream pull.
+# surfaces the merge disturbs — generated catalogs, doc graphs, workflow state.
+# Run after every upstream pull.
 #
 # Phases:
 #   1. preflight   — clean tree (or an in-progress merge to finish), upstream remote
@@ -55,7 +56,6 @@ resolution_guide() {
 Типовые разрешения:
   pnpm-lock.yaml                — возьми --theirs, затем `pnpm install` перегенерирует
   docs/*.zh.md, docs/*.i18n.yaml — см. фазу docs (регенерация + перезапись pairing)
-  apps/desktop/src/main.ts      — сохрани блоки с маркером "Fork-local"
 GUIDE
 }
 
