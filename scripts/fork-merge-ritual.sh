@@ -19,6 +19,10 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
+# gen-doc-graphs exceeds the default Node heap on the fork's Linux workstation
+# once the merged upstream doc corpus is indexed.
+export NODE_OPTIONS="${NODE_OPTIONS:+$NODE_OPTIONS }--max-old-space-size=8192"
+
 UPSTREAM_REMOTE="${UPSTREAM_REMOTE:-upstream}"
 UPSTREAM_URL="${UPSTREAM_URL:-git@github.com:deepseek-ai/deepseek-harness.git}"
 UPSTREAM_BRANCH="${UPSTREAM_BRANCH:-master}"
@@ -137,6 +141,9 @@ pnpm run verify-translation-pairing docs/config-catalog.md docs/event-producer-c
 log "verify: typecheck, constraints, doc gates, snapshots"
 pnpm run typecheck
 pnpm run constraints
+# verify-repository-references can flag a uv.lock size numeral whose 7-hex prefix
+# matches a fork-only commit in the local object database; when the file is still
+# byte-identical to upstream/master, treat that single finding as noise.
 pnpm run test:docs
 pnpm run test:snapshot
 
