@@ -4583,6 +4583,54 @@ export interface Config {
 ```
 <!-- END GENERATED config-catalog:@deepseek-ai/dsh-workspace-changes -->
 
+<!-- BEGIN GENERATED config-catalog:@local/dsh-web-search-zai -->
+<a id="localdsh-web-search-zai"></a>
+
+## `@local/dsh-web-search-zai`
+
+- `inject`: `web` · `credentials`
+- `source`: [`packages/fork/web-search-zai/src/index.ts:31`](../packages/fork/web-search-zai/src/index.ts)
+
+```ts config-catalog
+/** Plugin config; every field has a default. */
+export interface Config {
+  /** Credential reference holding the z.ai API key. */
+  apiKeyRef?: string
+  /** Search MCP endpoint. */
+  searchURL?: string
+  /** Reader MCP endpoint. */
+  readerURL?: string
+  /** Per-call deadline in milliseconds. */
+  timeoutMs?: number
+  /** Summary size requested from the search tool. */
+  contentSize?: ZaiContentSize
+  /** Recency window requested from the search tool. */
+  recency?: ZaiRecency
+  /** Region hint sent with every search. */
+  location?: ZaiLocation
+  /** Fall back to the free HTTP(S) fetcher when a z.ai read fails. */
+  fetchFallback?: boolean
+  /** Fallback fetcher response byte cap. */
+  fallbackMaxResponseBytes?: number
+  /** Fallback fetcher decoded character cap. */
+  fallbackMaxBodyChars?: number
+  /** Fallback fetcher deadline in milliseconds. */
+  fallbackTimeoutMs?: number
+  /** Fallback fetcher same-origin redirect cap. */
+  fallbackMaxRedirects?: number
+}
+
+/** Result-summary size the search tool accepts. */
+export type ZaiContentSize = 'medium' | 'high'
+
+/** Recency window the search tool accepts. */
+export type ZaiRecency = 'oneDay' | 'oneWeek' | 'oneMonth' | 'oneYear' | 'noLimit'
+
+/** Region hint the search tool accepts. */
+export type ZaiLocation = 'cn' | 'us'
+```
+<!-- END GENERATED config-catalog:@local/dsh-web-search-zai -->
+
 ## Loadable plugins with no config
 
 These load from a `cordis.yml` entry with no `config:` block; they declare no configuration API.

@@ -457,6 +457,7 @@
     { "path": "./packages/web/web-deepseek-api" },
     { "path": "./packages/web/web-fetch-http" },
     { "path": "./packages/web/tool-web" },
+    { "path": "./packages/fork/web-search-zai" },
     { "path": "./packages/spill/spill" },
     { "path": "./packages/spill/spill-local" },
     { "path": "./packages/spill/spill-policy" },

@@ -10013,6 +10013,37 @@ importers:
         specifier: workspace:*
         version: link:../../typert/protocol
 
+  packages/fork/web-search-zai:
+    dependencies:
+      '@deepseek-ai/schemastery':
+        specifier: link:../../../vendor/schemastery
+        version: link:../../../vendor/schemastery
+      '@modelcontextprotocol/client':
+        specifier: 2.2.0
+        version: 2.2.0
+    devDependencies:
+      '@deepseek-ai/cordis':
+        specifier: workspace:~
+        version: link:../../../vendor/cordis
+      '@deepseek-ai/dsh-credentials':
+        specifier: workspace:*
+        version: link:../../credentials/credentials
+      '@deepseek-ai/dsh-web':
+        specifier: workspace:*
+        version: link:../../web/web
+      '@deepseek-ai/dsh-web-fetch-http':
+        specifier: workspace:*
+        version: link:../../web/web-fetch-http
+      '@modelcontextprotocol/node':
+        specifier: 2.0.0
+        version: 2.0.0(@modelcontextprotocol/server@2.2.0)(hono@4.13.7)
+      '@modelcontextprotocol/server':
+        specifier: 2.2.0
+        version: 2.2.0
+      zod:
+        specifier: 4.4.3
+        version: 4.4.3
+
   packages/fs/fs:
     devDependencies:
       '@deepseek-ai/cordis':

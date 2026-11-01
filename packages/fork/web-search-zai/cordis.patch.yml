@@ -1,0 +1,16 @@
+# Fork-local z.ai backend for ctx.web. Both providers speak MCP to z.ai's
+# Streamable HTTP servers: `web_search_prime` for search and `webReader` for
+# page extraction. The GLM Coding Plan meters MCP tool calls against plan
+# credits, which is why this profile uses MCP instead of the paid REST tools.
+
+- insert:
+    - id: web-search-zai
+      name: '@local/dsh-web-search-zai'
+
+# Pin both capabilities to this backend. The base layer also mounts
+# `deepseek-official` search and `http` fetch, so an unpinned selection would be
+# WEB_PROVIDER_AMBIGUOUS. Override these keys in a later profile layer to switch.
+- id: web
+  config:
+    searchProvider: zai
+    fetchProvider: zai
