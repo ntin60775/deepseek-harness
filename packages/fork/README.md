@@ -36,6 +36,6 @@ Packages under `packages/fork/` exist for this fork's operating environment, not
 <details>
 <summary>Working context for maintainers — click to expand</summary>
 
-The group carries no product-package clock: entries may lag upstream API churn because only this fork's owner upgrades them. `web-search-zai` is the current web backend; earlier NeuralDeep and SearXNG experiments were removed. Keep each package's tests and README current; the fork merge ritual regenerates `docs/config-catalog.md`, which includes these packages' `Config` schemas.
+The group carries no product-package clock: entries may lag upstream API churn because only this fork's owner upgrades them. `web-search-zai` is the current web backend; earlier NeuralDeep and SearXNG experiments were removed. Keep each package's tests and README current; the fork merge ritual regenerates `docs/config-catalog.md`, which includes these packages' `Config` schemas. Workstation surfaces recorded here so root `AGENTS.md` stays under its word ceiling: Web UI refinements live in the `web`-profile bundle `/home/prog7/home/dev/dsh-plugins/ui-refinement` (balance widget; README there), and `~/.local/bin/pnpm` wraps the checkout's pnpm for `plugin_manager`. `scripts/check-workspace-constraints.ts` exempts this group from release-member policy — a fork-local edit the merge ritual preserves.
 
 </details>

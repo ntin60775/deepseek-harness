@@ -188,8 +188,4 @@ Docs accompany every code change: update affected README and JSDoc contracts tog
 
 ## Fork maintenance
 
-This checkout forks `deepseek-ai/deepseek-harness`. Its one fork-local surface, `scripts/fork-merge-ritual.sh`, merges `upstream/master`, regenerates catalogs, re-records pairing, re-disables the fork's workflows, and never pushes ([rationale](.agents/notes/implemented/process/2026-09-08-fork-merge-ritual.md)).
-
-Web UI refinements live in the `web`-profile bundle `/home/prog7/home/dev/dsh-plugins/ui-refinement` (balance widget; README there); `~/.local/bin/pnpm` wraps the checkout's pnpm for `plugin_manager`.
-
-**Chinese documentation is not maintained here.** `.zh.md` files arrive through upstream merges; fork-local documents are English-only (see `scripts/translation-pairing.manifest.json`).
+`scripts/fork-merge-ritual.sh` merges `upstream/master`, restores catalogs, re-disables fork workflows, never pushes ([rationale](.agents/notes/implemented/process/2026-09-08-fork-merge-ritual.md)). The private `packages/fork/` group, its constraints-checker exemption, and workstation notes (UI-refinement bundle, pnpm shim) live in [packages/fork/README.md](packages/fork/README.md).
