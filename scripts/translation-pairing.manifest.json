@@ -12,6 +12,7 @@
     "docs/i18n/terminology.md",
     "docs/i18n/translation-prompt.md",
     "packages/fork/README.md",
-    "packages/fork/web-search-zai/README.md"
+    "packages/fork/web-search-zai/README.md",
+    "scripts/web-launcher/README.md"
   ]
 }
