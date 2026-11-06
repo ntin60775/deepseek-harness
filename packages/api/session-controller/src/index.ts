@@ -42,6 +42,8 @@ import type {
   SessionControlFrame,
   SessionCreateRequest,
   SessionCreateValue,
+  SessionDeleteRequest,
+  SessionDeleteValue,
   SessionFollowFrame,
   SessionFollowRequest,
   SessionForkRequest,
@@ -142,6 +144,7 @@ export class SessionController extends TypertRemoteService {
     'llm',
     'remoteAccess',
     'sessions',
+    'sessionPersistence',
     'sessionProjections',
     'sessionQuery',
     'typert',
@@ -436,6 +439,20 @@ export class SessionController extends TypertRemoteService {
   @Remote('rename')
   rename(request: SessionRenameRequest): Promise<SessionRenameValue> {
     return this.commands.rename(request)
+  }
+
+  /**
+   * Permanently delete one stored Session: its log, Workspace account slot,
+   * archive entry, and pin. The controller closes an idle live Agent it owns;
+   * running work refuses as `session/live` with its activity unless the
+   * request passes `stopActivity`. The call is not idempotent: an already
+   * removed identity fails as `session/not-found`.
+   * @param request - Session identity to delete and whether to stop running work.
+   * @returns deletion confirmation.
+   */
+  @Remote('delete')
+  delete(request: SessionDeleteRequest): Promise<SessionDeleteValue> {
+    return this.commands.delete(request)
   }
 
   /**

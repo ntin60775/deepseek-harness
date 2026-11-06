@@ -101,6 +101,26 @@ export class SessionForkError extends Error {
   }
 }
 
+/**
+ * Structured permanent-deletion failure. `rpcError.code === 'session/live'`
+ * means a live Agent still holds the Session, whose details name the work it
+ * still runs; `session/not-found` means the log was already gone.
+ */
+export class SessionDeleteError extends Error {
+  override readonly name = 'SessionDeleteError'
+
+  /**
+   * @param rpcError - Host business or folded transport error.
+   * @param sessionId - the Session the deletion named.
+   */
+  constructor(
+    readonly rpcError: RemoteFailure,
+    readonly sessionId: SessionId,
+  ) {
+    super(`session delete failed: ${rpcError.code}: ${rpcError.message}`)
+  }
+}
+
 /** Identity-stable logical binding for one materialized Client Session. */
 export interface SessionBinding {
   readonly sessionId: SessionId
@@ -499,6 +519,19 @@ export class ClientSessions implements ISessions {
       if (!renamed.ok) throw new Error(`fork child rename failed: ${renamed.error.code}: ${renamed.error.message}`)
     }
     return childId
+  }
+
+  /**
+   * Permanently delete a stored Session on the Host: its log, Workspace
+   * account slot, archive entry, and pin. Release every local reference first;
+   * an Agent still holding the Session — this window or another — refuses as
+   * `session/live` and leaves the row and log intact.
+   * @param sessionId - Session to delete.
+   * @throws {SessionDeleteError} when the Host refuses or the Session is gone.
+   */
+  async delete(sessionId: SessionId, options: { readonly stopActivity?: boolean } = {}): Promise<void> {
+    const result = await this.manager.deleteSession(sessionId, options)
+    if (!result.ok) throw new SessionDeleteError(result.error, sessionId)
   }
 
   /**

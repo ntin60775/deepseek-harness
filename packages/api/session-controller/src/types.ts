@@ -12,7 +12,7 @@ import type { SessionId, SessionSeq, SessionSeqCursor } from '@deepseek-ai/dsh-s
 import type { SessionProjectionMap, SessionProjectionSummaryExcluded, SessionProjectionSummaryValues } from '@deepseek-ai/dsh-session-projection/types'
 import type { Principal } from '@deepseek-ai/dsh-typert-protocol'
 import type { JsonValue } from '@deepseek-ai/dsh-util-values'
-import type { WorkspaceId } from '@deepseek-ai/dsh-workspace/types'
+import type { SessionActivity, WorkspaceId } from '@deepseek-ai/dsh-workspace/types'
 
 declare module '@deepseek-ai/dsh-session-projection/types' {
   interface SessionProjectionMap {
@@ -207,6 +207,17 @@ declare module '@deepseek-ai/dsh-typert-protocol' {
     'session/title-invalid': { readonly sessionId: SessionId }
     'session/fork-unavailable': { readonly sessionId: SessionId }
     'session/migration-required': { readonly sessionId: SessionId }
+    /**
+     * Permanent deletion named a Session that cannot be removed yet.
+     * `activity` names the running work a `stopActivity` retry may stop;
+     * `closable` reports whether the Host owns the live Agent's disposer.
+     */
+    'session/live': {
+      readonly sessionId: SessionId
+      readonly activity: readonly SessionActivity[]
+      /** Whether the Host owns the live Agent's disposer and can close it on request. */
+      readonly closable: boolean
+    }
     'subagent/not-found': {
       readonly parentSessionId: SessionId
       readonly childSessionId: SessionId
@@ -304,6 +315,22 @@ export interface SessionRenameRequest {
 export interface SessionRenameValue {
   readonly title: string
   readonly seq: number
+}
+
+/** Permanent deletion request for one stored Session. */
+export interface SessionDeleteRequest {
+  readonly sessionId: SessionId
+  /**
+   * Stop the Session's running work and close its live Agent before removal.
+   * Required when the Host reports activity; an idle live Session is closed
+   * without it.
+   */
+  readonly stopActivity?: boolean
+}
+
+/** Confirmation that a stored Session and its stored artifacts were removed. */
+export interface SessionDeleteValue {
+  readonly deleted: true
 }
 
 /** Session fork request. */

@@ -92,6 +92,16 @@ export interface ISessions {
     agentPreset?: string
   }): Promise<SessionId>
   /**
+   * Permanently delete a stored Session on the Host: its log, Workspace
+   * account slot, archive entry, and pin. An idle Session open in any window
+   * is closed and removed; a Session with running work refuses with a
+   * `session/live` failure naming that work, and `stopActivity: true` stops it
+   * and closes the Agent before removal.
+   * @param sessionId - Session to delete.
+   * @param options - `stopActivity` stops running work instead of refusing.
+   */
+  delete(sessionId: SessionId, options?: { readonly stopActivity?: boolean }): Promise<void>
+  /**
    * Resolve an already discovered direct-parent address without opening it.
    * @param id - possible addressed child id.
    * @returns a retained, catalog-derived, or unknown-mode listed address, without retaining a new selection or scope.

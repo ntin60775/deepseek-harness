@@ -5,7 +5,7 @@ import { afterEach, describe, expect, it, vi, type MockInstance } from 'vitest'
 import type {
   ISessions, SessionListState, SessionReference, SessionSummary,
 } from '@deepseek-ai/dsh-api-session-controller/client'
-import { SessionCreateError } from '@deepseek-ai/dsh-api-session-controller/client'
+import { SessionCreateError, SessionDeleteError } from '@deepseek-ai/dsh-api-session-controller/client'
 import type { SubagentAddress } from '@deepseek-ai/dsh-subagent/client'
 import type {
   IWorkspaces, WorkspaceId, WorkspaceSnapshot, WorkspaceView,
@@ -159,8 +159,20 @@ class FakeSessions implements ISessions {
   readonly binding = vi.fn<ISessions['binding']>(sessionId =>
     this.retained.findLast(item => item.reference.sessionId === sessionId
       && item.release.mock.calls.length === 0)?.reference.binding)
+  readonly deleteCalls: SessionId[] = []
+  onDelete: ISessions['delete'] = async (sessionId) => {
+    this.list.update((state) => {
+      const { [sessionId]: _dead, ...rest } = state.byId
+      return { ...state, ids: state.ids.filter(id => id !== sessionId), byId: rest }
+    })
+  }
+  readonly retainInfo = vi.fn<ISessions['retainInfo']>((sessionId) => {
+    const referenceCount = this.retained.filter(item =>
+      item.reference.sessionId === sessionId && item.release.mock.calls.length === 0).length
+    const snapshot = Object.freeze({ referenceCount, retainedBy: {} })
+    return { getSnapshot: () => snapshot, subscribe: () => () => {} }
+  })
   declare readonly using: ISessions['using']
-  declare readonly retainInfo: ISessions['retainInfo']
   declare readonly searchResultLimit: ISessions['searchResultLimit']
   declare readonly refresh: ISessions['refresh']
   declare readonly search: ISessions['search']
@@ -172,6 +184,11 @@ class FakeSessions implements ISessions {
     this.list = new MutableSource(initial)
     this.create = vi.fn<ISessions['create']>(async options =>
       options?.sessionId ?? sid(`created-${String(options?.workspaceId ?? 'none')}`))
+  }
+
+  delete(sessionId: SessionId): Promise<void> {
+    this.deleteCalls.push(sessionId)
+    return this.onDelete(sessionId)
   }
 }
 
@@ -1535,6 +1552,74 @@ describe('UiWorkspaceService', () => {
     b.workspaces.onUnarchive = () => Promise.reject(new Error('unarchive rejected'))
     await expect(b.uiWorkspace.unarchiveSession(idle)).rejects.toThrow('unarchive rejected')
     expect(b.workspaces.unarchiveCalls).toEqual([idle, idle])
+  })
+
+  it('deletes an idle Session without touching the selection', async () => {
+    const b = bench()
+    b.uiWorkspace.openSession(sid('current'))
+
+    await expect(b.uiWorkspace.deleteSession(sid('elsewhere'))).resolves.toEqual({ kind: 'deleted' })
+
+    expect(b.sessions.deleteCalls).toEqual([sid('elsewhere')])
+    expect(b.sessions.retained[0]!.release).not.toHaveBeenCalled()
+    expect(b.selectPanel).toHaveBeenCalledOnce()
+  })
+
+  it('closes the selection after the Host removes an idle open Session', async () => {
+    const b = bench()
+    b.uiWorkspace.openSession(sid('current'))
+
+    await expect(b.uiWorkspace.deleteSession(sid('current'))).resolves.toEqual({ kind: 'deleted' })
+
+    expect(b.sessions.deleteCalls).toEqual([sid('current')])
+    expect(b.sessions.retained[0]!.release).toHaveBeenCalledOnce()
+    expect(b.selectPanel).toHaveBeenCalledTimes(2)
+  })
+
+  it('asks before stopping running work and stops through the second hop, retrying the Host release', async () => {
+    const activity = [{ kind: 'turn' as const }]
+    const live = () => new SessionDeleteError(
+      new RemoteError('session/live', 'running', { sessionId: sid('busy'), activity, closable: true }),
+      sid('busy'),
+    )
+    const b = bench()
+    b.sessions.onDelete = vi.fn<ISessions['delete']>()
+      .mockRejectedValueOnce(live())
+      .mockResolvedValueOnce(undefined)
+    b.uiWorkspace.openSession(sid('busy'))
+
+    await expect(b.uiWorkspace.deleteSession(sid('busy'))).resolves.toEqual({
+      kind: 'busy', canStop: true, activity,
+    })
+    // Nothing is closed or retried until the caller confirms the stop.
+    expect(b.sessions.deleteCalls).toEqual([sid('busy')])
+    expect(b.sessions.retained[0]!.release).not.toHaveBeenCalled()
+
+    await expect(b.uiWorkspace.stopAndDeleteSession(sid('busy'))).resolves.toEqual({ kind: 'deleted' })
+    expect(b.sessions.retained[0]!.release).toHaveBeenCalledOnce()
+    expect(b.sessions.deleteCalls).toEqual([sid('busy'), sid('busy')])
+  })
+
+  it('reports a Session held by another window without closing anything locally', async () => {
+    const activity = [{ kind: 'turn' as const }]
+    const b = bench()
+    b.sessions.onDelete = vi.fn<ISessions['delete']>().mockRejectedValue(
+      new SessionDeleteError(
+        new RemoteError('session/live', 'elsewhere', { sessionId: sid('elsewhere'), activity, closable: false }),
+        sid('elsewhere'),
+      ),
+    )
+
+    await expect(b.uiWorkspace.deleteSession(sid('elsewhere'))).resolves.toEqual({
+      kind: 'busy', canStop: false, activity,
+    })
+    expect(b.sessions.deleteCalls).toEqual([sid('elsewhere')])
+  })
+
+  it('preserves an unexpected deletion failure', async () => {
+    const b = bench()
+    b.sessions.onDelete = vi.fn<ISessions['delete']>().mockRejectedValue(new Error('delete exploded'))
+    await expect(b.uiWorkspace.deleteSession(sid('idle'))).rejects.toThrow('delete exploded')
   })
 
   it('passes directory operations to the Host and preserves structured browse failures', async () => {

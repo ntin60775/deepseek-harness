@@ -561,6 +561,17 @@ archiveSession(sessionId: SessionId, options: ArchiveSessionOptions = {}): Promi
 unarchiveSession(sessionId: SessionId): Promise<void>
 
 /**
+ * Drop every trace of a deleted session from the registry: its account slot
+ * in whichever Workspace owns it, its archive set entry, its pin, and the
+ * header/cwd caches. The session log itself is the persistence backend's
+ * concern and is already gone when a caller reaches this point. Unknown ids
+ * are an idempotent no-op.
+ * @param sessionId - The deleted session.
+ * @returns resolution after durability.
+ */
+forgetSession(sessionId: SessionId): Promise<void>
+
+/**
  * Pin one session durably, prepending it to the registry-global pin set.
  * The session must exist (live or in session persistence) and must not be
  * archived. An already pinned id resolves without writing or reordering.

@@ -311,7 +311,7 @@ export class TestSessions implements ISessions {
 
   /** Calls observed on the service-level face, newest last. */
   readonly calls: {
-    method: 'create' | 'refreshProjections' | 'refresh' | 'search' | 'fork'
+    method: 'create' | 'delete' | 'refreshProjections' | 'refresh' | 'search' | 'fork'
     args: unknown[]
   }[] = []
 
@@ -321,6 +321,7 @@ export class TestSessions implements ISessions {
   /** Replaceable search behavior (see {@link TestSessions.stubSearch}). */
   private searchStub: ((query: string, signal: AbortSignal) => { items: SessionSearchResultItem[]; hasMore: boolean }) | undefined
   private createStub: ((opts: Parameters<ISessions['create']>[0]) => Promise<SessionId>) | undefined
+  private deleteStub: ((sessionId: SessionId) => Promise<void>) | undefined
 
   /**
    * @param stabilize - the owning runtime's act wrapper.
@@ -623,6 +624,31 @@ export class TestSessions implements ISessions {
     const id = await this.createStub(opts)
     this.require(id)
     return id
+  }
+
+  /**
+   * Install permanent-deletion behavior for navigation tests.
+   * @param impl - implementation that decides success or a refusal for the id.
+   */
+  stubDelete(impl: (sessionId: SessionId) => Promise<void>): void {
+    this.deleteStub = impl
+  }
+
+  /**
+   * Delete a catalogued fixture Session. The default removes its row; an
+   * installed stub decides success or failure, as the Host would.
+   * @param sessionId - Session to delete.
+   */
+  async delete(sessionId: SessionId): Promise<void> {
+    this.calls.push({ method: 'delete', args: [sessionId] })
+    if (this.deleteStub !== undefined) {
+      await this.deleteStub(sessionId)
+      return
+    }
+    if (!this.records.has(sessionId)) {
+      throw new Error(`test sessions: unknown session "${sessionId}"`)
+    }
+    await this.remove(sessionId)
   }
 
   /** Resolve a retained or catalog-derived address independently of a view. */

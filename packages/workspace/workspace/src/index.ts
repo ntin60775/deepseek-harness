@@ -419,6 +419,34 @@ export class WorkspaceRegistry extends Service {
   }
 
   /**
+   * Drop every trace of a deleted session from the registry: its account slot
+   * in whichever Workspace owns it, its archive set entry, its pin, and the
+   * header/cwd caches. The session log itself is the persistence backend's
+   * concern and is already gone when a caller reaches this point. Unknown ids
+   * are an idempotent no-op.
+   * @param sessionId - The deleted session.
+   * @returns resolution after durability.
+   */
+  forgetSession(sessionId: SessionId): Promise<void> {
+    return this.enqueueOperation(async () => {
+      const state = this.requireState()
+      const archivedSessionIds = state.archivedSessionIds.filter(id => id !== sessionId)
+      const pinnedSessionIds = state.pinnedSessionIds.filter(id => id !== sessionId)
+      if (archivedSessionIds.length !== state.archivedSessionIds.length
+        || pinnedSessionIds.length !== state.pinnedSessionIds.length) {
+        await this.setState({ ...state, archivedSessionIds, pinnedSessionIds })
+      }
+      for (const entity of this.entities.values()) {
+        if (entity.accounts(sessionId)) await entity.detachSession(sessionId)
+      }
+      this.headers.delete(sessionId)
+      this.sessionPaths.delete(sessionId)
+      this.missingSessionPaths.delete(sessionId)
+      this.invalidSessionPaths.delete(sessionId)
+    })
+  }
+
+  /**
    * Pin one session durably, prepending it to the registry-global pin set.
    * The session must exist (live or in session persistence) and must not be
    * archived. An already pinned id resolves without writing or reordering.

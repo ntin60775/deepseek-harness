@@ -23,11 +23,12 @@ import pLimit, { type LimitFunction } from 'p-limit'
 import {
   SessionPersistence, SessionPersistenceRevision, SessionFormatUnsupportedError,
   SessionPersistenceCorruptionError,
-  SessionAlreadyExistsError, SessionPersistenceNotFoundError,
+  SessionAlreadyExistsError, SessionAlreadyOwnedError, SessionPersistenceNotFoundError,
   assertStoredId, materializeCreateHeader, sessionFormatVersionRefusal, validateStoredEvents,
   type SessionAccess, type SessionHandle,
   type SessionHandleReadResult,
   type SessionLocation, type SessionPersistenceCreateOptions,
+  type SessionPersistenceDeleteOptions,
   type SessionPersistenceListOptions, type SessionPersistenceOpenOptions,
   type SessionPersistenceSnapshot, type SessionPersistenceStatOptions,
   type SessionPersistenceRevision as PersistenceRevision,
@@ -561,6 +562,38 @@ class JsonlSessionPersistence extends SessionPersistence {
     }
     signal?.throwIfAborted()
     return snapshots
+  }
+
+  /**
+   * Remove one session's artifact directory, including every stored
+   * generation and the write lock beside it. The directory is resolved by
+   * scanning for the encoded id, so a session whose header no longer validates
+   * is still removable. A write handle in this process refuses first; another
+   * process's write lease is refused by acquiring the kernel lock before
+   * removal.
+   * @param id - the stored session to remove.
+   * @param options - optional cancellation before removal starts.
+   * @returns whether an artifact directory existed and was removed.
+   * @throws {SessionAlreadyOwnedError} while an owner holds the session.
+   */
+  async delete(id: SessionId, options?: SessionPersistenceDeleteOptions): Promise<boolean> {
+    const signal = options?.signal
+    signal?.throwIfAborted()
+    await this.ensureRootEncoding()
+    signal?.throwIfAborted()
+    if (this.tracker.isWriteOwned(id)) throw new SessionAlreadyOwnedError(id)
+    const dir = await this.findSessionDir(id, signal)
+    signal?.throwIfAborted()
+    if (dir === undefined) return false
+    const lease = await SessionWriteLease.acquire(dir, id)
+    try {
+      signal?.throwIfAborted()
+      await rm(dir, { recursive: true, force: true })
+      this.coldLogMemo.delete(id)
+      return true
+    } finally {
+      await lease.release()
+    }
   }
 
   // --- handle-facing storage internals (package-private via the handle class below) ---
@@ -1581,6 +1614,28 @@ class JsonlSessionPersistence extends SessionPersistence {
       const dir = join(project, encodeSegment(id))
       const selected = await this.resolveGenerationInDirectory(dir, signal)
       if (selected !== undefined) matches.push(selected)
+    }
+    if (matches.length > 1) {
+      throw new Error(`duplicate JSONL session id "${id}" appears in multiple project directories`)
+    }
+    signal?.throwIfAborted()
+    return matches[0]
+  }
+
+  /**
+   * Find the session's artifact directory without interpreting its header, so
+   * a corrupt or unsupported artifact can still be removed.
+   */
+  private async findSessionDir(id: SessionId, signal?: AbortSignal): Promise<string | undefined> {
+    const matches: string[] = []
+    for (const project of await this.listProjectDirs(signal)) {
+      signal?.throwIfAborted()
+      const dir = join(project, encodeSegment(id))
+      try {
+        if ((await stat(dir)).isDirectory()) matches.push(dir)
+      } catch (error: unknown) {
+        if (!isENOENT(error)) throw error
+      }
     }
     if (matches.length > 1) {
       throw new Error(`duplicate JSONL session id "${id}" appears in multiple project directories`)

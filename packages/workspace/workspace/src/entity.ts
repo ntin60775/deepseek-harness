@@ -103,6 +103,16 @@ export class WorkspaceEntity implements Workspace {
     return this.record.sessionIds.filter(id => this.host.candidateMatches(id, this.record.path))
   }
 
+  /**
+   * Whether this Workspace's durable record lists the session, regardless of
+   * whether its current cwd still matches the Workspace path.
+   * @param sessionId - session identity to test.
+   * @returns whether the record accounts the session.
+   */
+  accounts(sessionId: SessionId): boolean {
+    return this.record.sessionIds.includes(sessionId)
+  }
+
   async setTitle(title: string): Promise<void> {
     await this.mutate(record => ({ ...record, title }))
   }

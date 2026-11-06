@@ -21,11 +21,13 @@ import type { MessageId, MessageSource } from '@deepseek-ai/dsh-llm'
 import { buildForkSeed } from '@deepseek-ai/dsh-session/fork'
 import { SessionLogOffset, SessionSeq } from '@deepseek-ai/dsh-session'
 import type { Session, SessionEvent, SessionHeader, SessionId, UserMessage } from '@deepseek-ai/dsh-session'
+import { SessionAlreadyOwnedError } from '@deepseek-ai/dsh-session-persistence'
 import { SessionQueryError, type SessionObservation } from '@deepseek-ai/dsh-session-query'
 import { SessionTitleInvalidError } from '@deepseek-ai/dsh-session-title'
 import { assertNever } from '@deepseek-ai/dsh-util-values'
 import { RemoteError, remoteErrorOf } from '@deepseek-ai/dsh-typert-protocol'
 import type { Workspace } from '@deepseek-ai/dsh-workspace'
+import type { SessionActivity } from '@deepseek-ai/dsh-workspace/types'
 import {
   ApiSessionAgentController,
   ApiSessionCwdConflict,
@@ -42,6 +44,8 @@ import type {
   SessionCancelValue,
   SessionCreateRequest,
   SessionCreateValue,
+  SessionDeleteRequest,
+  SessionDeleteValue,
   SessionForkRequest,
   SessionForkValue,
   SessionPromptRequest,
@@ -54,6 +58,19 @@ import type {
   SessionUpdateQueueValue,
   SessionRequestId,
 } from './types.ts'
+
+/** The stable `session/live` refusal naming the work still attached to the Session. */
+function liveSessionRefusal(
+  sessionId: SessionId,
+  activity: readonly SessionActivity[],
+  closable: boolean,
+): RemoteError<'session/live'> {
+  return new RemoteError(
+    'session/live',
+    `session "${sessionId}" is open or still running work; close it before deleting`,
+    { sessionId, activity, closable },
+  )
+}
 
 type PromptContentCandidate =
   | SessionPromptRequest['content'][number]
@@ -217,6 +234,81 @@ export class SessionCommandController {
         `failed to rename session "${request.sessionId}": ${String(error)}`,
         {},
       )
+    }
+  }
+
+  /**
+   * Permanently delete one stored Session: remove its log, then its Workspace
+   * account slot, archive, and pin. A live Agent the controller owns is closed
+   * first — an idle one immediately, running work only when the caller passes
+   * `stopActivity`, with its activity reported as `session/live` otherwise. An
+   * Agent this controller does not own, or a writer another process holds,
+   * refuses the same way without touching the log. The client list is told the
+   * identity is gone; other derived caches reconcile from the disappearance on
+   * their next read.
+   * @param request - Session identity to delete and whether to stop its running work.
+   * @returns deletion confirmation after the log and registry entries are gone.
+   */
+  async delete(request: SessionDeleteRequest): Promise<SessionDeleteValue> {
+    const sessionId = request.sessionId
+    const live = this.ctx.agents.get(sessionId)
+    if (live !== undefined) {
+      const activity = await this.sessionActivity(sessionId)
+      const closable = this.agents.canCloseAgent(sessionId)
+      // Running work is stopped only after the caller confirmed it; an idle
+      // open Session is closed and deleted without another question.
+      if (!closable || (activity.length > 0 && request.stopActivity !== true)) {
+        throw liveSessionRefusal(sessionId, activity, closable)
+      }
+      await this.stopSessionWork(sessionId)
+      if (!await this.agents.closeAgent(sessionId)) {
+        /* v8 ignore next 3 -- its owner may dispose the Agent during the stop request, leaving nothing to close. */
+        throw liveSessionRefusal(sessionId, activity, false)
+      }
+    }
+    let deleted: boolean
+    try {
+      deleted = await this.ctx.sessionPersistence.delete(sessionId)
+    } catch (error) {
+      if (error instanceof SessionAlreadyOwnedError) {
+        throw liveSessionRefusal(sessionId, await this.sessionActivity(sessionId), false)
+      }
+      throw new RemoteError(
+        'gateway/internal',
+        `failed to delete session "${sessionId}": ${String(error)}`,
+        {},
+      )
+    }
+    if (!deleted) {
+      throw new RemoteError('session/not-found', `session "${sessionId}" not found`, { sessionId })
+    }
+    await this.ctx.workspaceRegistry.forgetSession(sessionId)
+    this.ctx.emit('api-session/removed', sessionId)
+    return { deleted: true }
+  }
+
+  /** What the composed providers report still running for the Session. */
+  private async sessionActivity(sessionId: SessionId): Promise<readonly SessionActivity[]> {
+    return await this.ctx.waterfall(
+      'workspace/session-activity',
+      { sessionId },
+      () => Promise.resolve([]),
+    )
+  }
+
+  /**
+   * Ask every stop provider to stop its family before the Agent closes, the
+   * way the archive stop path does. A rejecting provider is logged and never
+   * prevents the deletion the user already confirmed.
+   */
+  private async stopSessionWork(sessionId: SessionId): Promise<void> {
+    try {
+      await this.ctx.parallel('workspace/session-stop', { sessionId })
+    } catch (error: unknown) {
+      const failures = error instanceof AggregateError ? error.errors : [error]
+      for (const failure of failures) {
+        this.ctx.logger.warn(`session "${sessionId}": stop before deletion failed: ${String(failure)}`)
+      }
     }
   }
 

@@ -292,6 +292,31 @@
   display: contents;
 }
 
+/* The session row's action strip is one compact inset surface: the hover
+   controls stay distinguishable from the row fill, and each button gets its
+   own hover/pressed box instead of sharing the collapsed-row ink alone. */
+.sessionRow .rowActions {
+  gap: 2px;
+  height: 24px;
+  box-sizing: border-box;
+  padding: 1px;
+  border-radius: var(--dsw-radius-sm);
+  background: var(--dsw-specific-sidebar-fill);
+  box-shadow: inset 0 0 0 0.5px var(--dsw-alias-border-l3);
+}
+
+.sessionRow .iconButton {
+  width: 22px;
+  height: 22px;
+  margin: 0;
+  border-radius: calc(var(--dsw-radius-sm) - 1px);
+}
+
+.sessionRow .pinnedAction {
+  color: var(--dsw-alias-label-primary);
+}
+
+
 /* The search heading has no trailing time cell, so the unarchive action
    right-aligns itself. */
 .searchResultHeading .rowActions {
@@ -475,6 +500,23 @@
   .iconButton:hover {
     color: var(--dsw-alias-label-primary);
   }
+
+  .sessionRow .iconButton:hover {
+    background-color: var(--dsw-alias-interactive-bg-hover);
+  }
+
+  .sessionRow .deleteAction:hover {
+    background-color: var(--dsw-alias-interactive-bg-hover-danger);
+    color: var(--dsw-alias-state-error-primary);
+  }
+}
+
+.sessionRow .iconButton:active {
+  background-color: var(--dsw-alias-interactive-bg-active);
+}
+
+.sessionRow .deleteAction:active {
+  background-color: var(--dsw-alias-interactive-bg-hover-danger);
 }
 
 /* Chevrons ride the caption grey (#ADB2B8); the folder glyph stays one step

@@ -458,6 +458,16 @@ export class JsonlBackendTracker {
   }
 
   /**
+   * Whether this process holds a write claim or a materializing write handle
+   * for the session.
+   * @param id - the session to test.
+   * @returns true while a created entry or an open write handle owns the id.
+   */
+  isWriteOwned(id: SessionId): boolean {
+    return this.writers.has(id)
+  }
+
+  /**
    * Iterate the pending sessions for listing.
    * @returns the pending entries, keyed by session id.
    */

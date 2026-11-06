@@ -420,6 +420,23 @@ abstract stat(id: SessionId, options?: SessionPersistenceStatOptions): Promise<S
  * @returns one snapshot per stored session.
  */
 abstract list(options?: SessionPersistenceListOptions): Promise<readonly SessionPersistenceSnapshot[]>
+
+/**
+ * Permanently remove one stored session and every artifact this backend
+ * keeps for it. The session disappears from `stat`, `list`, and `open`;
+ * later reads reject as not found. This is the storage half of a user
+ * deletion: workspace accounting, search indexes, and projections belong to
+ * their owners and are not touched here.
+ *
+ * Cancellation is observed before removal starts; once the backend begins
+ * removing artifacts the call runs to completion.
+ * @param id - the stored session to remove.
+ * @param options - optional cancellation.
+ * @returns `true` when a stored session was removed, `false` when no stored session had that id.
+ * @throws {SessionAlreadyOwnedError} while an active write handle in this
+ *   process, or another process's write lease, owns the session.
+ */
+abstract delete(id: SessionId, options?: SessionPersistenceDeleteOptions): Promise<boolean>
 ```
 
 Types: [SessionId](core.md)

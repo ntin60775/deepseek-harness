@@ -948,6 +948,17 @@ workspaceDesktop(): { name: string; available: boolean; fileManager: 'finder' | 
 @Remote('rename') rename(request: SessionRenameRequest): Promise<SessionRenameValue>
 
 /**
+ * Permanently delete one stored Session: its log, Workspace account slot,
+ * archive entry, and pin. The controller closes an idle live Agent it owns;
+ * running work refuses as `session/live` with its activity unless the
+ * request passes `stopActivity`. The call is not idempotent: an already
+ * removed identity fails as `session/not-found`.
+ * @param request - Session identity to delete and whether to stop running work.
+ * @returns deletion confirmation.
+ */
+@Remote('delete') delete(request: SessionDeleteRequest): Promise<SessionDeleteValue>
+
+/**
  * Fork one cold-readable exact event prefix into a new Session. An omitted
  * boundary selects the latest completed-turn prefix; an open cut receives
  * synthetic fork closers.

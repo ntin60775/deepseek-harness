@@ -7,6 +7,7 @@ import type {
   ISessions,
   SessionCreateError,
   SessionBinding,
+  SessionDeleteError,
   SessionReference,
   SessionTarget,
   SessionListState,
@@ -16,12 +17,12 @@ import type {} from '@deepseek-ai/dsh-agent-preset-registry/types'
 import { createSnapshotStore } from '@deepseek-ai/dsh-client-store'
 import type { SubagentAddress } from '@deepseek-ai/dsh-subagent/client'
 import type {
-  IWorkspaces, WorkspaceId, WorkspaceSnapshot, WorkspaceView,
+  IWorkspaces, SessionActivity, WorkspaceId, WorkspaceSnapshot, WorkspaceView,
 } from '@deepseek-ai/dsh-api-workspace-controller/client'
 import type { SessionId } from '@deepseek-ai/dsh-session/types'
 import type {} from '@deepseek-ai/dsh-client-ui-layout/client'
 import type { DraftInitializationOptions } from '@deepseek-ai/dsh-client-ui-conversation/client'
-import type { RowToast } from './contract/slots.ts'
+import type { RowToast, SessionDeleteOutcome } from './contract/slots.ts'
 import { pinOrderAccounts, pinOrderSource } from './pin-order.ts'
 import type { WorkspaceViewStoreActions } from './stores.ts'
 
@@ -100,6 +101,20 @@ export interface UiWorkspace {
    * @param sessionId - Session to unarchive.
    */
   unarchiveSession(sessionId: SessionId): Promise<void>
+  /**
+   * Permanently delete a stored Session: its log, Workspace slot, archive
+   * entry, and pin. The Host closes an idle Session that is still live; one
+   * with running work reports `busy` so the caller can ask before stopping it.
+   * @param sessionId - Session to delete.
+   * @returns `deleted`, or `busy` naming the work and whether the Host can stop it.
+   */
+  deleteSession(sessionId: SessionId): Promise<SessionDeleteOutcome>
+  /**
+   * Stop the Session's running work and close its Agent, then delete it.
+   * @param sessionId - Session to delete.
+   * @returns `deleted`, or `busy` when the Host does not own the live Agent.
+   */
+  stopAndDeleteSession(sessionId: SessionId): Promise<SessionDeleteOutcome>
   /**
    * Pin a Session on the Host, then lead it in its accounts' saved orders
    * (its Workspace group or Ungrouped, and the flat list). The order write
@@ -388,6 +403,14 @@ class UiWorkspaceService extends Service implements UiWorkspace {
     await this.workspaces.unarchiveSession(sessionId)
   }
 
+  async deleteSession(sessionId: SessionId): Promise<SessionDeleteOutcome> {
+    return await this.runDelete(sessionId, false)
+  }
+
+  async stopAndDeleteSession(sessionId: SessionId): Promise<SessionDeleteOutcome> {
+    return await this.runDelete(sessionId, true)
+  }
+
   async pinSession(sessionId: SessionId): Promise<void> {
     await this.workspaces.pinSession(sessionId)
     const { items, pinnedSessionIds, archivedSessionIds } = this.workspaces.list.getSnapshot()
@@ -520,6 +543,24 @@ class UiWorkspaceService extends Service implements UiWorkspace {
     this.ctx.layout.selectPanel(null)
   }
 
+  /** Release the main-view reference when it names the Session being deleted. */
+  private closeForDelete(sessionId: SessionId): void {
+    if (this.mainReference?.sessionId === sessionId) this.clearMain()
+  }
+
+  /** One deletion attempt: the Host closes an idle live Agent; the stop hop also closes running work. */
+  private async runDelete(sessionId: SessionId, stopActivity: boolean): Promise<SessionDeleteOutcome> {
+    try {
+      await this.sessions.delete(sessionId, stopActivity ? { stopActivity: true } : undefined)
+      this.closeForDelete(sessionId)
+      return { kind: 'deleted' }
+    } catch (error) {
+      const refusal = liveDeleteRefusal(error)
+      if (refusal === undefined) throw error
+      return { kind: 'busy', canStop: refusal.closable, activity: refusal.activity }
+    }
+  }
+
   private replaceMain(
     target: SessionTarget,
     signal: AbortSignal,
@@ -561,6 +602,21 @@ class UiWorkspaceService extends Service implements UiWorkspace {
  */
 function sessionCreateErrorOf(error: unknown): SessionCreateError | undefined {
   return error instanceof Error && error.name === 'SessionCreateError' ? error as SessionCreateError : undefined
+}
+
+/**
+ * The activity a Host `session/live` deletion refusal reported, or nothing for
+ * any other failure. Class identity goes by name: client plugin bundles do not
+ * share error-class identity.
+ */
+function liveDeleteRefusal(
+  error: unknown,
+): { readonly activity: readonly SessionActivity[]; readonly closable: boolean } | undefined {
+  if (!(error instanceof Error) || error.name !== 'SessionDeleteError') return undefined
+  const { rpcError } = error as SessionDeleteError
+  return rpcError.code === 'session/live'
+    ? { activity: rpcError.details.activity, closable: rpcError.details.closable }
+    : undefined
 }
 
 /**

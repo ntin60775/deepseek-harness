@@ -22,9 +22,9 @@
  * and a hole has exactly one declaring entry — they carry the same owner
  * contract and the same occupant.
  *
- * WorkspaceBrowser declares the Session hover-button list. Its built-in
- * pin and archive entries share callbacks with the structured ctx.contextMenus
- * contributions. The Session menu adapter owns the legacy
+ * WorkspaceBrowser declares the Session hover-button list. Its built-in pin,
+ * archive, and delete entries share callbacks with the structured
+ * ctx.contextMenus contributions. The Session menu adapter owns the legacy
  * `sidebar.workspaces.session.menu.item` Slot for external React entries;
  * they receive the captured row identity and render together before Archive.
  *
@@ -418,6 +418,54 @@ export interface ForkSessionInjected {
   forkSession: (sessionId: SessionId) => void
 }
 
+/**
+ * One permanent-deletion attempt's outcome: the log is gone, or a live Agent
+ * still holds the Session. `canStop` says the Host owns that Agent's disposer
+ * and can stop its work before retrying; `activity` names what still runs.
+ */
+export type SessionDeleteOutcome =
+  | { readonly kind: 'deleted' }
+  | {
+    readonly kind: 'busy'
+    readonly canStop: boolean
+    readonly activity: readonly SessionActivity[]
+  }
+
+/**
+ * Delete action share: the row button and the context menu both raise the
+ * confirmation; the dialog entry owns the Host calls.
+ */
+export interface DeleteSessionInjected {
+  /** Ask for the permanent-deletion confirmation. */
+  requestDeleteSession: (sessionId: SessionId, displayTitle: string) => void
+}
+
+/** One pending permanent-deletion confirmation. */
+export interface SessionDeleteConfirmRequest {
+  /** Session to delete. */
+  readonly sessionId: SessionId
+  /** The row's display title, named in the dialog. */
+  readonly displayTitle: string
+}
+
+/**
+ * Delete dialog share: the pending request, its settlement, and the two Host
+ * hops. A plain attempt refuses while the Session runs work; the stop hop asks
+ * the Host to stop that work, close the live Agent, and delete.
+ */
+export interface SessionDeleteConfirmInjected {
+  hooks: {
+    /** The confirmation asked for, until the dialog consumes or cancels it. */
+    deleteRequest: HostObservable<SessionDeleteConfirmRequest | null>
+  }
+  /** Consume or cancel the pending confirmation. */
+  settleSessionDelete: () => void
+  /** Make one deletion attempt; an idle live Agent is closed by the Host. */
+  deleteSession: (sessionId: SessionId) => Promise<SessionDeleteOutcome>
+  /** Ask the Host to stop the Session's work and close its live Agent, then delete. */
+  stopAndDeleteSession: (sessionId: SessionId) => Promise<SessionDeleteOutcome>
+}
+
 /** Rename action share: the row only raises the request; the dialog entry answers it. */
 export interface RenameSessionInjected {
   /** Ask for the rename dialog, seeded with the row's current title. */
@@ -483,6 +531,13 @@ export type SessionArchiveConfirmProps =
   & PropsLocale<'workspace'>
   & Omit<SessionArchiveConfirmInjected, 'hooks'>
   & PropsHooks<SessionArchiveConfirmInjected['hooks']>
+
+/** Props of the permanent-delete dialog entry in `shell.overlay`. */
+export type SessionDeleteConfirmProps =
+  PropsRuntime<'shell.overlay'>
+  & PropsLocale<'workspace'>
+  & Omit<SessionDeleteConfirmInjected, 'hooks'>
+  & PropsHooks<SessionDeleteConfirmInjected['hooks']>
 
 /** Props of the existing overlay's keyed notice dispatcher. */
 export type RowToastProps =

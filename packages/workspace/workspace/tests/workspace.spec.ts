@@ -1382,6 +1382,39 @@ describe('registry-global session unpin', () => {
   })
 })
 
+describe('registry-global session forgetting', () => {
+  it('drops the account slot, archive entry, and pin of a deleted session', async () => {
+    const dir = await makeDir('forget-home')
+    const result = await harness({ sessions: [header('gone', dir, 100), header('kept', dir, 200)] })
+    const workspace = result.registry.list()[0]!
+    expect([...workspace.sessionIds]).toEqual(['kept', 'gone'])
+    await result.registry.pinSession(SessionId('gone'))
+    await result.registry.archiveSession(SessionId('kept'))
+
+    await result.registry.forgetSession(SessionId('gone'))
+    // The deleted id leaves the account and the pin; the unrelated archive stays.
+    expect([...workspace.sessionIds]).toEqual(['kept'])
+    expect(storedRecord(result.pool, workspace.id).sessionIds).toEqual(['kept'])
+    expect(storedState(result.pool).pinnedSessionIds).toEqual([])
+    expect(result.registry.pinnedSessionIds).toEqual([])
+    expect(result.registry.archivedSessionIds).toEqual(['kept'])
+
+    await result.registry.forgetSession(SessionId('kept'))
+    expect([...workspace.sessionIds]).toEqual([])
+    expect(result.registry.archivedSessionIds).toEqual([])
+    expect(storedState(result.pool).archivedSessionIds).toEqual([])
+  })
+
+  it('is an idempotent no-op for an unknown session', async () => {
+    const dir = await makeDir('forget-unknown')
+    const result = await harness({ sessions: [header('kept', dir, 100)] })
+    const changesBefore = result.changes.length
+    await expect(result.registry.forgetSession(SessionId('ghost'))).resolves.toBeUndefined()
+    expect(result.changes.length).toBe(changesBefore)
+    expect([...result.registry.list()[0]!.sessionIds]).toEqual(['kept'])
+  })
+})
+
 describe('first-use Workspace preparation', () => {
   const contexts: Context[] = []
 
