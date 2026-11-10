@@ -72,6 +72,18 @@ function createFixtureServer(): McpServer {
   }, async (): Promise<CallToolResult> => ({
     content: [{ type: 'text', text: 'reset done' }],
   }))
+
+  // outputSchema tool that skips the JSON text mirror the spec suggests, so the
+  // bridge must project structuredContent itself.
+  server.registerTool('structured', {
+    title: 'Structured Tool',
+    description: 'Returns a structured result and no content blocks.',
+    inputSchema: z.object({}),
+    outputSchema: z.object({ ok: z.boolean(), executionToken: z.string() }),
+  }, async () => ({
+    content: [],
+    structuredContent: { ok: true, executionToken: 'tok-1' },
+  }))
   return server
 }
 
