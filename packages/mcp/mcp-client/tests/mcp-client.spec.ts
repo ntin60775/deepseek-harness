@@ -1053,6 +1053,79 @@ describe('tool execution', () => {
     expect(result.content[0]).toEqual({ type: 'text', text: '(empty_tool returned no model-visible content)' })
   })
 
+  it('renders structuredContent when the result carries no content blocks', async () => {
+    const client = createMockClient(
+      [{ name: 'structured_only', inputSchema: { type: 'object' } }],
+      { content: [], structuredContent: { ok: true, summary: 'discovered' } },
+    )
+
+    await syncTools(client as never, ctx, defaultOpts, new Map())
+    const result = await executeToolFixture(ctx, { signal: testToolSignal, callId: ToolCallId('c1'), name: 'mcp__srv__structured_only', arguments: {} })
+
+    if (result.isError) throw new Error('expected a structured-only success result')
+    expect(result.content).toEqual([{ type: 'text', text: '{"ok":true,"summary":"discovered"}' }])
+    expect(result.value).toEqual({ content: [], structuredContent: { ok: true, summary: 'discovered' } })
+  })
+
+  it('renders structuredContent for a tool advertising an output schema', async () => {
+    const client = createMockClient(
+      [{
+        name: 'planned',
+        inputSchema: { type: 'object' },
+        outputSchema: {
+          type: 'object',
+          additionalProperties: false,
+          properties: { executionToken: { type: 'string' } },
+          required: ['executionToken'],
+        },
+      }],
+      { content: [], structuredContent: { executionToken: 'tok-1' } },
+    )
+
+    await syncTools(client as never, ctx, defaultOpts, new Map())
+    const result = await executeToolFixture(ctx, { signal: testToolSignal, callId: ToolCallId('c1'), name: 'mcp__srv__planned', arguments: {} })
+
+    if (result.isError) throw new Error('expected the advertised structuredContent to validate')
+    expect(result.content).toEqual([{ type: 'text', text: '{"executionToken":"tok-1"}' }])
+  })
+
+  it('does not duplicate structuredContent already shown by content', async () => {
+    const client = createMockClient(
+      [{ name: 'both', inputSchema: { type: 'object' } }],
+      { content: [{ type: 'text', text: 'Human summary.' }], structuredContent: { ok: true } },
+    )
+
+    await syncTools(client as never, ctx, defaultOpts, new Map())
+    const result = await executeToolFixture(ctx, { signal: testToolSignal, callId: ToolCallId('c1'), name: 'mcp__srv__both', arguments: {} })
+
+    expect(result.content).toEqual([{ type: 'text', text: 'Human summary.' }])
+  })
+
+  it('keeps the diagnostic when structuredContent is null', async () => {
+    const client = createMockClient(
+      [{ name: 'null_structured', inputSchema: { type: 'object' } }],
+      { content: [], structuredContent: null },
+    )
+
+    await syncTools(client as never, ctx, defaultOpts, new Map())
+    const result = await executeToolFixture(ctx, { signal: testToolSignal, callId: ToolCallId('c1'), name: 'mcp__srv__null_structured', arguments: {} })
+
+    expect(result.content[0]).toEqual({ type: 'text', text: '(null_structured returned no model-visible content)' })
+  })
+
+  it('reports the content diagnostic for an isError result carrying only structuredContent', async () => {
+    const client = createMockClient(
+      [{ name: 'err_structured', inputSchema: { type: 'object' } }],
+      { content: [], structuredContent: { reason: 'invalid plan' }, isError: true },
+    )
+
+    await syncTools(client as never, ctx, defaultOpts, new Map())
+    const result = await executeToolFixture(ctx, { signal: testToolSignal, callId: ToolCallId('c1'), name: 'mcp__srv__err_structured', arguments: {} })
+
+    expect(result.isError).toBe(true)
+    expect(result.content[0]).toEqual({ type: 'text', text: 'Error: (err_structured returned no model-visible content)' })
+  })
+
 
   it('handles isError with non-text content (fallback error message)', async () => {
     const client = createMockClient(

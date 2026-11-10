@@ -272,7 +272,7 @@ export function createMcpToolDefinition(
   }
 }
 
-/** Build the canonical result schema and existing Native text projection. */
+/** Build the canonical result schema and the Native content projection. */
 function createOutput(rawName: string, structuredSchema: JsonSchemaNode | undefined): ToolDefinition['output'] {
   return {
     schema: {
@@ -285,8 +285,7 @@ function createOutput(rawName: string, structuredSchema: JsonSchemaNode | undefi
       additionalProperties: false,
     },
     render(_args: unknown, value: JsonValue) {
-      const result = value as McpResult
-      return [{ type: 'text', text: extractText(result.content, rawName) }]
+      return projectModelContent(value as McpResult, rawName)
     },
   }
 }
@@ -331,8 +330,8 @@ function createExecutor(
         : {},
     }
     if (containsImage(content)) {
-      const fallback: ContentBlock[] = [{ type: 'text', text: extractText(content, rawName) }]
-      const projected = await prepareImageProjection(ctx, exec, content, rawName)
+      const fallback: ContentBlock[] = projectModelContent(value, rawName)
+      const projected = await prepareImageProjection(ctx, exec, content)
       projections.set(exec, { value, fallback, content: projected })
     }
     return value
@@ -413,7 +412,6 @@ async function prepareImageProjection(
   ctx: Context,
   exec: ToolExecution,
   content: JsonValue[],
-  toolName: string,
 ): Promise<ContentBlock[]> {
   const decoded: SaveImageAttachment[] = []
   const validationErrors = new Map<number, string>()
@@ -429,7 +427,7 @@ async function prepareImageProjection(
     }
   }
   if (validationErrors.size > 0) {
-    return projectContent(content, toolName, (block, index) => ({
+    return projectContent(content, (block, index) => ({
       type: 'text',
       text: imageDiagnostic(
         block,
@@ -444,13 +442,13 @@ async function prepareImageProjection(
   } catch (error: unknown) {
     // resolveImageAdmission contains provider failures and throws Error only.
     const reason = (error as Error).message
-    return projectContent(content, toolName, block => ({ type: 'text', text: imageDiagnostic(block, reason) }))
+    return projectContent(content, block => ({ type: 'text', text: imageDiagnostic(block, reason) }))
   }
 
   try {
     const refs = await attachments.saveImages(decoded)
     const byIndex = new Map(imageIndexes.map((index, offset) => [index, refs[offset] as ImageAttachmentRef] as const))
-    return projectContent(content, toolName, (_block, index) => ({
+    return projectContent(content, (_block, index) => ({
       type: 'image',
       attachment: byIndex.get(index) as ImageAttachmentRef,
     }))
@@ -458,7 +456,7 @@ async function prepareImageProjection(
     const reason = isImageAdmissionError(error)
       ? `image admission rejected the result: ${error.message}`
       : 'durable image storage rejected the result'
-    return projectContent(content, toolName, block => ({
+    return projectContent(content, block => ({
       type: 'text',
       text: imageDiagnostic(block, reason),
     }))
@@ -473,20 +471,45 @@ async function prepareImageProjection(
  * Policy-owned canonical-value replacements may omit fields required on the MCP wire.
  */
 function extractText(mcpContent: JsonValue[], toolName: string): string {
-  const content = projectContent(mcpContent, toolName)
+  const content = projectContent(mcpContent)
+  if (content.length === 0) return noContentText(toolName)
   // The default image projector below also returns text, so this local call
   // cannot produce a core image block.
   return content.map(block => (block as Extract<ContentBlock, { type: 'text' }>).text).join('\n')
 }
 
 /**
+ * Project one canonical result into the model-facing content of a success.
+ * `content` carries the result when it has any model-visible block. When the
+ * blocks carry nothing, `structuredContent` becomes JSON text: an MCP tool with
+ * an `outputSchema` may return only that field
+ * ([spec](https://modelcontextprotocol.io/specification/2025-11-25/server/tools)),
+ * and the serialized JSON is what the spec asks such a server to place in a
+ * text block itself.
+ */
+function projectModelContent(result: McpResult, toolName: string): ContentBlock[] {
+  const projected = projectContent(result.content)
+  if (projected.length > 0) return projected
+  const structured = result.structuredContent
+  if (structured !== undefined && structured !== null) {
+    return [{ type: 'text', text: JSON.stringify(structured) }]
+  }
+  return [{ type: 'text', text: noContentText(toolName) }]
+}
+
+/** Diagnostic text naming the raw tool for a result with no model-visible content. */
+function noContentText(toolName: string): string {
+  return `(${toolName} returned no model-visible content)`
+}
+
+/**
  * Project ordered MCP blocks into the core content vocabulary.
  * Text-like runs are newline-coalesced; admitted images split those runs at
- * their original position.
+ * their original position. An empty return means the blocks carried nothing
+ * model-visible; the caller chooses the replacement.
  */
 function projectContent(
   mcpContent: JsonValue[],
-  toolName: string,
   image: (block: McpContentBlock, index: number) => ContentBlock = block => ({
     type: 'text',
     text: imageDiagnostic(block, 'this result was not admitted to durable model context'),
@@ -531,7 +554,5 @@ function projectContent(
     }
   }
   flushText()
-  return projected.length > 0
-    ? projected
-    : [{ type: 'text', text: `(${toolName} returned no model-visible content)` }]
+  return projected
 }

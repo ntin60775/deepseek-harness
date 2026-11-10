@@ -158,6 +158,17 @@ describe('fixture server — controlled scenarios', () => {
     expect(result.content[0]).toEqual({ type: 'text', text: '5' })
   })
 
+  it('renders structuredContent from a stdio tool that returns no content blocks', async () => {
+    const result = await executeToolFixture(ctx, {
+      signal: testToolSignal,
+      callId: nextCallId(), name: 'mcp__fixture__structured', arguments: {},
+    })
+    expect(result.isError).toBe(false)
+    expect(result.content).toEqual([{ type: 'text', text: '{"ok":true,"executionToken":"tok-1"}' }])
+    if (result.isError) throw new Error('expected structured-only success')
+    expect(result.value).toEqual({ content: [], structuredContent: { ok: true, executionToken: 'tok-1' } })
+  })
+
   it('executes greet("World") → "Hello, World!"', async () => {
     const result = await executeToolFixture(ctx, {
       signal: testToolSignal,
