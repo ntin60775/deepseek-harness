@@ -272,7 +272,7 @@ describe('QueueDock', () => {
     act(() => { source.push({ ...pending, pendingSubmissions: [...pending.pendingSubmissions, {
       requestId: 'queued-request' as never, placement: 'queued', time: 2, text: '新排队回显', attachments: [],
     }] }) })
-    fireEvent.click(view.getByRole('button', { name: '2 条排队消息发送中…' }))
+    fireEvent.click(view.getByRole('button', { name: '2 条排队消息' }))
     expect(view.queryByText('留在正文')).toBeNull()
     expect(view.getByText('原有排队')).toBeTruthy()
     expect(view.getByText('新排队回显').closest('[data-submission-echo]')).not.toBeNull()
@@ -327,7 +327,7 @@ describe('QueueDock', () => {
     const source = liveSession(pending)
     const view = render(<QueueDock {...kitFor(pending)} useSession={source.useSession} useProjection={source.useProjection} />)
     expect(view.getByRole('status').textContent).toBe('发送中…')
-    const header = view.getByRole('button', { name: /2 条排队消息\s*发送中…/ })
+    const header = view.getByRole('button', { name: '2 条排队消息' })
     expect(header.getAttribute('aria-expanded')).toBe('false')
     fireEvent.click(header)
     expect(view.getAllByRole('status')).toHaveLength(1)

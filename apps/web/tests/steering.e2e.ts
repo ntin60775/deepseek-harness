@@ -639,8 +639,9 @@ describe('web e2e: empty-draft Cmd+Enter steers the whole queue', () => {
       () => dock.getByRole('button', { name: 'Steer queued message', disabled: false }).count(),
       { timeout: 10_000 },
     ).toBe(2)
-    await page.getByRole('textbox', { name: 'Cmd/Ctrl+Enter steers all queued messages', exact: true })
-      .waitFor({ timeout: 10_000 })
+    // The dock owns the queue's state; the empty draft now keeps the ordinary
+    // placeholder, so wait for the dock header instead.
+    await page.locator('[data-queue-dock]').waitFor({ timeout: 10_000 })
 
     // Empty draft + Cmd+Enter: both queued rows steer in FIFO order, the dock
     // empties, and the pending steering renders at the conversation tail.

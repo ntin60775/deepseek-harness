@@ -414,14 +414,12 @@ export const InputBar = memo(function InputBar({
     return translated !== hintKey ? translated : rawHint
   })()
 
+  // Queue state belongs to the queue dock above this card: the placeholder
+  // keeps describing what typing does, so an empty field never claims to be
+  // the queue's control surface.
   const placeholderText = placeholder ?? (disabled
     ? t('placeholder.unavailable')
-  // The steer hint deliberately outranks the plan placeholder:
-  // while it shows, the whole-queue gesture is genuinely available
-  // (the gate never consults plan mode), so the actionable hint wins.
-    : canSteerQueue
-      ? t('placeholder.steerQueue')
-      : planActive ? t('placeholder.plan') : t('placeholder.default'))
+    : planActive ? t('placeholder.plan') : t('placeholder.default'))
 
   return (
     <div className={clsx(css.root, variant === 'hero' && css.hero)}>

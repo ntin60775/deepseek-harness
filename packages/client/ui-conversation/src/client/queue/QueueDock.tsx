@@ -165,36 +165,52 @@ export function QueueDock({ useSession, useProjection, updateQueue, notify, load
     )) setEditing(null)
   }
 
+  /* The header names the block on every queue size: it is the only place that
+     says what these rows are, and the only place the whole-queue gesture is
+     advertised. With one row it stays a caption rather than a control. */
+  const head = (
+    <>
+      <span className={css.lead} aria-hidden><IconQueueOutlineRegular /></span>
+      <span className={css.title}>{t('queue.title')}</span>
+      <span className={css.count} aria-hidden>{rowCount}</span>
+      {!listVisible && pendingQueue.length > 0 && (
+        <span className={css.status} role="status">{t('queue.sending')}</span>
+      )}
+      <span className={css.spacer} />
+      {/* The chord steers only while a turn runs and the child is mutable. */}
+      {running && queueMutable && <span className={css.hint} aria-hidden>{t('queue.hint')}</span>}
+      {rowCount > 1 && (
+        <span className={css.chevron} aria-hidden>
+          {expanded ? <IconChevronDownOutlineRegular /> : <IconChevronUpOutlineRegular />}
+        </span>
+      )}
+    </>
+  )
+
   return (
     <div className={css.dock} data-queue-dock="">
       <div className={css.panel}>
-        {rowCount > 1 && (
-          <button
-            type="button"
-            className={css.header}
-            aria-controls={listId}
-            aria-expanded={expanded}
-            disabled={interactionActive}
-            onClick={() => { setCollapsed(value => !value) }}
-          >
-            <span className={css.lead} aria-hidden><IconQueueOutlineRegular /></span>
-            <span className={css.count}>{t('queue.count', { n: rowCount })}</span>
-            {!listVisible && pendingQueue.length > 0 && (
-              <span className={css.status} role="status">{t('queue.sending')}</span>
-            )}
-            <span className={css.chevron} aria-hidden>
-              {expanded ? <IconChevronDownOutlineRegular /> : <IconChevronUpOutlineRegular />}
-            </span>
-          </button>
-        )}
+        {rowCount > 1
+          ? (
+            <button
+              type="button"
+              className={css.header}
+              aria-controls={listId}
+              aria-expanded={expanded}
+              aria-label={t('queue.count', { n: rowCount })}
+              disabled={interactionActive}
+              onClick={() => { setCollapsed(value => !value) }}
+            >
+              {head}
+            </button>
+          )
+          : <div className={`${css.header} ${css.headerStatic}`}>{head}</div>}
         <ul id={listId} className={css.list} hidden={!listVisible}>
           {listVisible && queue.map((row) => {
             const attachments = queueAttachments(row.content)
             const text = textOf(row.content)
             return (
               <li key={row.id} className={css.row}>
-                {/* Single-item strip has no count header, so the row itself carries the queue glyph. */}
-                {rowCount === 1 && <span className={css.lead} aria-hidden><IconQueueOutlineRegular /></span>}
                 {editing?.id === row.id
                   ? (
                     <InlineEditor
@@ -297,10 +313,10 @@ export function QueueDock({ useSession, useProjection, updateQueue, notify, load
                             <IconTrashOutlineRegular size={14} />
                           </button>
                         </Tooltip>
-                        <Tooltip portal label={t('queue.steer')} side="bottom" delayMs={500} disabled={!running}>
+                        <Tooltip portal label={t('queue.steer.tooltip')} side="bottom" delayMs={500} disabled={!running}>
                           <button
                             type="button"
-                            className={css.action}
+                            className={`${css.action} ${css.actionPrimary}`}
                             aria-label={t('queue.steer')}
                             title={running ? undefined : t('queue.steer.unavailable')}
                             disabled={busy !== null || !running}
@@ -324,7 +340,6 @@ export function QueueDock({ useSession, useProjection, updateQueue, notify, load
           {listVisible && pendingQueue.map((submission) => {
             return (
               <li key={submission.requestId} className={`${css.row} ${css.pendingRow}`} data-submission-echo="">
-                {rowCount === 1 && <span className={css.lead} aria-hidden><IconQueueOutlineRegular /></span>}
                 {submission.attachments.length > 0 && (
                   <span className={css.attachments}>
                     {submission.attachments.map((attachment, index) => attachment.type === 'image'

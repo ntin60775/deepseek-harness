@@ -271,12 +271,9 @@ describe.skipIf(MODE === 'record')('web e2e: composer interrupt for a running co
       .getByRole('button').first().click()
     await page.getByRole('button', { name: /1 subagent/ }).click()
     await page.getByRole('treeitem', { name: new RegExp(LABEL) }).press('Enter')
-    // A live continuable child advertises the ordinary steer-all gesture, so
-    // that placeholder is the composer's accessible name in this window. It
-    // changes back as the queue drains, so later interactions address the
-    // stable composer node instead.
-    await page.getByRole('textbox', { name: 'Cmd/Ctrl+Enter steers all queued messages' })
-      .waitFor({ timeout: 15_000 })
+    // A live continuable child accepts the ordinary steer-all gesture; the
+    // queue dock is what shows the waiting rows in this window.
+    await page.locator('[data-queue-dock]').waitFor({ timeout: 15_000 })
     const input = page.locator('[data-composer-input]').first()
     expect(await input.isDisabled()).toBe(false)
 

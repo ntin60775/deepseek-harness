@@ -819,41 +819,31 @@ describe('image draft rail', () => {
 })
 
 describe('Enter semantics', () => {
-  it('advertises the empty-draft whole-queue steering gesture when it is available', () => {
-    const { placeholder } = bench({ running: true, queue: [row('q-1')], steerQueue: vi.fn() })
-    expect(placeholder).toBe('Cmd/Ctrl+Enter 插话发送全部排队消息')
+  it('keeps the ordinary placeholder while messages wait in the queue dock', () => {
+    const ordinary = '发消息或创建任务, / 调用指令, @ 文件或对话'
+    // Queue state belongs to the dock above the card: an empty field keeps
+    // describing typing, never the queue's own controls.
+    expect(bench({ running: true, queue: [row('q-1')], steerQueue: vi.fn() }).placeholder).toBe(ordinary)
+    expect(bench({ running: true }).placeholder).toBe(ordinary)
+    expect(bench({ queue: [row('q-1')] }).placeholder).toBe(ordinary)
+    expect(bench({ running: true, queue: [row('q-1')], draft: '消息' }).placeholder).toBe(ordinary)
     expect(bench({
       running: true,
       queue: [row('q-1')],
       subagent: {
         address: { parentSessionId: 'parent' as SessionId, childSessionId: SID, mode: 'continuable' },
       },
-    }).placeholder).toBe('Cmd/Ctrl+Enter 插话发送全部排队消息')
-  })
-
-  it('keeps the owning placeholder or ordinary guidance when whole-queue steering is unavailable', () => {
-    expect(bench({ running: true }).placeholder).toBe('发消息或创建任务, / 调用指令, @ 文件或对话')
-    expect(bench({ queue: [row('q-1')] }).placeholder).toBe('发消息或创建任务, / 调用指令, @ 文件或对话')
-    expect(bench({ running: true, queue: [row('q-1')], draft: '消息' }).placeholder).toBe('发消息或创建任务, / 调用指令, @ 文件或对话')
+    }).placeholder).toBe(ordinary)
     expect(bench({
       running: true,
       queue: [row('q-1')],
       placeholder: '上层指定提示',
     }).placeholder).toBe('上层指定提示')
-    // The command menu owns Enter while open: neither the hint nor the
-    // gesture may claim the chord.
-    expect(bench({
-      running: true,
-      queue: [row('q-1')],
-      commandMenuOpen: true,
-    }).placeholder).toBe('发消息或创建任务, / 调用指令, @ 文件或对话')
-    // The steer hint intentionally outranks the plan placeholder: while it
-    // shows, the whole-queue gesture is genuinely available in plan mode.
     expect(bench({
       running: true,
       queue: [row('q-1')],
       plan: { active: true, pending: false },
-    }).placeholder).toBe('Cmd/Ctrl+Enter 插话发送全部排队消息')
+    }).placeholder).toBe('描述你的任务以生成计划')
   })
 
   it('an open command menu withholds the whole-queue steering gesture', () => {

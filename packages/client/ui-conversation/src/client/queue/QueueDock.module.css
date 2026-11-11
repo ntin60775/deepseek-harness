@@ -16,9 +16,8 @@
     var(--dsh-composer-dock-inset) -
     var(--dsh-composer-dock-inset)
   );
-  /* Cancel the stack gap after this item and tuck 3px under the input card
-     (square bottom), reading as one attached surface. */
-  margin: 0 auto calc(0px - var(--dsh-composer-stack-gap) - 3px);
+  /* A separate card above the composer: keep the stack gap on both sides. */
+  margin: 0 auto;
   /* Horizontal padding completes the shared dock inset (this wrapper only
      subtracts two insets from its width); no vertical padding, so the visual
      gap above the panel stays the uniform stack gap. */
@@ -30,8 +29,7 @@
   isolation: isolate;
   overflow: hidden;
   width: 100%;
-  padding: 2px 0;
-  border-radius: var(--dsw-radius-lg) var(--dsw-radius-lg) 0 0;
+  border-radius: var(--dsw-radius-lg);
   --dsh-scrollbar-thumb: var(--dsw-alias-scrollbar-bg-l2);
   --dsh-scrollbar-thumb-hover: var(--dsw-alias-scrollbar-hover-l2);
 }
@@ -51,8 +49,6 @@
   position: absolute;
   inset: 0;
   border: 0.5px solid var(--dsw-alias-border-l1);
-  /* The input card's own top border closes the shape below. */
-  border-bottom: none;
   border-radius: inherit;
   content: '';
   pointer-events: none;
@@ -62,16 +58,13 @@
   box-sizing: border-box;
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   width: 100%;
   height: 36px;
-  /* Right inset 12px puts the chevron on the same vertical line as the Todo
-     header's chevron (12px body padding there). */
-  padding: 4px 12px;
+  padding: 0 10px 0 12px;
   border: none;
-  border-radius: var(--dsw-radius-md);
   background: transparent;
-  color: var(--dsw-alias-label-primary);
+  color: var(--dsw-alias-label-secondary);
   text-align: left;
   cursor: pointer;
 }
@@ -85,6 +78,12 @@
   cursor: default;
 }
 
+/* A single queued message keeps the header as a static caption, so it is
+   never a button that only repeats itself when pressed. */
+.headerStatic {
+  cursor: default;
+}
+
 .lead {
   display: grid;
   flex: none;
@@ -92,13 +91,42 @@
   color: var(--dsw-alias-label-tertiary);
 }
 
-.count {
-  flex: 1 1 auto;
-  min-width: 0;
-  font-family: Inter, var(--dsw-font-family);
+.title {
+  flex: none;
   font-size: 13px;
   font-weight: 500;
-  line-height: 24px;
+  line-height: 20px;
+}
+
+.count {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 999px;
+  corner-shape: round;
+  background: var(--dsw-alias-interactive-bg-hover);
+  color: var(--dsw-alias-label-secondary);
+  font-size: 11px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
+.spacer {
+  flex: 1 1 auto;
+}
+
+.hint {
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  color: var(--dsw-alias-label-tertiary);
+  font-size: 12px;
+  line-height: 16px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .chevron {
@@ -122,11 +150,11 @@
   box-sizing: border-box;
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   width: 100%;
-  /* Grows with the inline editor's content; the other rows stay 36px. */
-  min-height: 36px;
-  padding: 4px 5px 4px 12px;
+  /* Grows with the inline editor's content; the other rows stay 44px. */
+  min-height: 44px;
+  padding: 6px 8px 6px 14px;
   border-radius: var(--dsw-radius-md);
 }
 
@@ -194,19 +222,22 @@
   object-fit: cover;
 }
 
+/* The queued message is the subject of this block: primary ink at the
+   composer's own 14px size, never the dimmed secondary tone. */
 .preview {
   flex: 1 1 auto;
   min-width: 0;
-  font: var(--dsw-font-xs-13);
   font-family: Inter, var(--dsw-font-family);
-  color: var(--dsw-alias-label-primary-dimmed);
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--dsw-alias-label-primary);
 }
 
 .actions {
   display: flex;
   flex: none;
   align-items: center;
-  gap: 10px;
+  gap: 4px;
 }
 
 .status {
@@ -231,9 +262,22 @@
   cursor: pointer;
 }
 
+/* Steering is the one action that changes what the agent does now; the tinted
+   accent fill separates it from the two quiet icon controls beside it. */
+.actionPrimary {
+  background: color-mix(in srgb, var(--dsw-alias-state-business-primary) 14%, transparent);
+  color: var(--dsw-alias-state-business-primary);
+}
+
 @media (hover: hover) {
   .action:hover:not(:disabled) {
     background: var(--dsw-alias-interactive-bg-hover);
+    color: var(--dsw-alias-label-secondary);
+  }
+
+  .actionPrimary:hover:not(:disabled) {
+    background: color-mix(in srgb, var(--dsw-alias-state-business-primary) 22%, transparent);
+    color: var(--dsw-alias-state-business-primary);
   }
 }
 
