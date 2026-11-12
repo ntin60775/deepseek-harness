@@ -49,7 +49,7 @@ Placement: bugs → postmortems; rationale → Agent Notes; procedures → cookb
 
 ## Wordcount Budgets
 
-[scripts/doc-budgets.manifest.json](../scripts/doc-budgets.manifest.json) sets standing-doc ceilings; `pnpm run verify-doc-budgets` rejects excess or missing files.
+[scripts/doc-budgets.manifest.json](../scripts/doc-budgets.manifest.json) sets standing-doc ceilings; `pnpm run verify-doc-budgets` rejects excess or missing files. A `<path>#<token>` key budgets that file's `<!-- BEGIN <token> -->` region and excludes the region from the `<path>` count.
 
 When the gate goes red:
 
