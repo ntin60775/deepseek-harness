@@ -16,6 +16,8 @@ import css from './TodoPanel.module.css'
 export interface TodoPanelProps {
   /** The session's current plan (empty renders nothing) — selected by the dock adapter. */
   todos: readonly TodoItem[]
+  /** The owning Session's run state: the plan expands by itself while it is true. */
+  running: boolean
   /** The dock entry's locale seat, passed down as a plain prop. */
   t: TodoDockProps['t']
 }
@@ -49,8 +51,7 @@ function statusLabel(status: TodoItem['status'], t: TodoPanelProps['t']): string
 }
 
 /** Header summary: "·"-joined per-status counts; zero-count segments are omitted as noise (a non-empty list keeps at least one). */
-function progressLabel(todos: readonly TodoItem[], t: TodoPanelProps['t']): string {
-  const done = todos.filter(item => item.status === 'completed').length
+function progressLabel(todos: readonly TodoItem[], done: number, t: TodoPanelProps['t']): string {
   const active = todos.filter(item => item.status === 'in_progress').length
   const pending = todos.length - done - active
   // En spaces (U+2002): HTML collapses runs of ASCII spaces, so widening the
@@ -62,9 +63,29 @@ function progressLabel(todos: readonly TodoItem[], t: TodoPanelProps['t']): stri
   ].join('\u2002·\u2002')
 }
 
-export function TodoPanel({ todos, t }: TodoPanelProps) {
-  const [collapsed, setCollapsed] = useState(true)
+/**
+ * Render the plan strip above the composer.
+ * The list expands by itself while the Session runs and returns to the strip when it goes idle.
+ * A manual toggle overrides auto-expansion until the next running interval starts.
+ * @param props - the projected plan, the owning Session's run state, and the locale seat.
+ * @returns the plan strip, or nothing while the plan is empty.
+ */
+export function TodoPanel({ todos, running, t }: TodoPanelProps) {
+  // `undefined` follows the Session: expanded while running, strip at idle.
+  // An explicit value is the operator's choice for one running interval; the
+  // render-phase reset (React's derived-state pattern) rebases it on every
+  // run-state change so it cannot leak into the next interval, with no effect.
+  const [collapsedByOperator, setCollapsedByOperator] = useState<boolean | undefined>(undefined)
+  const [lastRunning, setLastRunning] = useState(running)
+  if (lastRunning !== running) {
+    setLastRunning(running)
+    setCollapsedByOperator(undefined)
+  }
+  const collapsed = collapsedByOperator ?? !running
   if (todos.length === 0) return null
+
+  const done = todos.filter(item => item.status === 'completed').length
+  const meterFillWidth = `${String((done / todos.length) * 100)}%`
 
   return (
     <section className={css.root} data-testid="todo-panel" aria-label={t('todo.title')}>
@@ -73,11 +94,14 @@ export function TodoPanel({ todos, t }: TodoPanelProps) {
           type="button"
           className={css.header}
           aria-expanded={!collapsed}
-          onClick={() => { setCollapsed(v => !v) }}
+          onClick={() => { setCollapsedByOperator(!collapsed) }}
         >
           <span className={css.lead} aria-hidden><IconChecklistOutlineRegular /></span>
           <span className={css.title}>{t('todo.title')}</span>
-          <span className={css.progress}>{progressLabel(todos, t)}</span>
+          <span className={css.progress}>{progressLabel(todos, done, t)}</span>
+          <span className={css.meter} data-testid="todo-progress" aria-hidden>
+            <span className={css.meterFill} style={{ width: meterFillWidth }} />
+          </span>
           <span className={css.chevron} aria-hidden>
             {collapsed ? <IconChevronUpOutlineRegular /> : <IconChevronDownOutlineRegular />}
           </span>
@@ -102,10 +126,10 @@ export function TodoPanel({ todos, t }: TodoPanelProps) {
 /** Props for the projected todo dock. */
 export type TodoDockProps = PropsRuntime<'conversation.input.dock'> & PropsLocale<'conversation'>
 
-/** Renders the current todo projection, or nothing when it is absent. */
-export function TodoDock({ useProjection, t }: TodoDockProps) {
+/** Renders the current todo projection, or nothing when it is absent; the plan expands while the Session runs. */
+export function TodoDock({ useProjection, session, t }: TodoDockProps) {
   const todos = useProjection('todos')
-  return <TodoPanel todos={todos ?? []} t={t} />
+  return <TodoPanel todos={todos ?? []} running={session.running} t={t} />
 }
 
 /** Registers the projected todo dock. */

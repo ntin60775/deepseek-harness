@@ -67,7 +67,7 @@
 }
 
 .progress {
-  flex: 1 1 auto;
+  flex: 0 1 auto;
   min-width: 0;
   overflow: hidden;
   font-size: 13px;
@@ -78,9 +78,29 @@
   white-space: nowrap;
 }
 
+/* Decorative done/total meter beside the textual counters; it repeats their
+   numbers, so assistive technology skips it. */
+.meter {
+  display: block;
+  flex: none;
+  overflow: hidden;
+  width: 64px;
+  height: 3px;
+  border-radius: 1px;
+  background: var(--dsw-alias-bg-skeleton);
+}
+
+.meterFill {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--dsw-alias-brand-primary);
+}
+
 .chevron {
   display: grid;
   flex: none;
+  margin-left: auto;
   place-items: center;
   color: var(--dsw-alias-label-tertiary);
 }
