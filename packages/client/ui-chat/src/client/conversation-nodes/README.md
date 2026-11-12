@@ -218,6 +218,10 @@ Grouping reads each Node's [group-tree position](../contract/group-tree.ts), whi
 
 A reply contains non-blank text, an image, or another visible block; reasoning and tool-call protocol blocks do not count as a reply. An Assistant with neither non-blank reasoning nor reply content contributes no reference. Group creation requires a member, so metadata-only Turns create no empty group.
 
+Each group keeps one always-mounted presentational container around its visible body; the group title stays a plain row above it. The container's surface follows body visibility: headerless states (Verbose, running Detailed, and the deferred latest completed exchange) show it directly, an opened group gains it, and a collapsed group keeps the plain title with the surface off.
+
+The body remains the only scrollport, and the material, inset, and fade rules live in the [ui-chat README](../../../README.md#grouped-rendering). Opening or closing a group changes the surface class only, so member keys, inner disclosure state, and paging anchors survive. These presentation rules do not change grouping, mode eligibility, whole-Turn folding, or scroll ownership.
+
 ### Examples
 
 `A` denotes an Assistant Node, `T` a tool Node, and `G[...]` a process group. Arrows show input or root-reference order; examples share one Turn unless stated otherwise.
