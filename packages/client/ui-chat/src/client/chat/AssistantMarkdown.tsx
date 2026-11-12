@@ -32,6 +32,8 @@ export interface AssistantMarkdownProps extends
   Pick<ChatNodeOwnerProps, 'loadImage'> {
   /** Render only the requested business portion, preserving original block indexes. */
   groupPart?: string | undefined
+  /** This response seat is its completed Turn's closing reply: render the final-answer card. */
+  finalAnswer?: boolean | undefined
   /** Stable Hook forwarded to each independently expandable reasoning block. */
   useDisclosure: UseDisclosure
   blocks: readonly AssistantBlock[]
@@ -56,8 +58,8 @@ export interface AssistantMarkdownProps extends
 
 /** Renders non-blank reasoning blocks as independent disclosures alongside the response. */
 export const AssistantMarkdown = memo(function AssistantMarkdown({
-  blocks, streaming, textInteractionSource = false, interrupted, loadImage, groupPart, useDisclosure,
-  reasoningHidden = false, usePresentation, revealProcess, mentions, renderSlot, useGroupAction, t,
+  blocks, streaming, textInteractionSource = false, interrupted, loadImage, groupPart, finalAnswer = false,
+  useDisclosure, reasoningHidden = false, usePresentation, revealProcess, mentions, renderSlot, useGroupAction, t,
 }: AssistantMarkdownProps) {
   // Stable per locale revision (t identity changes on switch): a fresh object
   // per render would rebuild MarkdownText's component table every chunk.
@@ -145,14 +147,19 @@ export const AssistantMarkdown = memo(function AssistantMarkdown({
         )
     }
   }
+  const body = (
+    <div className={css.body}>
+      {rendered}
+      {interrupted && (groupPart === undefined || groupPart === 'response'
+        || !blocks.some(block => block.kind !== 'reasoning' && block.kind !== 'tool-call'))
+        && <span className={css.stopped}>{t('message.stopped')}</span>}
+    </div>
+  )
   return (
-    <div className={css.root} data-streaming={streaming || undefined}>
-      <div className={css.body}>
-        {rendered}
-        {interrupted && (groupPart === undefined || groupPart === 'response'
-          || !blocks.some(block => block.kind !== 'reasoning' && block.kind !== 'tool-call'))
-          && <span className={css.stopped}>{t('message.stopped')}</span>}
-      </div>
+    <div className={finalAnswer ? `${css.root} ${css.finalAnswer}` : css.root}
+      data-streaming={streaming || undefined} data-final-answer={finalAnswer || undefined}>
+      {finalAnswer && <div className={css.finalAnswerLabel}>{t('message.finalAnswer')}</div>}
+      {body}
     </div>
   )
 })
