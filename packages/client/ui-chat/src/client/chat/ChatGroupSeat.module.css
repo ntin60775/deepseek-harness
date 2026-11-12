@@ -95,16 +95,40 @@
   opacity: 1;
 }
 
-.title[aria-expanded="true"] {
-  padding-bottom: 8px;
+/* A visible group body sits in a quiet grouped-content surface. The shell is always mounted and
+   owns no layout: its hairline is an inset stroke so opening and closing never shifts the body's
+   width or height, and the surface leaves scrolling, fading, and clipping to the body. */
+.shell {
+  position: relative;
+  border-radius: var(--dsw-radius-lg);
 }
 
+.shell::after {
+  position: absolute;
+  inset: 0;
+  border: 0.5px solid var(--dsw-alias-border-l1);
+  border-radius: inherit;
+  content: '';
+  opacity: 0;
+  pointer-events: none;
+}
+
+.material {
+  background: var(--dsw-alias-markdown-code-block);
+}
+
+.material::after {
+  opacity: 1;
+}
+
+/* The inset lives inside the scrollport, so a styled and an unstyled shell share one box. */
 .body {
   --dsh-chat-flow-gap: 4px;
   max-height: min(400px, 50vh);
   overflow-y: auto;
   overscroll-behavior-y: auto;
   scrollbar-gutter: stable;
+  padding: 8px 12px;
 }
 
 .label {

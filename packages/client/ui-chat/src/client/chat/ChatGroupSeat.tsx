@@ -1,4 +1,8 @@
-/** Stable process container; display policy changes visibility, never member parents. */
+/**
+ * Stable process group seat; display policy changes visibility, never member parents.
+ * A presentational container around the visible body carries the grouped-content material, while the
+ * group title stays a plain row above it.
+ */
 import { memo, useCallback, useEffect, useId, useRef, useState, type ComponentProps, type ReactNode } from 'react'
 import {
   IconAgentPresetOutlineRegular, IconApiOutlineRegular, IconBrowseOutlineRegular, IconChevronDownOutlineRegular,
@@ -129,7 +133,13 @@ const ProcessGroupHeader = memo(function ProcessGroupHeader({ groupKey, useChatG
   )
 })
 
-/** Render a process group with local disclosure and the existing outer-Turn visibility. */
+/**
+ * Render a process group with local disclosure, the existing outer-Turn visibility, and a quiet
+ * container around the visible body. The container is always mounted so member keys, disclosure
+ * state, and position anchors survive every display change; only its material class follows body
+ * visibility, because a hidden body has nothing to frame. The body keeps the sole scrollport and
+ * its edge fades, and the title stays a plain row outside the container.
+ */
 export const ChatGroupSeat = memo(function ChatGroupSeat({ groupKey, useChatGroup, useGroupHeaderAction, ...props }: ChatGroupSeatProps) {
   const members = useChatGroup(groupKey, group => group?.members)
   const turn = useChatGroup(groupKey, group => group?.data.turn)
@@ -187,6 +197,9 @@ export const ChatGroupSeat = memo(function ChatGroupSeat({ groupKey, useChatGrou
   const capped = grouped && (!deferCompletedTurns || (shownCap ?? closingCap))
   const classes = [css.body, !capped ? css.expandedBody : '',
     capped && edges.canScrollUp ? css.fadeTop : '', capped && edges.canScrollDown ? css.fadeBottom : '']
+  // The surface frames a visible body only: headerless modes show it directly, while a grouped body
+  // shows it after the reader opens the group. The shell itself stays mounted either way.
+  const surface = !grouped || open
   return (
     <div ref={rootRef} className={css.root} data-chat-group-key={groupKey}
       data-chat-flow-key={groupKey} data-chat-anchor-key={`group:${groupKey}`} data-chat-turn={turn}
@@ -196,11 +209,14 @@ export const ChatGroupSeat = memo(function ChatGroupSeat({ groupKey, useChatGrou
         <ProcessGroupHeader groupKey={groupKey} useChatGroup={useChatGroup}
           usePresentation={props.usePresentation} t={props.t} open={open} bodyId={bodyId} toggle={toggle} />
       </div>
-      <div ref={bodyRef} id={bodyId} className={classes.join(' ')} data-step-process-body
-        data-scroll-up={edges.canScrollUp || undefined} data-scroll-down={edges.canScrollDown || undefined}
-        {...events}>
-        <div ref={contentRef} className={css.content} data-step-process-content data-chat-flow="">
-          <GroupMembers {...props} members={members} />
+      <div className={surface ? `${css.shell} ${css.material}` : css.shell}
+        data-process-container data-process-surface={surface ? 'material' : 'plain'}>
+        <div ref={bodyRef} id={bodyId} className={classes.join(' ')} data-step-process-body
+          data-scroll-up={edges.canScrollUp || undefined} data-scroll-down={edges.canScrollDown || undefined}
+          {...events}>
+          <div ref={contentRef} className={css.content} data-step-process-content data-chat-flow="">
+            <GroupMembers {...props} members={members} />
+          </div>
         </div>
       </div>
     </div>
