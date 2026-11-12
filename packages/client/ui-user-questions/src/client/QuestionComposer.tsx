@@ -6,7 +6,7 @@ import clsx from 'clsx'
 import {
   Button, IconCheckOutlineRegular, IconChevronDownOutlineRegular, IconChevronLeftOutlineRegular,
   IconChevronRightOutlineRegular, IconChevronUpOutlineRegular, IconCloseOutlineRegular,
-  IconEditOutlineRegular, MarkdownText, Tooltip,
+  IconEditOutlineRegular, MarkdownText,
 } from '@deepseek-ai/dsh-client-ui-primitives'
 import { planReviewOf, type QuestionAnswer, type QuestionCardSnapshot, type QuestionComposerProps } from './contract/slots.ts'
 import type { PendingQuestion } from './contract/slots.ts'
@@ -26,16 +26,6 @@ type Feedback = { key: 'error.incomplete' | 'error.unanswered' | 'error.unavaila
 const REMOVED_CARD: QuestionCardSnapshot = {
   state: 'open', waitState: 'counting', countdown: undefined, channel: 'none', closed: true,
 }
-
-/** Long copy the user expanded on one question: the question itself or an option description by index. */
-interface ExpandedCopy {
-  /** Index of the question the expansions belong to. */
-  readonly index: number
-  /** Expanded copy of that question: `'question'` or an option index. */
-  readonly copies: ReadonlySet<'question' | number>
-}
-
-const NOTHING_EXPANDED: ExpandedCopy['copies'] = new Set()
 
 /**
  * Split the conventional recommendation suffix without changing the answer value.
@@ -245,8 +235,8 @@ function QuestionFlow({ pending, t, useStore, useQuestionCard, actions }: Questi
   // while the user decides; answer drafts live in the Session store above.
   const [minimized, setMinimized] = useState(false)
   // The free-form textarea autofocuses on first presentation; re-expanding a
-  // collapsed question must not steal focus from the expand toggle back into
-  // the input, so focus is granted once per question index.
+  // minimized card must not steal focus from the minimize toggle back into the
+  // input, so focus is granted once per question index.
   const focusedQuestions = useRef(new Set<number>())
   const answerSurface = useRef<HTMLDivElement>(null)
   // Every navigation write stays in bounds and drafts mirrors questions 1:1.
@@ -255,24 +245,11 @@ function QuestionFlow({ pending, t, useStore, useQuestionCard, actions }: Questi
   // oxlint-disable-next-line typescript/no-non-null-assertion
   const draft = drafts[index]!
   const hasOptions = (question.options?.length ?? 0) > 0
-  // CSS decides which copy is clipped; only the user's expansions are state,
-  // and they apply only while their question is the one shown.
-  const [expandedCopy, setExpandedCopy] = useState<ExpandedCopy>({ index, copies: NOTHING_EXPANDED })
-  const expanded = expandedCopy.index === index ? expandedCopy.copies : NOTHING_EXPANDED
-
-  const questionToggleLabel = t(expanded.has('question') ? 'text.collapse' : 'text.expand')
-
-  const toggleCopy = (copy: 'question' | number): void => {
-    const copies = new Set(expanded)
-    if (!copies.delete(copy)) copies.add(copy)
-    setExpandedCopy({ index, copies })
-  }
 
   const replaceProgress = (nextIndex: number, nextDrafts: QuestionDraftAnswer[]): void => {
     if (nextIndex !== index) {
-      // Another question starts at its top with its long copy collapsed.
+      // Another question starts at its top.
       if (answerSurface.current !== null) answerSurface.current.scrollTop = 0
-      setExpandedCopy({ index: nextIndex, copies: NOTHING_EXPANDED })
     }
     actions.replace(pending.key, {
       index: nextIndex,
@@ -527,26 +504,13 @@ function QuestionFlow({ pending, t, useStore, useQuestionCard, actions }: Questi
               onFocusCapture={focusAnswerSurface}
               onBlurCapture={blurAnswerSurface}
             >
-              <div className={css.questionTitle} data-expanded={expanded.has('question') || undefined}>
+              <div className={css.questionTitle}>
                 <h2
                   className={clsx(css.title, css.titlePreview)}
                   id={`question-${pending.key}-${String(index)}`}
                 >
                   {question.question}
                 </h2>
-                <Tooltip label={questionToggleLabel} side="top" portal>
-                  <button
-                    type="button"
-                    className={clsx(css.iconButton, css.copyToggle, css.questionToggle)}
-                    aria-label={questionToggleLabel}
-                    aria-expanded={expanded.has('question')}
-                    aria-controls={`question-${pending.key}-${String(index)}`}
-                    aria-describedby={`question-${pending.key}-${String(index)}`}
-                    onClick={() => { toggleCopy('question') }}
-                  >
-                    {expanded.has('question') ? <IconChevronUpOutlineRegular /> : <IconChevronDownOutlineRegular />}
-                  </button>
-                </Tooltip>
               </div>
               {question.detail !== undefined && (
                 <div className={css.detail}><MarkdownText text={question.detail} labels={markdownLabels} /></div>
@@ -556,8 +520,6 @@ function QuestionFlow({ pending, t, useStore, useQuestionCard, actions }: Questi
                   const selected = draft.selected.includes(option.label)
                   const display = parseRecommendedLabel(option.label)
                   const hasDescription = option.description !== undefined && option.description.trim() !== ''
-                  const descriptionExpanded = expanded.has(optionIndex)
-                  const descriptionToggleLabel = t(descriptionExpanded ? 'text.collapse' : 'text.expand')
                   const descriptionId = `${descriptionIdPrefix}-question-${String(index)}-option-${String(optionIndex)}-description`
                   return (
                     <div
@@ -568,7 +530,6 @@ function QuestionFlow({ pending, t, useStore, useQuestionCard, actions }: Questi
                         selected && question.multiSelect !== true && css.optionSelected,
                       )}
                       data-option-row
-                      data-expanded={descriptionExpanded || undefined}
                     >
                       <button
                         type="button"
@@ -606,21 +567,6 @@ function QuestionFlow({ pending, t, useStore, useQuestionCard, actions }: Questi
                           )}
                         </span>
                       </button>
-                      {hasDescription && (
-                        <Tooltip label={descriptionToggleLabel} side="top" portal>
-                          <button
-                            type="button"
-                            className={clsx(css.iconButton, css.copyToggle, css.descriptionToggle)}
-                            aria-label={descriptionToggleLabel}
-                            aria-expanded={descriptionExpanded}
-                            aria-controls={descriptionId}
-                            aria-describedby={descriptionId}
-                            onClick={() => { toggleCopy(optionIndex) }}
-                          >
-                            {descriptionExpanded ? <IconChevronUpOutlineRegular /> : <IconChevronDownOutlineRegular />}
-                          </button>
-                        </Tooltip>
-                      )}
                     </div>
                   )
                 })}

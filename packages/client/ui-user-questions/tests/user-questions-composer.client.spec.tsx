@@ -356,7 +356,7 @@ describe('QuestionComposer', () => {
     expect(screen.getByRole<HTMLButtonElement>('button', { name: '正在提交…' }).disabled).toBe(true)
   })
 
-  it('expands long copy in place without choosing an option', () => {
+  it('renders long copy in full without a disclosure control', () => {
     const description = 'Remove the experimental client from every shipped template and require an explicit profile install.'
     const { carrier } = wait([{
       id: 'release', question: 'How should the release graph change?',
@@ -369,42 +369,19 @@ describe('QuestionComposer', () => {
     }])
     render(<QuestionComposer matched={carrier} {...kit} />)
 
-    // CSS shows each toggle only while its copy overflows; every candidate is rendered.
-    const heading = screen.getByRole('heading', { name: 'How should the release graph change?' })
-    const [questionToggle, descriptionToggle, ...rest] = screen.getAllByRole('button', { name: '展开' })
-    expect(rest).toHaveLength(0)
-    if (questionToggle === undefined || descriptionToggle === undefined) throw new Error('Both copy toggles must render')
-    expect(questionToggle.getAttribute('aria-describedby')).toBe(heading.id)
-    expect(questionToggle.getAttribute('aria-controls')).toBe(heading.id)
+    // The question and each non-empty description render as plain text; nothing sits behind a toggle.
+    expect(screen.getByRole('heading', { name: 'How should the release graph change?' })).toBeTruthy()
     const option = screen.getByRole('radio', { name: 'Explicit install' })
     const text = screen.getByText(description)
     expect(option.getAttribute('aria-describedby')).toBe(text.id)
-    expect(descriptionToggle.getAttribute('aria-controls')).toBe(text.id)
-    expect(descriptionToggle.getAttribute('aria-describedby')).toBe(text.id)
-    expect(descriptionToggle.getAttribute('aria-expanded')).toBe('false')
-
-    fireEvent.click(descriptionToggle)
-    expect(descriptionToggle.getAttribute('aria-expanded')).toBe('true')
-    expect(descriptionToggle.getAttribute('aria-label')).toBe('收起')
-    expect(text.closest('[data-option-row]')?.hasAttribute('data-expanded')).toBe(true)
-    expect(screen.getByText(description)).toBe(text)
-    expect(option.getAttribute('aria-checked')).toBe('false')
-    expect(questionToggle.getAttribute('aria-expanded')).toBe('false')
-
-    fireEvent.click(questionToggle)
-    expect(questionToggle.getAttribute('aria-expanded')).toBe('true')
-    expect(questionToggle.getAttribute('aria-label')).toBe('收起')
-    expect(heading.parentElement?.hasAttribute('data-expanded')).toBe(true)
-    fireEvent.click(questionToggle)
-    fireEvent.click(descriptionToggle)
-    expect(heading.parentElement?.hasAttribute('data-expanded')).toBe(false)
-    expect(text.closest('[data-option-row]')?.hasAttribute('data-expanded')).toBe(false)
-    expect(screen.getAllByRole('button', { name: '展开' })).toEqual([questionToggle, descriptionToggle])
+    expect(document.querySelectorAll('[data-option-description]')).toHaveLength(1)
+    expect(screen.queryByRole('button', { name: '展开' })).toBeNull()
+    expect(screen.queryByRole('button', { name: '收起' })).toBeNull()
   })
 
-  it('resets scrolling and expanded copy when the question changes', () => {
-    const firstDescription = 'First question detail that was expanded.'
-    const secondDescription = 'Second question detail starts collapsed.'
+  it('resets scrolling and shows the next question in full', () => {
+    const firstDescription = 'First question detail.'
+    const secondDescription = 'Second question detail.'
     const { carrier } = wait([
       {
         id: 'first', question: 'First question?',
@@ -420,8 +397,6 @@ describe('QuestionComposer', () => {
     expect(screen.getByRole('region', { name: 'First question?' })).toBeTruthy()
     const firstScroll = screen.getByText('First question?').closest('[data-question-scroll]') as HTMLElement
     firstScroll.scrollTop = 80
-    for (const toggle of screen.getAllByRole('button', { name: '展开' })) fireEvent.click(toggle)
-    expect(screen.getAllByRole('button', { name: '收起' }).map(toggle => toggle.getAttribute('aria-expanded'))).toEqual(['true', 'true'])
     fireEvent.click(screen.getByRole('radio', { name: 'Continue' }))
 
     const secondScroll = screen.getByText('Second question?').closest('[data-question-scroll]') as HTMLElement
@@ -429,29 +404,8 @@ describe('QuestionComposer', () => {
     expect(screen.getByRole('region', { name: 'Second question?' })).toBeTruthy()
     expect(secondScroll).toBe(firstScroll)
     expect(secondScroll.scrollTop).toBe(0)
-    expect(screen.queryByRole('button', { name: '收起' })).toBeNull()
-    expect(secondScroll.querySelector('[data-expanded]')).toBeNull()
     expect(screen.queryByText(firstDescription)).toBeNull()
-    const descriptionToggle = screen.getAllByRole('button', { name: '展开' })[1]
-    expect(document.getElementById(descriptionToggle?.getAttribute('aria-controls') ?? '')?.textContent).toBe(secondDescription)
-  })
-
-  it('keeps expansions with their question when the shared position moves elsewhere', () => {
-    const { carrier } = wait([
-      { id: 'first', question: 'First question?', options: [{ label: 'Continue', description: 'First detail.' }] },
-      { id: 'second', question: 'Second question?', options: [{ label: 'Continue', description: 'Second detail.' }] },
-    ])
-    render(<QuestionComposer matched={carrier} {...kit} />)
-    fireEvent.click(screen.getAllByRole('button', { name: '展开' })[1] as HTMLElement)
-    expect(screen.getByRole('button', { name: '收起' })).toBeTruthy()
-
-    // Another surface of the same Session moves the shared question position.
-    const blank = { selected: [], custom: '', skipped: false }
-    act(() => { kit.actions.replace(carrier.key, { index: 1, drafts: [blank, blank] }) })
-
-    expect(screen.getByRole('region', { name: 'Second question?' })).toBeTruthy()
-    expect(screen.queryByRole('button', { name: '收起' })).toBeNull()
-    expect(document.querySelector('[data-expanded]')).toBeNull()
+    expect(screen.getByText(secondDescription)).toBeTruthy()
   })
 
   it('renders plan detail through the shared assistant Markdown primitive', () => {
@@ -1024,8 +978,9 @@ describe('review card', () => {
     const chosen = screen.getByRole<HTMLButtonElement>('radio', { name: '工程落地型' })
     expect(chosen.getAttribute('aria-checked')).toBe('true')
     expect(chosen.disabled).toBe(true)
-    // Long copy stays readable on a frozen card.
-    expect(screen.getAllByRole<HTMLButtonElement>('button', { name: '展开' }).map(toggle => toggle.disabled)).toEqual([false, false, false])
+    // Long copy stays readable on a frozen card without a disclosure control to freeze.
+    expect(screen.queryByRole('button', { name: '展开' })).toBeNull()
+    expect(screen.queryByRole('button', { name: '收起' })).toBeNull()
     // Nothing is left to send, and the unused free-text field would read as
     // somewhere to type.
     expect(screen.queryByRole('button', { name: '跳过' })).toBeNull()
