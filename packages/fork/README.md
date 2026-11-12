@@ -30,6 +30,7 @@ Packages under `packages/fork/` exist for this fork's operating environment, not
 ## Related documentation
 
 - [Web subsystem](../../docs/subsystems/web.md) — the seam these providers register into.
+- [Fork merge ritual rationale](../../.agents/notes/implemented/process/2026-09-08-fork-merge-ritual.md) — why upstream merges run `scripts/fork-merge-ritual.sh` and what it restores.
 
 ## Dev Note
 
