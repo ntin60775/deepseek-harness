@@ -4918,7 +4918,7 @@ it('does not infer menu targets from links or data attributes inside a plugin fl
   expect(h.props.resolveFilePath).not.toHaveBeenCalled()
 })
 
-describe('Final answer card', () => {
+describe('Reply cards and final-answer bar', () => {
   function projectClosed(input: Parameters<typeof chatSnapshotFixture>[0]) {
     const builder = new ChatSnapshotBuilder()
     const groups = new ConversationGroupStore<ProcessGroupData>()
@@ -4935,43 +4935,47 @@ describe('Final answer card', () => {
     return { h, view, snapshot }
   }
 
-  const cards = (container: HTMLElement): HTMLElement[] =>
+  const bars = (container: HTMLElement): HTMLElement[] =>
     [...container.querySelectorAll<HTMLElement>('[data-final-answer]')]
+  const replyCards = (container: HTMLElement): HTMLElement[] =>
+    [...container.querySelectorAll<HTMLElement>('[data-reply-card]')]
 
-  it('marks the closing completed reply and leaves the interim reply plain', () => {
-    const { h, view } = mountClosed({
+  it('cards every reply and bars only the closing completed answer', () => {
+    const { view } = mountClosed({
       nodes: [user(1, 'question'), assistant(2, 'interim reply', 1, 1), assistant(3, 'final reply', 1, 2)],
       turnTimings: new Map([[1, { startTime: 0 }]]),
       turnEnds: new Map([[1, 4]]),
     })
-    const label = h.props.t('message.finalAnswer')
-    expect(cards(view.container)).toHaveLength(1)
-    const card = cards(view.container)[0]!
-    expect(card.textContent).toContain(label)
-    expect(card.textContent).toContain('final reply')
-    expect(card.textContent).not.toContain('interim reply')
+    expect(bars(view.container)).toHaveLength(1)
+    const bar = bars(view.container)[0]!
+    expect(bar.textContent).toContain('final reply')
+    expect(bar.textContent).not.toContain('interim reply')
+    expect(view.getByText('interim reply').closest('[data-reply-card]')).not.toBeNull()
     expect(view.getByText('interim reply').closest('[data-final-answer]')).toBeNull()
-    expect(view.getAllByText(label)).toHaveLength(1)
+    expect(replyCards(view.container)).toHaveLength(2)
+    expect(view.container.textContent).not.toContain('Final answer')
   })
 
-  it('leaves an open Turn without a card', () => {
+  it('cards an open Turn reply without the bar', () => {
     const { view } = mountClosed({
       nodes: [user(1, 'question'), assistant(2, 'streamed reply', 1, 1)],
       turnTimings: new Map([[1, { startTime: 0 }]]),
     })
-    expect(cards(view.container)).toHaveLength(0)
+    expect(bars(view.container)).toHaveLength(0)
+    expect(view.getByText('streamed reply').closest('[data-reply-card]')).not.toBeNull()
   })
 
-  it('leaves a completed Turn without a closing text reply alone', () => {
+  it('leaves a completed Turn without a closing text reply uncarded', () => {
     const { view } = mountClosed({
       nodes: [user(1, 'question'), reasoningAssistant(2, 'only reasoning', 1, 1)],
       turnTimings: new Map([[1, { startTime: 0 }]]),
       turnEnds: new Map([[1, 3]]),
     })
-    expect(cards(view.container)).toHaveLength(0)
+    expect(bars(view.container)).toHaveLength(0)
+    expect(replyCards(view.container)).toHaveLength(0)
   })
 
-  it('leaves an image-only final reply alone', () => {
+  it('cards an image-only final reply without the bar', () => {
     const imageOnly: AssistantMessageNode = {
       kind: 'assistant', seq: 2, time: 2_000, turn: 1, step: 1,
       blocks: [{
@@ -4987,7 +4991,8 @@ describe('Final answer card', () => {
       turnEnds: new Map([[1, 3]]),
     })
     expect(view.container.querySelector('[data-chat-node-key="fixture:assistant:2"]')).not.toBeNull()
-    expect(cards(view.container)).toHaveLength(0)
+    expect(bars(view.container)).toHaveLength(0)
+    expect(replyCards(view.container)).toHaveLength(1)
   })
 
   const nonCompleted: ReadonlyArray<readonly [string, TurnEndReason]> = [
@@ -4998,18 +5003,19 @@ describe('Final answer card', () => {
     ['blocked', { kind: 'blocked' }],
   ]
 
-  it.each(nonCompleted)('leaves a Turn that ended %s without a card', (_name, reason) => {
+  it.each(nonCompleted)('cards a Turn that ended %s without the bar', (_name, reason) => {
     const { view } = mountClosed({
       nodes: [user(1, 'question'), assistant(2, 'completed-looking answer', 1, 1)],
       turnTimings: new Map([[1, { startTime: 0 }]]),
       turnEnds: new Map([[1, 3]]),
       turnEndReasons: new Map([[1, reason]]),
     })
-    expect(cards(view.container)).toHaveLength(0)
+    expect(bars(view.container)).toHaveLength(0)
+    expect(view.getByText('completed-looking answer').closest('[data-reply-card]')).not.toBeNull()
     expect(view.getByText('completed-looking answer').closest('[data-final-answer]')).toBeNull()
   })
 
-  it('keeps the card on the response seat and not on the reasoning seat', () => {
+  it('keeps the bar on the response seat and cards no reasoning seat', () => {
     const mixed: AssistantMessageNode = {
       kind: 'assistant', seq: 2, time: 2_000, turn: 1, step: 1,
       blocks: [{ kind: 'reasoning', text: 'private reasoning' }, { kind: 'text', text: 'shared answer' }],
@@ -5021,30 +5027,31 @@ describe('Final answer card', () => {
     })
     const reasoningSeat = view.container.querySelector('[data-chat-group-part="reasoning"]')
     expect(reasoningSeat).not.toBeNull()
+    expect(reasoningSeat!.querySelector('[data-reply-card]')).toBeNull()
     expect(reasoningSeat!.querySelector('[data-final-answer]')).toBeNull()
     expect(view.container.querySelector('[data-chat-group-part="response"] [data-final-answer]')).not.toBeNull()
-    expect(cards(view.container)).toHaveLength(1)
+    expect(bars(view.container)).toHaveLength(1)
   })
 
-  it('keeps the card when the loaded tail has no turn/start', () => {
+  it('keeps the bar when the loaded tail has no turn/start', () => {
     const { view, snapshot } = mountClosed({
       nodes: [user(1, 'question'), assistant(2, 'answer from a partial tail', 1, 1)],
       turnEnds: new Map([[1, 3]]),
     })
     expect(snapshot.timeline.turns.get(1)?.start).toBeUndefined()
-    expect(cards(view.container)).toHaveLength(1)
+    expect(bars(view.container)).toHaveLength(1)
     expect(view.getByText('answer from a partial tail').closest('[data-final-answer]')).not.toBeNull()
   })
 
-  it('keeps the card in Verbose', () => {
+  it('keeps the bar in Verbose', () => {
     const h = makeCompletionHarness('verbose')
     const view = render(<h.ChatView {...h.props} />)
     act(() => { h.complete() })
-    expect(view.getAllByText(h.props.t('message.finalAnswer')).length).toBeGreaterThan(0)
+    expect(bars(view.container).length).toBeGreaterThan(0)
     expect(view.getByText('current answer').closest('[data-final-answer]')).not.toBeNull()
   })
 
-  it.each(['all', 'final'] as const)('keeps the card while the process stays folded (%s replies)', (replies) => {
+  it.each(['all', 'final'] as const)('keeps the bar while the process stays folded (%s replies)', (replies) => {
     const h = makeCompletionHarness('standard')
     h.setFoldedReplies(replies)
     const view = render(<h.ChatView {...h.props} />)
@@ -5054,6 +5061,6 @@ describe('Final answer card', () => {
     const answer = view.getByText('current answer')
     expect(answer.closest('[data-final-answer]')).not.toBeNull()
     expect(answer.closest('[hidden]')).toBeNull()
-    expect(cards(view.container).length).toBeGreaterThan(0)
+    expect(bars(view.container).length).toBeGreaterThan(0)
   })
 })

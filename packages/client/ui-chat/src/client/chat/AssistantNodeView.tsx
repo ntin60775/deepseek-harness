@@ -16,8 +16,8 @@ type AssistantNodeViewProps = ChatNodeViewProps<'assistant-step'> & InjectFace<A
 
 /**
  * Streaming, settled, and interrupted Assistant states share one keyed renderer instance.
- * The closing text reply of a Turn that ended `completed` renders in the final-answer
- * card on its response seat; every other reply stays plain Markdown.
+ * Every response-seat reply renders in the elevated reply card; the closing text reply
+ * of a Turn that ended `completed` additionally carries the final-answer left bar.
  */
 export const AssistantNodeView = memo(function AssistantNodeView({
   node, groupPart, useDisclosure, useGroupAction, useTurnData, turnProcess, openFile, loadImage, fileMentions,
@@ -42,8 +42,8 @@ export const AssistantNodeView = memo(function AssistantNodeView({
     [fileMentions, owner, getFileTriggerProps],
   )
   // `owner` already requires a closed Turn whose closing text reply is this row.
-  // The card also needs the successful end and the response seat, so a partial
-  // tail without turn/start keeps its card while the reasoning seat never does.
+  // The bar also needs the successful end and the response seat, so a partial
+  // tail without turn/start keeps its bar while the reasoning seat never does.
   const finalAnswer = owner !== undefined
     && groupPart !== 'reasoning'
     && turn?.end?.data.reason.kind === 'completed'

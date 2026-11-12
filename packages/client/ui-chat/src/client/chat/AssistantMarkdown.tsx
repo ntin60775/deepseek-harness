@@ -32,7 +32,10 @@ export interface AssistantMarkdownProps extends
   Pick<ChatNodeOwnerProps, 'loadImage'> {
   /** Render only the requested business portion, preserving original block indexes. */
   groupPart?: string | undefined
-  /** This response seat is its completed Turn's closing reply: render the final-answer card. */
+  /**
+   * This response seat is its completed Turn's closing reply: add the
+   * final-answer bar to the reply card. Reasoning seats never carry it.
+   */
   finalAnswer?: boolean | undefined
   /** Stable Hook forwarded to each independently expandable reasoning block. */
   useDisclosure: UseDisclosure
@@ -155,10 +158,15 @@ export const AssistantMarkdown = memo(function AssistantMarkdown({
         && <span className={css.stopped}>{t('message.stopped')}</span>}
     </div>
   )
+  // Every response-seat reply reads as a card; the reasoning seat stays a
+  // process row inside the group container. An ungrouped seat renders the
+  // whole reply flow and cards it the same way. The final bar is a card
+  // modifier, so it never stands on an uncarded seat.
+  const card = groupPart !== 'reasoning'
+  const bar = card && finalAnswer
   return (
-    <div className={finalAnswer ? `${css.root} ${css.finalAnswer}` : css.root}
-      data-streaming={streaming || undefined} data-final-answer={finalAnswer || undefined}>
-      {finalAnswer && <div className={css.finalAnswerLabel}>{t('message.finalAnswer')}</div>}
+    <div className={card ? `${css.root} ${css.card}${bar ? ` ${css.finalAnswer}` : ''}` : css.root}
+      data-streaming={streaming || undefined} data-reply-card={card || undefined} data-final-answer={bar || undefined}>
       {body}
     </div>
   )
