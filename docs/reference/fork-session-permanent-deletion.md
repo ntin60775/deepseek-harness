@@ -1,0 +1,58 @@
+---
+node_type: reference
+title: Permanent Session deletion from the sidebar (fork-local)
+service: _platform
+status: active
+updated: 2026-11-10
+tags: [fork, session, deletion, persistence]
+links:
+  documents:
+    - ../../packages/api/session-controller/src/commands.ts
+    - ../../packages/api/session-controller/src/client/sessions/manager.ts
+    - ../../packages/api/session-controller/src/client/contract/sessions.ts
+    - ../../packages/client/ui-workspace/src/client/session-actions/DeleteSession.tsx
+    - ../../apps/web/tests/session-delete.e2e.ts
+  part_of: [README.md]
+  depends_on: [../subsystems/persistence.md, ../subsystems/session.md]
+  relates_to:
+    - ../subsystems/workspace.md
+    - ../subsystems/session-query.md
+    - ../session-format-status.md
+    - ../../.agents/notes/implemented/feature/2026-11-06-session-permanent-deletion.md
+---
+
+# Permanent Session deletion from the sidebar (fork-local)
+
+This page traces one permanent Session deletion end to end in this fork: the sidebar action, the Remote command, the Host orchestration, the storage removal, the registry cleanup, and the client row drop, plus the irreversibility limits and the tests that pin them. The feature is fork-local and absent from `upstream/master`. The [Agent Note](../../.agents/notes/implemented/feature/2026-11-06-session-permanent-deletion.md) owns the decision, alternatives, and consequences; [persistence.md](../subsystems/persistence.md), [session.md](../subsystems/session.md), and [workspace.md](../subsystems/workspace.md) own the Cordis types and signatures named here; this page links to those instead of restating them.
+
+## End-to-end path of one deletion
+
+- Entry points: `DeleteSessionRowButton` (hover action, order 300) in [DeleteSession.tsx](../../packages/client/ui-workspace/src/client/session-actions/DeleteSession.tsx) and the context-menu entry registered at order 700 with `danger: true` in [context-menus.tsx](../../packages/client/ui-workspace/src/client/session-actions/context-menus.tsx). Both render only while the Session's access snapshot includes `session/delete`, and both call `requestDeleteSession`, which opens the confirmation dialog.
+- Dialog: `SessionDeleteConfirmDialog` renders one modal per pending request, keyed by the Session id. The first pass calls `UiWorkspace.deleteSession`; when the Host returns `busy`, the same dialog lists the reported activities and switches its action to `stopAndDeleteSession`. When `canStop` is false the stop button is hidden and the dialog shows the open-elsewhere alert; other failures stay visible in the dialog as errors.
+- Client service: `deleteSession` and `stopAndDeleteSession` in [navigation.ts](../../packages/client/ui-workspace/src/client/navigation.ts) share `runDelete(sessionId, stopActivity)`, which calls `ISessions.delete` (the face declared in [contract/sessions.ts](../../packages/api/session-controller/src/client/contract/sessions.ts)), resolves through `SessionManager.deleteSession` in [manager.ts](../../packages/api/session-controller/src/client/sessions/manager.ts), and sends the Remote command `session/delete` — `@Remote('delete')` on the `session` namespace in [index.ts](../../packages/api/session-controller/src/index.ts). A `busy` outcome is a `SessionDeleteError` whose `rpcError.code` is `session/live`; any other rejection propagates to the dialog.
+- Host orchestration: `SessionCommandController.delete` in [commands.ts](../../packages/api/session-controller/src/commands.ts) inspects a live Agent for the id. When one exists, it collects activity through the `workspace/session-activity` waterfall and checks disposer ownership through `ApiSessionAgentController.canCloseAgent`, and refuses with `session/live` — carrying `activity` and `closable` — when the Agent is not owned by this controller or reports running work while `stopActivity` is not `true`. Otherwise it first stops work through the `workspace/session-stop` parallel, where a rejecting provider is logged and does not block the deletion the user confirmed, then disposes the Agent through `closeAgent`.
+- Storage: `ctx.sessionPersistence.delete(sessionId)` — the abstract method specified in [persistence.md](../subsystems/persistence.md) — runs next. The JSONL backend ([src/index.ts](../../packages/session/session-persistence-jsonl/src/index.ts), behavior detail owned by its [README](../../packages/session/session-persistence-jsonl/README.md)) locates the artifact directory by scanning project directories for the encoded id, so a Session whose stored header no longer validates is still removable; it refuses with `SessionAlreadyOwnedError` while this process holds a write claim (`JsonlBackendTracker.isWriteOwned`) or another process holds the kernel lock (`SessionWriteLease.acquire`), throws when the same id resolves in two project directories, and then removes the directory recursively and clears its cold-log memo. The controller maps `SessionAlreadyOwnedError` to the same `session/live` refusal with `closable: false`, and a `false` return to a `session/not-found` failure.
+- Registry: after the log is gone, `WorkspaceRegistry.forgetSession` ([semantics in workspace.md](../subsystems/workspace.md)) drops the account slot from each `WorkspaceEntity` whose record `accounts` the id, removes the archive-set and pin entries (writing the durable registry state only when one changed), and clears the header and cwd caches; unknown ids are an idempotent no-op.
+- Announcement: the controller emits `api-session/removed` only after `forgetSession` settles, so a registry failure leaves the removed Session announced to no client. On each client, `handleSessionRemoved` in [manager.ts](../../packages/api/session-controller/src/client/sessions/manager.ts) drops an ordinary row and flags its resident `ClientSession` removed; a durable subagent row instead stays and is marked stopped with no Agent available. The manager deletes the projection store when the Session has no subagent catalog and aborts its in-flight projection reads. `UiWorkspace.runDelete` clears the main view when it shows the deleted Session.
+- Derived reads other than the client list, such as session-query search ([session-query.md](../subsystems/session-query.md)), receive no per-index cleanup event; they reconcile with persistence on their next read and lose the Session when the log is absent.
+
+## Irreversibility and what survives
+
+- The whole per-Session artifact directory is removed: the current log, every retained historical generation beside it, and the write lock file. Because stored generations are immutable history, this deletion is the supported route that destroys committed generations, and nothing about the Session is recoverable afterwards; the adjacent-migration rule in [session-format-status.md](../session-format-status.md) forbids migrations from moving, overwriting, or deleting those generations, and the [Agent Note](../../.agents/notes/implemented/feature/2026-11-06-session-permanent-deletion.md) records why user deletion is the storage owner's authorized exception.
+- Cancellation applies only before removal starts: `SessionPersistenceDeleteOptions.signal` aborts while the backend still searches and locks, and once artifact removal begins the call runs to completion.
+- The Remote command is not idempotent: a second `session/delete` for the same id fails as `session/not-found`, leaving the registry and the event stream untouched.
+- Deletion does not cascade: forked children, subagent Sessions, and content-addressed attachments keep their own data, and a project directory emptied by the removal stays on disk; the consequences are stated in the [Agent Note](../../.agents/notes/implemented/feature/2026-11-06-session-permanent-deletion.md).
+- A live Agent this controller did not create or resume cannot be closed by deletion: `session/live` answers with `closable: false`, the dialog offers no stop action, and the log is untouched. The Host keeps one Agent per Session across windows, so a successful deletion closes it for every connected client and each window drops or disables the row as above.
+
+## Checkpoint policy and the open Session
+
+- [session-checkpoint-policy](../../packages/session/session-checkpoint-policy/README.md) decides when the store must flush before a model request or tool effect; this fork changes no behavior there. Its durable writes are written into the same Session artifact directory, so a deletion removes every checkpointed state with the log. The package's spec gained only a rejecting `delete()` stub because the abstract `SessionPersistence` service gained the method; the same kind of fixture stub keeps the session-query and session-query-sqlite specs compiling, so no search or checkpoint behavior was redefined by this change.
+- A Session open with an idle Agent is closed and deleted in one pass with no extra confirmation; a Session with running work requires the caller's confirmed stop-and-delete pass that sends `stopActivity: true`, after which the Host stops work, closes the Agent, and removes the log.
+
+## Regression coverage
+
+- [packages/session/session-persistence-jsonl/tests/delete.spec.ts](../../packages/session/session-persistence-jsonl/tests/delete.spec.ts) proves the storage half: removal of the artifact directory, catalog row, and every reader path; refusal while this process holds the write handle and removal after close; refusal while another process holds the kernel write lease; removal of a Session whose stored header no longer validates; refusal to delete one copy when the id appears in two project directories; and cancellation observed before anything is removed.
+- [packages/api/session-controller/tests/session-delete.host.spec.ts](../../packages/api/session-controller/tests/session-delete.host.spec.ts) proves the Host half in order: log removed, then registry trace, then `api-session/removed`; an already absent Session reported without touching the registry; a live-Agent refusal naming the activity providers report; closing an owned live Agent and stopping its work on request; another process's writer mapped to the same `session/live` refusal; an unexpected storage failure kept as an internal diagnostic; and no removal announcement when the registry cannot forget the Session.
+- [packages/workspace/workspace/tests/workspace.spec.ts](../../packages/workspace/workspace/tests/workspace.spec.ts) covers `registry-global session forgetting`: `forgetSession` clears the account slot, archive entry, and pin, and resolves as a no-op for an unknown id.
+- [packages/client/ui-workspace/tests/session-actions.client.spec.tsx](../../packages/client/ui-workspace/tests/session-actions.client.spec.tsx) covers the UI half: the delete button is absent without `session/delete` access, the dialog names the Session and deletes on confirm, and a busy refusal lists the live work and switches the confirmation to stop and delete. [packages/client/ui-workspace/tests/apply.client.spec.ts](../../packages/client/ui-workspace/tests/apply.client.spec.ts) proves the row and menu both ask through the navigation service.
+- [apps/web/tests/session-delete.e2e.ts](../../apps/web/tests/session-delete.e2e.ts) drives the full flow in a real browser against a Web server with no model calls: confirm running work, stop and delete, the row disappears and its emptied Ungrouped group is no longer rendered, the Host persistence `list`/`stat` and the archive and pin sets are empty, and a reload rebuilds an empty list from the Host baseline. It seeds one cold Session from the committed fixture `snapshots/web/seeded-history/session.v3.jsonl`.
