@@ -27,7 +27,8 @@ import type {
   MessageImagesOwnerProps, NodeKey, TurnLocation,
 } from '@deepseek-ai/dsh-client-ui-conversation/client'
 import type { WorkspaceSnapshot } from '@deepseek-ai/dsh-api-workspace-controller/client'
-import { SessionSeq, type SessionId } from '@deepseek-ai/dsh-session/types'
+import { SessionSeq, type SessionId, type TurnEndReason } from '@deepseek-ai/dsh-session/types'
+import { AttachmentId } from '@deepseek-ai/dsh-attachment'
 import type { SessionStatusSnapshot } from '@deepseek-ai/dsh-client-ui-session/client'
 import type { KeyedSnapshotSelectorHook, SnapshotSelectorHook } from '@deepseek-ai/dsh-client-ui-slots'
 import { allowAllAccess, bindSnapshotSelector, makeTranslate } from '@deepseek-ai/dsh-client-test-runtime'
@@ -4915,4 +4916,144 @@ it('does not infer menu targets from links or data attributes inside a plugin fl
   fireEvent.contextMenu(view.getByRole('button', { name: 'Custom target' }))
   expect(custom).toHaveBeenCalledOnce()
   expect(h.props.resolveFilePath).not.toHaveBeenCalled()
+})
+
+describe('Final answer card', () => {
+  function projectClosed(input: Parameters<typeof chatSnapshotFixture>[0]) {
+    const builder = new ChatSnapshotBuilder()
+    const groups = new ConversationGroupStore<ProcessGroupData>()
+    const state = new ProcessState()
+    const snapshot = installGroupedSnapshot(builder, state, groups, chatSnapshotFixture(input))
+    return { snapshot, groups }
+  }
+
+  function mountClosed(input: Parameters<typeof chatSnapshotFixture>[0]) {
+    const { snapshot, groups } = projectClosed(input)
+    const h = makeHarness({ chat: snapshot }, { running: false })
+    h.setGrouped(groups)
+    const view = render(<h.ChatView {...h.props} />)
+    return { h, view, snapshot }
+  }
+
+  const cards = (container: HTMLElement): HTMLElement[] =>
+    [...container.querySelectorAll<HTMLElement>('[data-final-answer]')]
+
+  it('marks the closing completed reply and leaves the interim reply plain', () => {
+    const { h, view } = mountClosed({
+      nodes: [user(1, 'question'), assistant(2, 'interim reply', 1, 1), assistant(3, 'final reply', 1, 2)],
+      turnTimings: new Map([[1, { startTime: 0 }]]),
+      turnEnds: new Map([[1, 4]]),
+    })
+    const label = h.props.t('message.finalAnswer')
+    expect(cards(view.container)).toHaveLength(1)
+    const card = cards(view.container)[0]!
+    expect(card.textContent).toContain(label)
+    expect(card.textContent).toContain('final reply')
+    expect(card.textContent).not.toContain('interim reply')
+    expect(view.getByText('interim reply').closest('[data-final-answer]')).toBeNull()
+    expect(view.getAllByText(label)).toHaveLength(1)
+  })
+
+  it('leaves an open Turn without a card', () => {
+    const { view } = mountClosed({
+      nodes: [user(1, 'question'), assistant(2, 'streamed reply', 1, 1)],
+      turnTimings: new Map([[1, { startTime: 0 }]]),
+    })
+    expect(cards(view.container)).toHaveLength(0)
+  })
+
+  it('leaves a completed Turn without a closing text reply alone', () => {
+    const { view } = mountClosed({
+      nodes: [user(1, 'question'), reasoningAssistant(2, 'only reasoning', 1, 1)],
+      turnTimings: new Map([[1, { startTime: 0 }]]),
+      turnEnds: new Map([[1, 3]]),
+    })
+    expect(cards(view.container)).toHaveLength(0)
+  })
+
+  it('leaves an image-only final reply alone', () => {
+    const imageOnly: AssistantMessageNode = {
+      kind: 'assistant', seq: 2, time: 2_000, turn: 1, step: 1,
+      blocks: [{
+        kind: 'image',
+        attachment: {
+          attachmentId: AttachmentId('card-image'), mediaType: 'image/png', bytes: 1, width: 1, height: 1,
+        },
+      }],
+    }
+    const { view } = mountClosed({
+      nodes: [user(1, 'question'), imageOnly],
+      turnTimings: new Map([[1, { startTime: 0 }]]),
+      turnEnds: new Map([[1, 3]]),
+    })
+    expect(view.container.querySelector('[data-chat-node-key="fixture:assistant:2"]')).not.toBeNull()
+    expect(cards(view.container)).toHaveLength(0)
+  })
+
+  const nonCompleted: ReadonlyArray<readonly [string, TurnEndReason]> = [
+    ['stopped', { kind: 'aborted', reason: { kind: 'user' } }],
+    ['failed', { kind: 'error', error: { message: 'provider exploded', code: 'UNKNOWN' } }],
+    ['interrupted', { kind: 'interrupted' }],
+    ['max-tokens', { kind: 'max-tokens' }],
+    ['blocked', { kind: 'blocked' }],
+  ]
+
+  it.each(nonCompleted)('leaves a Turn that ended %s without a card', (_name, reason) => {
+    const { view } = mountClosed({
+      nodes: [user(1, 'question'), assistant(2, 'completed-looking answer', 1, 1)],
+      turnTimings: new Map([[1, { startTime: 0 }]]),
+      turnEnds: new Map([[1, 3]]),
+      turnEndReasons: new Map([[1, reason]]),
+    })
+    expect(cards(view.container)).toHaveLength(0)
+    expect(view.getByText('completed-looking answer').closest('[data-final-answer]')).toBeNull()
+  })
+
+  it('keeps the card on the response seat and not on the reasoning seat', () => {
+    const mixed: AssistantMessageNode = {
+      kind: 'assistant', seq: 2, time: 2_000, turn: 1, step: 1,
+      blocks: [{ kind: 'reasoning', text: 'private reasoning' }, { kind: 'text', text: 'shared answer' }],
+    }
+    const { view } = mountClosed({
+      nodes: [user(1, 'question'), mixed],
+      turnTimings: new Map([[1, { startTime: 0 }]]),
+      turnEnds: new Map([[1, 3]]),
+    })
+    const reasoningSeat = view.container.querySelector('[data-chat-group-part="reasoning"]')
+    expect(reasoningSeat).not.toBeNull()
+    expect(reasoningSeat!.querySelector('[data-final-answer]')).toBeNull()
+    expect(view.container.querySelector('[data-chat-group-part="response"] [data-final-answer]')).not.toBeNull()
+    expect(cards(view.container)).toHaveLength(1)
+  })
+
+  it('keeps the card when the loaded tail has no turn/start', () => {
+    const { view, snapshot } = mountClosed({
+      nodes: [user(1, 'question'), assistant(2, 'answer from a partial tail', 1, 1)],
+      turnEnds: new Map([[1, 3]]),
+    })
+    expect(snapshot.timeline.turns.get(1)?.start).toBeUndefined()
+    expect(cards(view.container)).toHaveLength(1)
+    expect(view.getByText('answer from a partial tail').closest('[data-final-answer]')).not.toBeNull()
+  })
+
+  it('keeps the card in Verbose', () => {
+    const h = makeCompletionHarness('verbose')
+    const view = render(<h.ChatView {...h.props} />)
+    act(() => { h.complete() })
+    expect(view.getAllByText(h.props.t('message.finalAnswer')).length).toBeGreaterThan(0)
+    expect(view.getByText('current answer').closest('[data-final-answer]')).not.toBeNull()
+  })
+
+  it.each(['all', 'final'] as const)('keeps the card while the process stays folded (%s replies)', (replies) => {
+    const h = makeCompletionHarness('standard')
+    h.setFoldedReplies(replies)
+    const view = render(<h.ChatView {...h.props} />)
+    act(() => { h.complete() })
+    const control = view.container.querySelector<HTMLButtonElement>('[data-turn-process="2"]')!
+    expect(control.getAttribute('aria-expanded')).toBe('false')
+    const answer = view.getByText('current answer')
+    expect(answer.closest('[data-final-answer]')).not.toBeNull()
+    expect(answer.closest('[hidden]')).toBeNull()
+    expect(cards(view.container).length).toBeGreaterThan(0)
+  })
 })

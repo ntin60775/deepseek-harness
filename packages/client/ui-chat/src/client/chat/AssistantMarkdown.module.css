@@ -14,6 +14,28 @@
   color: var(--dsw-alias-label-primary);
 }
 
+/* Final answer card: the elevated independent-content-card family of
+   QuestionComposer/PlanReviewPanel. border: 0 leaves the 0.5px hairline to the
+   elevation shadow, so the card adds no layout edge of its own and keeps the
+   same surface geometry in both themes. */
+.finalAnswer {
+  box-sizing: border-box;
+  padding: 14px 16px 16px;
+  border: 0;
+  border-radius: var(--dsw-radius-xl);
+  background: var(--dsw-specific-input-major);
+  box-shadow: var(--dsw-elevation-panel);
+}
+
+/* Card caption: quiet tertiary label above the reply, one step below the
+   response size so the answer text keeps the reading weight. */
+.finalAnswerLabel {
+  margin-bottom: 6px;
+  color: var(--dsw-alias-label-tertiary);
+  font-size: var(--dsh-content-font-size-secondary, 13px);
+  line-height: calc(20px + var(--dsh-content-font-delta-secondary, 0px));
+}
+
 .body {
   --dsh-assistant-block-gap: 16px;
   display: flex;

@@ -14,7 +14,11 @@ export interface AssistantNodeInjected extends PresentationInjected {
 type AssistantNodeViewProps = ChatNodeViewProps<'assistant-step'> & InjectFace<AssistantNodeInjected>
   & PropsRenderSlots<'conversation.chat.reasoning.body' | 'conversation.chat.message.images'>
 
-/** Streaming, settled, and interrupted Assistant states share one keyed renderer instance. */
+/**
+ * Streaming, settled, and interrupted Assistant states share one keyed renderer instance.
+ * The closing text reply of a Turn that ended `completed` renders in the final-answer
+ * card on its response seat; every other reply stays plain Markdown.
+ */
 export const AssistantNodeView = memo(function AssistantNodeView({
   node, groupPart, useDisclosure, useGroupAction, useTurnData, turnProcess, openFile, loadImage, fileMentions,
   usePresentation, renderSlot, t, sessionId, useContextMenu, resolveFilePath,
@@ -37,6 +41,12 @@ export const AssistantNodeView = memo(function AssistantNodeView({
     () => owner === undefined ? undefined : fileMentions(owner, getFileTriggerProps),
     [fileMentions, owner, getFileTriggerProps],
   )
+  // `owner` already requires a closed Turn whose closing text reply is this row.
+  // The card also needs the successful end and the response seat, so a partial
+  // tail without turn/start keeps its card while the reasoning seat never does.
+  const finalAnswer = owner !== undefined
+    && groupPart !== 'reasoning'
+    && turn?.end?.data.reason.kind === 'completed'
   const keepReplies = usePresentation(policy => policy.foldedReplies === 'all')
   // A kept reply row stays visible while the folded Turn hides its inline reasoning.
   const reasoningHidden = turnProcess !== undefined
@@ -50,6 +60,7 @@ export const AssistantNodeView = memo(function AssistantNodeView({
     <AssistantMarkdown
       blocks={data.blocks}
       groupPart={groupPart}
+      finalAnswer={finalAnswer}
       useDisclosure={useDisclosure}
       streaming={data.status === 'running'}
       textInteractionSource={data.status === 'settled' && data.finalNode?.messageId !== undefined}
