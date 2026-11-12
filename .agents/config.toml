@@ -1,0 +1,29 @@
+# OntoShip role registry.
+# One [agents.<name>] section per role; `model` is required.
+# Standard DSH layout: the four reviewers and the curator on qwen3.8-flash
+# with `xhigh`, the critic on qwen3.8-max with `medium`. `level` is the
+# role's reasoning_effort, passed straight to `subagent`.
+
+[agents.reviewer-spec]
+model = "qwen-token-plan/qwen3.8-flash"
+level = "xhigh"
+
+[agents.reviewer-tests]
+model = "qwen-token-plan/qwen3.8-flash"
+level = "xhigh"
+
+[agents.reviewer-code]
+model = "qwen-token-plan/qwen3.8-flash"
+level = "xhigh"
+
+[agents.reviewer-kb]
+model = "qwen-token-plan/qwen3.8-flash"
+level = "xhigh"
+
+[agents.critic]
+model = "qwen-token-plan/qwen3.8-max"
+level = "medium"
+
+[agents.curator]
+model = "qwen-token-plan/qwen3.8-flash"
+level = "xhigh"
