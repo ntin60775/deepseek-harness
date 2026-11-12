@@ -18,6 +18,7 @@ The procedure below is packaged as the `dsh-web-launcher` skill (`.agents/skills
 
 - **Запуск** — starts the server when it is down and opens the interface; when the server is already up it only opens the interface. `Enter` presses it.
 - **Остановка** — stops the server. When the server still runs work (tool calls, subagents), the window asks first, because those runs are interrupted.
+- **Пересборка** — runs `scripts/web-launcher/rebuild-web.sh` in the background: package `lib/`, client bundles and `apps/web/dist`. The server is not restarted and stays enabled state-wise; it polls the bundles it serves, so open tabs reload on their own. Closing the window while a build runs is refused, because killing a build leaves partially written artifacts. The window reports the script's exit code and output tail when it fails.
 - **×** on the window frame or `Esc` closes the window; the server keeps running, as before.
 
 ## Environment

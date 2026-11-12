@@ -23,8 +23,8 @@ import urllib.error
 import urllib.request
 from pathlib import Path
 
-from PyQt6.QtCore import QPointF, QSize, Qt, QThread, QTimer, pyqtSignal
-from PyQt6.QtGui import QColor, QFont, QIcon, QKeySequence, QPainter, QPixmap, QPolygonF, QShortcut
+from PyQt6.QtCore import QPointF, QRectF, QSize, Qt, QThread, QTimer, pyqtSignal
+from PyQt6.QtGui import QColor, QFont, QIcon, QKeySequence, QPainter, QPen, QPixmap, QPolygonF, QShortcut
 from PyQt6.QtWidgets import (
     QApplication,
     QFrame,
@@ -46,6 +46,11 @@ DSH_HOME = Path(os.environ.get("DSH_HOME") or (Path.home() / ".dsh"))
 DEFAULT_URL = "http://127.0.0.1:3080"
 URL_PATTERN = re.compile(r"^dsh web: (http\S+)", re.MULTILINE)
 SERVER_COMMAND = ("apps/cli/src/bin.ts", "web")
+
+# Rebuild runs the checkout's own script so the window and a terminal issue one and the
+# same build; the script resolves Node itself and refuses to run beside `pnpm run dev:web`.
+REBUILD_SCRIPT = HERE / "rebuild-web.sh"
+REBUILD_TIMEOUT_SECONDS = 900.0
 
 # A child of the server counts as running work unless it is idle infrastructure:
 # below one CPU second after five minutes of life is a language server, an MCP
@@ -396,11 +401,54 @@ class StopWorker(QThread):
         self.finished_ok.emit()
 
 
+class RebuildWorker(QThread):
+    """Rebuild this checkout's artifacts through scripts/web-launcher/rebuild-web.sh."""
+
+    finished_ok = pyqtSignal()
+    failed = pyqtSignal(str)
+
+    def run(self) -> None:
+        if not REBUILD_SCRIPT.is_file():
+            self.failed.emit(f"Скрипт пересборки не найден: {REBUILD_SCRIPT}")
+            return
+        env = dict(os.environ)
+        node = node_binary()
+        if node:
+            env["DSH_NODE"] = node
+        try:
+            completed = subprocess.run(
+                [str(REBUILD_SCRIPT)],
+                cwd=REPO,
+                env=env,
+                stdin=subprocess.DEVNULL,
+                capture_output=True,
+                text=True,
+                errors="replace",
+                timeout=REBUILD_TIMEOUT_SECONDS,
+            )
+        except subprocess.TimeoutExpired:
+            self.failed.emit(
+                f"Пересборка не завершилась за {int(REBUILD_TIMEOUT_SECONDS)} секунд; "
+                f"артефакты могут быть неполными — повторите сборку в терминале."
+            )
+            return
+        except OSError as error:
+            self.failed.emit(f"Не удалось запустить пересборку: {error}")
+            return
+        if completed.returncode == 0:
+            self.finished_ok.emit()
+            return
+        output = ((completed.stdout or "") + (completed.stderr or ""))[-3000:].strip()
+        self.failed.emit(
+            f"Пересборка завершилась с кодом {completed.returncode}.\n{output or 'вывод пуст'}"
+        )
+
+
 # --- window -----------------------------------------------------------------
 
 
 class Launcher(QWidget):
-    """The launcher window: server state, one stop action and one start action."""
+    """The launcher window: server state, stop, rebuild and start actions."""
 
     def __init__(self) -> None:
         super().__init__()
@@ -412,6 +460,7 @@ class Launcher(QWidget):
         self._start_worker: StartWorker | None = None
         self._server_started = False
         self._stop_worker: StopWorker | None = None
+        self._rebuild_worker: RebuildWorker | None = None
 
         root = QVBoxLayout(self)
         root.setContentsMargins(18, 16, 18, 16)
@@ -525,9 +574,22 @@ class Launcher(QWidget):
         )
         self._stop_button.clicked.connect(self._on_stop)
 
+        self._rebuild_button = QPushButton(" Пересборка")
+        self._rebuild_button.setObjectName("side")
+        self._rebuild_button.setMinimumHeight(40)
+        self._rebuild_button.setIcon(self._rebuild_icon())
+        self._rebuild_button.setIconSize(QSize(15, 15))
+        self._rebuild_button.setToolTip(
+            "Пересобрать артефакты этого checkout: lib/ пакетов, клиентские бандлы и apps/web/dist.\n"
+            f"Сервер не перезапускается: он сам следит за бандлами и перезагружает вкладки.\n"
+            f"Скрипт: {REBUILD_SCRIPT}"
+        )
+        self._rebuild_button.clicked.connect(self._on_rebuild)
+
         self._run_button = QPushButton(" Запуск")
         self._run_button.setObjectName("run")
-        self._run_button.setMinimumHeight(40)
+        # Two rows tall: it spans Остановка and Пересборка in the grid below (40 + 10 + 40).
+        self._run_button.setMinimumHeight(90)
         self._run_button.setIcon(self._play_icon())
         self._run_button.setIconSize(QSize(15, 15))
         self._run_button.setDefault(True)
@@ -537,11 +599,15 @@ class Launcher(QWidget):
         )
         self._run_button.clicked.connect(self._on_run)
 
-        row = QHBoxLayout()
-        row.setSpacing(10)
-        row.addWidget(self._stop_button, 1)
-        row.addWidget(self._run_button, 2)
-        actions.addLayout(row)
+        grid = QGridLayout()
+        grid.setHorizontalSpacing(10)
+        grid.setVerticalSpacing(10)
+        grid.setColumnStretch(0, 1)
+        grid.setColumnStretch(1, 2)
+        grid.addWidget(self._stop_button, 0, 0)
+        grid.addWidget(self._rebuild_button, 1, 0)
+        grid.addWidget(self._run_button, 0, 1, 2, 1)
+        actions.addLayout(grid)
 
         self._confirm = QWidget()
         confirm_layout = QVBoxLayout(self._confirm)
@@ -588,6 +654,26 @@ class Launcher(QWidget):
         painter.setPen(Qt.PenStyle.NoPen)
         painter.setBrush(QColor("#ffe8e4"))
         painter.drawRoundedRect(2, 2, size - 4, size - 4, 1.5, 1.5)
+        painter.end()
+        return QIcon(pixmap)
+
+    @staticmethod
+    def _rebuild_icon() -> QIcon:
+        """Circular arrow: rebuild the artifacts without touching the running server."""
+        size = 15
+        pixmap = QPixmap(size, size)
+        pixmap.fill(Qt.GlobalColor.transparent)
+        painter = QPainter(pixmap)
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing, True)
+        pen = QPen(QColor("#e6e6e6"))
+        pen.setWidthF(1.6)
+        painter.setPen(pen)
+        painter.drawArc(QRectF(2.5, 2.5, size - 5.0, size - 5.0), 45 * 16, 250 * 16)
+        painter.setPen(Qt.PenStyle.NoPen)
+        painter.setBrush(QColor("#e6e6e6"))
+        painter.drawPolygon(
+            QPolygonF([QPointF(size - 3.0, 1.5), QPointF(size - 0.5, 5.5), QPointF(size - 6.0, 5.0)])
+        )
         painter.end()
         return QIcon(pixmap)
 
@@ -651,6 +737,11 @@ class Launcher(QWidget):
         )
         self._style_chip()
         self._run_button.setEnabled(True)
+        if REBUILD_SCRIPT.is_file():
+            self._rebuild_button.setEnabled(True)
+        else:
+            self._rebuild_button.setEnabled(False)
+            self._rebuild_button.setToolTip(f"Скрипт пересборки не найден: {REBUILD_SCRIPT}")
 
     def _style_chip(self) -> None:
         self._chip.style().unpolish(self._chip)
@@ -663,18 +754,29 @@ class Launcher(QWidget):
         self._style_chip()
         self._stop_button.setEnabled(False)
         self._run_button.setEnabled(False)
+        self._rebuild_button.setEnabled(False)
 
     def _end_busy(self) -> None:
         self._busy = False
         self._refresh()
 
     def _show_error(self, text: str) -> None:
+        self._show_status(text, "message")
+
+    def _show_success(self, text: str) -> None:
+        self._show_status(text, "ok")
+
+    def _show_status(self, text: str, object_name: str) -> None:
+        self._message.setObjectName(object_name)
+        self._message.style().unpolish(self._message)
+        self._message.style().polish(self._message)
         self._message.setText(text)
         self._message.show()
 
     def _hide_error(self) -> None:
         self._message.hide()
         self._message.setText("")
+        self._message.setObjectName("message")
 
     # -- actions -------------------------------------------------------------
 
@@ -726,6 +828,7 @@ class Launcher(QWidget):
     def _show_confirm(self) -> None:
         self._confirming = True
         self._stop_button.setVisible(False)
+        self._rebuild_button.setVisible(False)
         self._run_button.setVisible(False)
         self._confirm.show()
 
@@ -733,6 +836,7 @@ class Launcher(QWidget):
         self._confirming = False
         self._confirm.hide()
         self._stop_button.setVisible(True)
+        self._rebuild_button.setVisible(True)
         self._run_button.setVisible(True)
 
     def _stop_now(self) -> None:
@@ -745,6 +849,21 @@ class Launcher(QWidget):
 
     def _on_stopped(self) -> None:
         self._end_busy()
+
+    def _on_rebuild(self) -> None:
+        if self._busy:
+            return
+        self._hide_error()
+        self._hide_confirm()
+        self._rebuild_worker = RebuildWorker()
+        self._rebuild_worker.finished_ok.connect(self._on_rebuilt)
+        self._rebuild_worker.failed.connect(self._on_failed)
+        self._set_busy("пересборка…")
+        self._rebuild_worker.start()
+
+    def _on_rebuilt(self) -> None:
+        self._end_busy()
+        self._show_success("Артефакты пересобраны. Открытые вкладки перезагрузятся сами.")
 
     def _open_browser(self, url: str) -> None:
         command = browser_command()
@@ -763,6 +882,12 @@ class Launcher(QWidget):
             self._show_error(f"Не удалось открыть браузер: {error}")
 
     def closeEvent(self, event) -> None:
+        # Killing a build mid-run leaves partially written lib/ and apps/web/dist trees,
+        # so the window stays open until the rebuild settles on its own.
+        if self._rebuild_worker is not None and self._rebuild_worker.isRunning():
+            self._show_error("Идёт пересборка артефактов — закройте окно после её завершения.")
+            event.ignore()
+            return
         if (
             self._start_worker is not None
             and self._start_worker.isRunning()
@@ -787,6 +912,7 @@ QLabel#key { color: #9aa0a6; }
 QLabel#value { color: #e6e6e6; }
 QLabel#question { color: #e8c07a; }
 QLabel#message { color: #f2a4a4; }
+QLabel#ok { color: #7fe08a; }
 QFrame#line { background: #2f3439; border: none; max-height: 1px; }
 QPushButton { border-radius: 6px; font-weight: 600; }
 QPushButton#stop { background: #8f3327; border: 1px solid #8f3327; color: #ffe8e4; }
