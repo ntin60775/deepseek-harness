@@ -1,9 +1,9 @@
 // @vitest-environment jsdom
 /**
- * Final-answer card presentation: the Assistant body carries the card material,
- * its caption resolves through the Chat dictionary, and the caption key exists
- * in every shipped dictionary. The predicate that selects the row is covered by
- * the ChatView specs, where a Turn and its tail are projected together.
+ * Reply cards and the final-answer bar: every response-seat reply carries the
+ * card, the completed closing reply additionally carries the bar, and no
+ * caption renders in any locale. The predicate that selects the final row is
+ * covered by the ChatView specs, where a Turn and its tail are projected together.
  */
 import { afterEach, describe, expect, it } from 'vitest'
 import { cleanup, render } from '@testing-library/react'
@@ -58,47 +58,49 @@ function imageBlock(): AssistantBlock {
   }
 }
 
-describe('final-answer card', () => {
-  it('wraps the reply with the localized caption when the row is the completed closing answer', () => {
+describe('reply cards and final-answer bar', () => {
+  it('cards an intermediate reply without the final bar', () => {
+    const { view } = mount()
+    expect(view.container.querySelector('[data-reply-card]')).not.toBeNull()
+    expect(view.container.querySelector('[data-final-answer]')).toBeNull()
+    expect(view.getByText('The reply body.')).toBeDefined()
+  })
+
+  it('cards the completed closing answer and marks it with the bar', () => {
     const { view } = mount({ finalAnswer: true })
     const card = view.container.querySelector('[data-final-answer]') as HTMLElement
     expect(card).not.toBeNull()
-    expect(card.textContent).toBe(`${en['message.finalAnswer']}The reply body.`)
-    expect(view.getByText('The reply body.')).toBeDefined()
+    expect(card.hasAttribute('data-reply-card')).toBe(true)
+    expect(card.textContent).toBe('The reply body.')
   })
 
-  it('leaves an intermediate reply plain', () => {
-    const { view } = mount()
+  it('cards a streaming reply without the bar', () => {
+    const { view } = mount({ streaming: true })
+    expect(view.container.querySelector('[data-reply-card]')).not.toBeNull()
     expect(view.container.querySelector('[data-final-answer]')).toBeNull()
-    expect(view.queryByText(en['message.finalAnswer'])).toBeNull()
-    expect(view.getByText('The reply body.')).toBeDefined()
   })
 
-  it('keeps images inside an image-only reply without inventing a caption', () => {
+  it('cards an image-only reply without inventing a bar', () => {
     const { view } = mount({ blocks: [imageBlock()], groupPart: 'response' })
+    expect(view.container.querySelector('[data-reply-card]')).not.toBeNull()
     expect(view.container.querySelector('[data-final-answer]')).toBeNull()
   })
 
-  it('renders the caption in the active locale', () => {
-    const { view } = mount({ finalAnswer: true }, ru)
-    expect(view.getByText('Окончательный ответ')).toBeDefined()
+  it('keeps the reasoning seat out of the card family', () => {
+    const { view } = mount({
+      blocks: [{ kind: 'reasoning', text: 'private reasoning' }],
+      groupPart: 'reasoning',
+      finalAnswer: true,
+    })
+    expect(view.container.querySelector('[data-reply-card]')).toBeNull()
+    expect(view.container.querySelector('[data-final-answer]')).toBeNull()
   })
 
-  it('declares the caption key in all eight dictionaries', () => {
-    const labels = {
-      zh: '最终回答',
-      en: 'Final answer',
-      ja: '最終回答',
-      es: 'Respuesta final',
-      fr: 'Réponse finale',
-      de: 'Endgültige Antwort',
-      ru: 'Окончательный ответ',
-      pt: 'Resposta final',
-    }
-    const dictionaries = { zh, en, ja, es, fr, de, ru, pt }
-    for (const [locale, dictionary] of Object.entries(dictionaries)) {
-      expect(dictionary['message.finalAnswer'], locale).toBe(labels[locale as keyof typeof labels])
-      expect(makeTranslate(dictionary, commonEn)('message.finalAnswer'), locale).toBe(labels[locale as keyof typeof labels])
+  it('renders no caption in any shipped locale', () => {
+    for (const dictionary of [zh, en, ja, es, fr, de, ru, pt]) {
+      const { view } = mount({ finalAnswer: true }, dictionary)
+      expect(view.container.textContent).toBe('The reply body.')
+      view.unmount()
     }
   })
 })

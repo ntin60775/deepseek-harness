@@ -1,4 +1,4 @@
-/** Final-answer card material, asserted against the stylesheet text (jsdom has no layout). */
+/** Reply card and final-answer bar materials, asserted against the stylesheet text (jsdom has no layout). */
 import { readFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { describe, expect, it } from 'vitest'
@@ -21,9 +21,9 @@ function declarations(selector: string): string[] {
   return (rule[1] ?? '').split(';').map(part => part.trim()).filter(Boolean)
 }
 
-describe('final-answer card material', () => {
-  it('uses the elevated independent-content-card family', () => {
-    expect(declarations('.finalAnswer')).toEqual(expect.arrayContaining([
+describe('reply card material', () => {
+  it('uses the elevated independent-content-card family for every reply card', () => {
+    expect(declarations('.card')).toEqual(expect.arrayContaining([
       'background: var(--dsw-specific-input-major)',
       'border-radius: var(--dsw-radius-xl)',
       'border: 0',
@@ -31,10 +31,10 @@ describe('final-answer card material', () => {
     ]))
   })
 
-  it('keeps the caption on the shared secondary text ladder', () => {
-    expect(declarations('.finalAnswerLabel')).toEqual(expect.arrayContaining([
-      'color: var(--dsw-alias-label-tertiary)',
-      'font-size: var(--dsh-content-font-size-secondary, 13px)',
+  it('marks the final answer with the business-blue left bar on a compensated text axis', () => {
+    expect(declarations('.finalAnswer')).toEqual(expect.arrayContaining([
+      'border-left: 3.5px solid var(--dsw-alias-state-business-primary)',
+      'padding-left: 12.5px',
     ]))
   })
 })

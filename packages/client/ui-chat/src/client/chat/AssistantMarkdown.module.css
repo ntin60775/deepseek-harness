@@ -14,11 +14,12 @@
   color: var(--dsw-alias-label-primary);
 }
 
-/* Final answer card: the elevated independent-content-card family of
-   QuestionComposer/PlanReviewPanel. border: 0 leaves the 0.5px hairline to the
-   elevation shadow, so the card adds no layout edge of its own and keeps the
-   same surface geometry in both themes. */
-.finalAnswer {
+/* Reply card: the elevated independent-content-card family of
+   QuestionComposer/PlanReviewPanel, shared by every response-seat reply so
+   intermediate and final answers keep one visual weight. border: 0 leaves the
+   0.5px hairline to the elevation shadow, so the card adds no layout edge of
+   its own and keeps the same surface geometry in both themes. */
+.card {
   box-sizing: border-box;
   padding: 14px 16px 16px;
   border: 0;
@@ -27,13 +28,13 @@
   box-shadow: var(--dsw-elevation-panel);
 }
 
-/* Card caption: quiet tertiary label above the reply, one step below the
-   response size so the answer text keeps the reading weight. */
-.finalAnswerLabel {
-  margin-bottom: 6px;
-  color: var(--dsw-alias-label-tertiary);
-  font-size: var(--dsh-content-font-size-secondary, 13px);
-  line-height: calc(20px + var(--dsh-content-font-delta-secondary, 0px));
+/* Final-answer bar: the completed closing reply keeps the card and adds the
+   business-blue left edge (deepseek-500 light, deepseek-400 dark). The reduced
+   left padding compensates the border width, so the reply text keeps the same
+   axis as every other card. No caption: the bar alone marks the result. */
+.finalAnswer {
+  border-left: 3.5px solid var(--dsw-alias-state-business-primary);
+  padding-left: 12.5px;
 }
 
 .body {
