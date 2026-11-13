@@ -1,0 +1,114 @@
+/* Mockup palette sampled from the operator's live GUI (dark) + shipped light tokens. */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { background: #161616; }
+body {
+  font-family: 'JetBrains Mono', 'JetBrainsMono Nerd Font', 'JetBrainsMono Nerd Font Mono', 'Noto Sans Mono', monospace;
+  color: #fbf1c6;
+  -webkit-font-smoothing: antialiased;
+}
+.gui { background: #2c2c2c; position: relative; overflow: hidden; }
+svg { display: block; }
+
+/* ---- header ---- */
+.titleRow { display: flex; align-items: center; justify-content: space-between; height: 48px; padding: 0 16px; }
+.titleCluster { display: flex; align-items: center; gap: 18px; min-width: 0; }
+.crumbCurrent { font-size: 14px; line-height: 20px; font-weight: 500; color: #fbf1c6; white-space: nowrap; }
+.crumbLink { font-size: 14px; line-height: 20px; color: #a89c82; white-space: nowrap; }
+.crumbSep { color: #a89c82; font-size: 14px; margin: 0 6px; }
+.headerActions { display: flex; align-items: center; gap: 14px; }
+.preset { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; color: #a89c82; white-space: nowrap; }
+.countTrigger { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; color: #d4c3a0; background: none; border: 0; font-family: inherit; white-space: nowrap; }
+.utilities { display: flex; align-items: center; gap: 10px; color: #a89c82; }
+.switcherTitle { display: inline-flex; align-items: center; gap: 4px; font-size: 14px; font-weight: 500; color: #fbf1c6; }
+
+/* ---- tabs ---- */
+.tabs { display: flex; align-items: flex-end; gap: 26px; height: 38px; padding: 0 24px; }
+.tab { font-size: 14px; line-height: 20px; color: #d4c3a0; padding-bottom: 8px; }
+.tab.active { color: #fe7f1f; border-bottom: 2px solid #fe7f1f; }
+
+/* ---- chat surface ---- */
+.chat { background: #353333; position: relative; padding: 20px 28px; font-size: 13px; line-height: 22px; color: #fbf1c6; }
+.turn { border-left: 3px solid #fe7f1f; padding-left: 16px; }
+.turn p { margin-bottom: 10px; }
+.dim { color: #a89c82; }
+code.inline { background: #403d3b; color: #d2859a; border-radius: 4px; padding: 1px 5px; font-size: 12px; font-family: inherit; }
+
+/* ---- subagent catalog menu (360px, per SubagentHeaderLineage.module.css) ---- */
+.menu {
+  position: absolute; width: 360px; padding: 6px;
+  background: #353333; border-radius: 12px;
+  box-shadow: 0 0 0 1px #171717, 0 14px 34px rgba(0, 0, 0, .55);
+}
+.row { display: flex; align-items: flex-start; gap: 7px; padding: 4px 6px 4px 9px; border-radius: 12px; }
+.row.hover { background: #3c3a38; }
+.statusSlot { flex: none; width: 14px; height: 17px; display: flex; align-items: center; justify-content: center; }
+.dotOngoing { width: 7px; height: 7px; border-radius: 50%; background: #b7ba2a; }
+.dotIdle { width: 8px; height: 8px; border-radius: 50%; border: 1.5px solid #bbad90; }
+.content { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.label { font-size: 13px; line-height: 17px; color: #fbf1c6; overflow-wrap: anywhere; }
+.secondaryLabel { font-size: 12px; line-height: 17px; color: #d4c3a0; }
+.metrics { flex: none; display: grid; grid-template-rows: 17px 15px; text-align: right; font-size: 10px; line-height: 15px; color: #d4c3a0; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.metricToken { grid-row: 1; line-height: 17px; }
+.metricDuration { grid-row: 2; }
+.sideSlot { flex: none; width: 28px; height: 28px; margin: 4px 0; display: flex; align-items: center; justify-content: center; color: #d4c3a0; }
+
+/* ---- NEW: route line ---- */
+.route { display: flex; align-items: center; gap: 6px; font-size: 11px; line-height: 16px; color: #d4c3a0; min-width: 0; margin-top: 1px; }
+.route .path { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; border-bottom: 1px dotted rgba(254, 127, 31, .6); }
+.effort { flex: none; font-size: 10px; line-height: 14px; padding: 0 5px; border-radius: 4px; background: #403d3b; color: #fbf1c6; border-bottom: 1px dotted rgba(254, 127, 31, .6); }
+.mark { flex: none; width: 14px; height: 14px; border-radius: 50%; background: #fe7f1f; color: #161616; font-size: 9px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; }
+
+/* ---- NEW: header route badge ---- */
+.routeBadge { display: inline-flex; align-items: center; gap: 6px; height: 24px; padding: 0 8px; border-radius: 8px; background: #3c3a38; box-shadow: 0 0 0 1px #171717; font-size: 11px; color: #d4c3a0; white-space: nowrap; }
+.routeBadge .path { border-bottom: 1px dotted rgba(254, 127, 31, .6); }
+.routeBadge .effort { border-bottom: 0; }
+
+/* ---- composer ---- */
+.composer { margin: 14px 28px 20px; background: #3c3a38; border-radius: 16px; box-shadow: 0 0 0 1px #171717; padding: 12px 14px 10px; }
+.composer .placeholder { font-size: 13px; color: #a89c82; margin-bottom: 14px; }
+.toolRow { display: flex; align-items: center; gap: 8px; }
+.iconBtn { width: 28px; height: 28px; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #d4c3a0; }
+.spacer { flex: 1; }
+.modelLabel { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: #d4c3a0; white-space: nowrap; }
+.modelLabel .path { border-bottom: 1px dotted rgba(254, 127, 31, .6); }
+.sendBtn { width: 28px; height: 28px; border-radius: 8px; background: #fe7f1f; color: #161616; display: flex; align-items: center; justify-content: center; }
+
+/* ---- tool card ---- */
+.toolCard { background: #3c3a38; border-radius: 12px; box-shadow: 0 0 0 1px #171717; padding: 10px 14px; margin-bottom: 14px; }
+.toolHead { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #fbf1c6; }
+.toolHead .t { font-weight: 500; }
+.nameTag { font-size: 11px; color: #d4c3a0; background: #403d3b; border-radius: 4px; padding: 1px 6px; }
+.toolHead .right { margin-left: auto; display: flex; align-items: center; gap: 8px; font-size: 11px; color: #a89c82; }
+.toolDesc { margin-top: 6px; font-size: 12px; line-height: 17px; color: #d4c3a0; }
+
+/* ---- legend ---- */
+.legend { background: #161616; padding: 14px 22px 16px; font-size: 12px; line-height: 19px; color: #d4c3a0; }
+.legend h2 { font-size: 13px; font-weight: 500; color: #fbf1c6; margin-bottom: 8px; }
+.legend .item { display: flex; gap: 8px; margin-bottom: 5px; }
+.legend .mark { margin-top: 2px; }
+.legend .note { color: #a89c82; margin-top: 7px; }
+.legend code { background: #2c2c2c; color: #d2859a; border-radius: 4px; padding: 0 4px; font-family: inherit; font-size: 11px; }
+
+/* ---- light theme override ---- */
+body.light, body.light .gui { background: #ffffff; }
+body.light { color: #0f1115; }
+body.light .crumbCurrent, body.light .label, body.light .switcherTitle { color: #0f1115; }
+body.light .crumbLink, body.light .preset, body.light .dim { color: #979da6; }
+body.light .countTrigger, body.light .secondaryLabel, body.light .metrics, body.light .sideSlot, body.light .tab { color: #61666b; }
+body.light .tab.active { color: #d96a15; border-bottom-color: #d96a15; }
+body.light .chat { background: #f9fafb; color: #0f1115; }
+body.light .turn { border-left-color: #d96a15; }
+body.light code.inline { background: rgba(0, 0, 0, .06); color: #b04a63; }
+body.light .menu { background: #e9ecf2; box-shadow: 0 0 0 1px rgba(0, 0, 0, .1), 0 14px 34px rgba(15, 17, 21, .18); }
+body.light .row.hover { background: rgba(0, 0, 0, .05); }
+body.light .dotOngoing { background: #8a8d1f; }
+body.light .dotIdle { border-color: #979da6; }
+body.light .route, body.light .routeBadge, body.light .modelLabel { color: #61666b; }
+body.light .route .path, body.light .routeBadge .path, body.light .modelLabel .path { border-bottom-color: rgba(217, 106, 21, .65); }
+body.light .effort { background: rgba(0, 0, 0, .08); color: #0f1115; }
+body.light .routeBadge { background: #f1f3f5; box-shadow: 0 0 0 1px rgba(0, 0, 0, .1); }
+body.light .mark { background: #d96a15; color: #ffffff; }
+body.light .legend { background: #f1f3f5; color: #61666b; }
+body.light .legend h2 { color: #0f1115; }
+body.light .legend .note { color: #979da6; }
+body.light .legend code { background: rgba(0, 0, 0, .06); color: #b04a63; }

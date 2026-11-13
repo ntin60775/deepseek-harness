@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="shared.css">
+<style>
+  body { width: 1160px; }
+  .gui { width: 1160px; }
+  .chat { height: 300px; position: static; }
+  .menu { top: 53px; left: 560px; }
+  .row { flex-direction: column; gap: 0; }
+  .rowTop { display: flex; align-items: flex-start; gap: 7px; width: 100%; }
+  .route { margin-left: 21px; }
+</style>
+</head>
+<body>
+<div class="gui">
+  <div class="titleRow">
+    <div class="titleCluster">
+      <span class="crumbCurrent">Ведение тикетов юнита …</span>
+      <div class="headerActions">
+        <span class="preset"><svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 9l6-5 6 5v7H4z"/><circle cx="10" cy="11.5" r="1.5"/></svg>Стандартный режим</span>
+        <span class="countTrigger"><svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="7" cy="6" r="2.6"/><path d="M2.5 16c.6-3 2.4-4.5 4.5-4.5s3.9 1.5 4.5 4.5"/><circle cx="13.5" cy="6.5" r="2.2"/><path d="M12.9 11.6c1.9.3 3.4 1.7 4 4.4"/></svg>Субагенты 2</span>
+      </div>
+    </div>
+    <div class="utilities">
+      <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="6" cy="5" r="2"/><circle cx="6" cy="15" r="2"/><circle cx="14" cy="8" r="2"/><path d="M6 7v6M14 10c0 3-3 3-6 3"/></svg>
+      <svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor"><circle cx="4" cy="10" r="1.4"/><circle cx="10" cy="10" r="1.4"/><circle cx="16" cy="10" r="1.4"/></svg>
+    </div>
+  </div>
+  <div class="tabs"><span class="tab active">Чат</span><span class="tab">Траектория</span><span class="tab">Статистика</span><span class="tab">…</span></div>
+  <div class="chat">
+    <div class="turn">
+      <p>Порядок:</p>
+      <p>1. Текущему исполнителю отправлена команда на компактный отчёт о состоянии (шаг ship, worktree, коммиты, незакоммиченные изменения) — он ещё работал над тикетом 01.</p>
+      <p>2. По его отчёту спавню нового исполнителя на маршруте <code class="inline">deepseek-account/deepseek-flash</code> / <code class="inline">max</code> с handoff-промтом: юнит, спека, тикет 01 и фактическое состояние на момент остановки.</p>
+      <p>Жду отчёт остановленного исполнителя, чтобы передача была по фактам, а не вслепую.</p>
+    </div>
+    <div class="menu">
+      <div class="row">
+        <div class="rowTop">
+          <span class="statusSlot"><span class="dotOngoing"></span></span>
+          <span class="content">
+            <span class="label">Исполнитель цепочки team-profiles</span>
+            <span class="secondaryLabel">executor</span>
+          </span>
+          <span class="metrics"><span class="metricToken">6.3M ток</span><span class="metricDuration">12m 15s</span></span>
+          <span class="sideSlot"><svg width="12" height="12" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M7 4l6 6-6 6"/></svg></span>
+        </div>
+        <span class="route"><span class="path">deepseek-account/deepseek-flash</span><span class="effort">high</span><span class="mark">1</span><span class="mark">2</span></span>
+      </div>
+      <div class="row">
+        <div class="rowTop">
+          <span class="statusSlot"><span class="dotIdle"></span></span>
+          <span class="content">
+            <span class="label">Исполнитель на deepseek-flash max</span>
+            <span class="secondaryLabel">executor-2</span>
+          </span>
+          <span class="metrics"><span class="metricToken">4.2M ток</span><span class="metricDuration">3m 38s</span></span>
+          <span class="sideSlot"><svg width="12" height="12" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M7 4l6 6-6 6"/></svg></span>
+        </div>
+        <span class="route"><span class="path">deepseek-account/deepseek-flash</span><span class="effort">max</span></span>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="legend">
+  <h2>Макет 1 · Каталог субагентов: маршрут третьей строкой в каждом ряду</h2>
+  <div class="item"><span class="mark">1</span><span>Строка маршрута <code>provider/model</code> под именем агента. Данные — проекция <code>modelSelection</code> (<code>next ?? lastUsed</code>) дочерней сессии: тот же канал summary, что токены и время; новых событий не нужно. Пунктир — новое в макете.</span></div>
+  <div class="item"><span class="mark">2</span><span>Чип reasoning effort. Effort не задан явно → чип «default» (решает адаптер); маршрут ещё не записан (ребёнок без запросов) → строка скрыта, без выдуманных данных.</span></div>
+  <div class="note">Меню остаётся 360px; строка маршрута занимает всю ширину ряда под метриками, длинный путь — ellipsis + tooltip с полным маршрутом. External/unknown-ряды маршрут не показывают. Так сразу видно, чем executor отличается от executor-2.</div>
+</div>
+</body>
+</html>

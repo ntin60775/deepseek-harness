@@ -27,3 +27,13 @@ level = "medium"
 [agents.curator]
 model = "qwen-token-plan/qwen3.8-flash"
 level = "xhigh"
+
+# Flash pool for critic projection slices (skill critic).
+# Routes verified against live list_subagent_models 2026-11-13; operator decision 2026-11-13.
+[[validation.pool]]
+model = "deepseek-account/deepseek-flash"
+level = "max"
+
+[[validation.pool]]
+model = "qwen-token-plan/qwen3.8-flash"
+level = "xhigh"
