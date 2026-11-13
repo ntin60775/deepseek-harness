@@ -369,6 +369,36 @@
   color: var(--dsw-alias-label-tertiary);
 }
 
+/* Recorded model route under the name column; the row's hover fill covers it. */
+.route {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  margin-top: 1px;
+  color: var(--dsw-alias-label-tertiary);
+  font-size: 11px;
+  line-height: 16px;
+}
+
+.routePath {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.routeEffort {
+  flex: none;
+  padding: 0 5px;
+  border-radius: var(--dsw-radius-xs);
+  background: var(--dsw-alias-bg-module-platform);
+  color: var(--dsw-alias-label-secondary);
+  font-size: 10px;
+  line-height: 14px;
+  white-space: nowrap;
+}
+
 .metrics {
   color: var(--dsw-alias-label-tertiary);
   font-size: 10px;
