@@ -217,6 +217,21 @@ function entryName(entry: SubagentCatalogSnapshot['entries'][number]): string {
   return entry.mode === 'continuable' || entry.mode === 'external' ? entry.name ?? entry.id : entry.id
 }
 
+/**
+ * Recorded model route of one catalog row from the child's summary projection;
+ * never resolves live adapter options. Hidden for external and unknown entries
+ * and rows whose format or child catalog needs migration.
+ */
+function recordedRoute(
+  entry: SubagentCatalogSnapshot['entries'][number],
+  summary: SessionSummary | undefined,
+  requiresOpening: boolean,
+): NonNullable<SessionProjectionMap['modelSelection']['lastUsed']> | undefined {
+  if (entry.mode === 'external' || entry.mode === 'unknown' || requiresOpening) return undefined
+  // The wire view already folds pending into next (pending ?? lastUsed).
+  return summary?.projectionValues?.modelSelection?.next ?? undefined
+}
+
 /** Only a local child's last closed, normally completed turn receives the completed marker. */
 function completedEntry(entry: SubagentCatalogSnapshot['entries'][number], summary: SessionSummary | undefined): boolean {
   return entry.mode !== 'external' && entry.activity === 'inactive'
@@ -243,7 +258,11 @@ function catalogProgress(entries: SubagentCatalogSnapshot['entries'], summaries:
   ].join('\u2002·\u2002')
 }
 
-/** Render one catalog level and recurse only through explicitly expanded rows. */
+/**
+ * Render one catalog level and recurse only through explicitly expanded rows.
+ * The package README owns the row presentation contract, including the
+ * recorded-route line; {@link recordedRoute} owns its data and visibility.
+ */
 function CatalogRows({
   parentSessionId, currentSessionId, catalog, catalogs, summaries, expanded, level,
   openChild, openChildAside, refreshProjection, toggleBranch, closeCatalog, t,
@@ -302,6 +321,11 @@ function CatalogRows({
         const secondary = [secondaryLabel, mode, activity]
           .filter(value => value !== undefined)
           .join(' · ')
+        const route = recordedRoute(entry, summary, requiresOpening)
+        const routeText = route === undefined ? '' : `${route.provider}/${route.model}`
+        const effortLabel = route === undefined ? '' : route.reasoningEffort ?? t('route.effortDefault')
+        const routeTitle = route === undefined ? '' : t('route.title', { route: routeText })
+        const routeAria = route === undefined ? '' : `${routeTitle} ${effortLabel}`
         const totalTokens = tokenTotal(summary?.projectionValues?.tokenUsage)
         const durationMs = activityDuration(
           summary,
@@ -358,7 +382,7 @@ function CatalogRows({
               aria-disabled={external || undefined}
               aria-level={level}
               aria-current={isCurrent || undefined}
-              aria-label={[primaryLabel, secondary, metrics].filter(value => value !== '').join(' ')}
+              aria-label={[primaryLabel, secondary, metrics, routeAria].filter(value => value !== '').join(' ')}
               {...canExpand ? { 'aria-expanded': isExpanded } : {}}
               className={css.row}
               onClick={open}
@@ -385,6 +409,19 @@ function CatalogRows({
                   <span className={`${css.label} ${isCurrent ? css.currentLabel : ''}`}>{primaryLabel}</span>
                   {secondaryLabel !== undefined && (
                     <span className={css.secondaryLabel}>{secondaryLabel}</span>
+                  )}
+                  {route !== undefined && (
+                    <span className={css.route}>
+                      <Tooltip label={routeTitle} delayMs={500} portal side="bottom" openOnClick>
+                        <span
+                          className={css.routePath}
+                          onClick={(event) => { event.stopPropagation() }}
+                        >
+                          {routeText}
+                        </span>
+                      </Tooltip>
+                      <span className={css.routeEffort}>{effortLabel}</span>
+                    </span>
                   )}
                 </span>
                 {metrics !== '' && (

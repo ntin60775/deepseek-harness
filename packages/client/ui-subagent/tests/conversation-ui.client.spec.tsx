@@ -4,11 +4,12 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import { act, cleanup, fireEvent, render, screen, within } from '@testing-library/react'
 import { allowAllAccess, makeTranslate, RemoteError, sessionSnapshot } from '@deepseek-ai/dsh-client-test-runtime'
 import type {
-  SessionListState, SessionSummary, SessionSnapshot,
+  SessionListState, SessionProjectionMap, SessionSummary, SessionSnapshot,
 } from '@deepseek-ai/dsh-api-session-controller/client'
 import type { SubagentAddress, SubagentCatalogEntry } from '@deepseek-ai/dsh-subagent/client'
 import type { TeamProjection, TeamTaskId, TeamTaskView } from '@deepseek-ai/dsh-agent-team/client'
 import type { SessionId } from '@deepseek-ai/dsh-session/types'
+import { ReasoningEffortId } from '@deepseek-ai/dsh-llm/brand'
 import type { SessionStatusSnapshot } from '@deepseek-ai/dsh-client-ui-session/client'
 import {
   SubagentCatalogAction, SubagentHeaderLineage,
@@ -1990,4 +1991,218 @@ it.each([false, true])('closes a pinned wide catalog on its next click (hover fi
   expect(screen.queryByRole('dialog')).toBeNull()
   expect(trigger.getAttribute('aria-expanded')).toBe('false')
   expect(document.activeElement).toBe(trigger)
+})
+
+describe('catalog route line', () => {
+  const routeText = 'deepseek-account/deepseek-flash'
+  const maxEffort = { provider: 'deepseek-account', model: 'deepseek-flash', reasoningEffort: ReasoningEffortId('max') }
+  const workerEntry = { id: CHILD, mode: 'continuable', label: 'worker', activity: 'running' } as const
+
+  function routeSummary(selection: SessionProjectionMap['modelSelection'], over: Partial<SessionSummary> = {}): SessionSummary {
+    return {
+      ...summary(CHILD, 1), running: true, ...over,
+      projectionValues: { subagentCatalog: [], modelSelection: selection },
+    }
+  }
+
+  function openCatalog(input: HeaderCatalogProps): void {
+    render(<HeaderCatalog {...input} />)
+    fireEvent.click(screen.getByRole('button', { name: /\d+ 个子智能体$/ }))
+  }
+
+  it('renders the recorded route and effort chip under the name inside the click area', () => {
+    const input = props(catalog({ entries: [workerEntry] }), {}, {
+      [CHILD]: routeSummary({ lastUsed: maxEffort, next: maxEffort }),
+    })
+    openCatalog(input)
+    const row = screen.getByRole('treeitem', { name: /worker/ })
+    const path = within(row).getByText(routeText)
+    expect(within(row).getByText('max')).toBeTruthy()
+    const clickarea = row.querySelector<HTMLElement>('[class*="clickarea"]')!
+    expect(clickarea.contains(path)).toBe(true)
+    const nameColumn = path.closest('[class*="content"]')!
+    expect(nameColumn.contains(within(row).getByText('worker'))).toBe(true)
+    const secondary = within(row).getByText(CHILD)
+    expect(secondary.compareDocumentPosition(path) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+  })
+
+  it('shows the effective next selection rather than the last used one', () => {
+    const next = { provider: 'qwen-token-plan', model: 'qwen3.8-flash' }
+    const input = props(catalog({ entries: [workerEntry] }), {}, {
+      [CHILD]: routeSummary({ lastUsed: maxEffort, next }),
+    })
+    openCatalog(input)
+    const row = screen.getByRole('treeitem', { name: /worker/ })
+    expect(within(row).getByText('qwen-token-plan/qwen3.8-flash')).toBeTruthy()
+    expect(within(row).queryByText(routeText)).toBeNull()
+    expect(within(row).getByText(zh['route.effortDefault'])).toBeTruthy()
+  })
+
+  it.each([
+    { dictionary: zh, chip: '默认', trigger: '1 个子智能体' },
+    { dictionary: en, chip: 'Default', trigger: '1 subagent' },
+  ])('labels an absent effort with the localized default chip: $chip', ({ dictionary, chip, trigger }) => {
+    const noEffort = { provider: 'deepseek-account', model: 'deepseek-flash' }
+    const input = props(catalog({ entries: [workerEntry] }), {}, {
+      [CHILD]: routeSummary({ lastUsed: noEffort, next: noEffort }),
+    })
+    render(<HeaderCatalog {...input} t={makeTranslate(dictionary)} />)
+    fireEvent.click(screen.getByRole('button', { name: trigger }))
+    const row = screen.getByRole('treeitem', { name: /worker/ })
+    expect(within(row).getByText(chip)).toBeTruthy()
+  })
+
+  it('renders a recorded effort id verbatim', () => {
+    const xhigh = { ...maxEffort, reasoningEffort: ReasoningEffortId('xhigh') }
+    const input = props(catalog({ entries: [workerEntry] }), {}, {
+      [CHILD]: routeSummary({ lastUsed: xhigh, next: xhigh }),
+    })
+    openCatalog(input)
+    expect(within(screen.getByRole('treeitem', { name: /worker/ })).getByText('xhigh')).toBeTruthy()
+  })
+
+  const hiddenId = 'hidden' as SessionId
+  const hiddenEntry = { id: hiddenId, mode: 'continuable', label: 'hidden-row', activity: 'inactive' } as const
+  const hiddenWithRoute: SessionSummary = {
+    ...summary(hiddenId, 1),
+    projectionValues: { subagentCatalog: [], modelSelection: { lastUsed: maxEffort, next: maxEffort } },
+  }
+  it.each([
+    { name: 'an empty projection', entry: hiddenEntry, child: summary(hiddenId, 1) },
+    { name: 'a null selection', entry: hiddenEntry, child: { ...summary(hiddenId, 1), projectionValues: { subagentCatalog: [], modelSelection: { lastUsed: null, next: null } } } },
+    { name: 'external membership', entry: { ...hiddenEntry, mode: 'external' }, child: hiddenWithRoute },
+    { name: 'unknown mode', entry: { ...hiddenEntry, mode: 'unknown' }, child: hiddenWithRoute },
+    { name: 'a migration-required format', entry: hiddenEntry, child: { ...hiddenWithRoute, formatStatus: 'migration-required' } },
+  ] satisfies { name: string; entry: CatalogFixtureEntry; child: SessionSummary }[])(
+    'hides the route for $name while a recorded sibling keeps it', ({ entry, child }) => {
+      const input = props(catalog({ entries: [workerEntry, entry] }), {}, {
+        [CHILD]: routeSummary({ lastUsed: maxEffort, next: maxEffort }),
+        [hiddenId]: child,
+      })
+      openCatalog(input)
+      expect(within(screen.getByRole('treeitem', { name: /worker/ })).getByText(routeText)).toBeTruthy()
+      expect(within(screen.getByRole('treeitem', { name: /hidden-row/ })).queryByText(routeText)).toBeNull()
+    },
+  )
+
+  it('hides the route while the child catalog needs migration', () => {
+    const input = props(catalog({ entries: [workerEntry, hiddenEntry] }), {}, {
+      [CHILD]: routeSummary({ lastUsed: maxEffort, next: maxEffort }),
+      [hiddenId]: hiddenWithRoute,
+    })
+    const initial = input.useSessions(state => state)
+    const state: SessionListState = {
+      ...initial,
+      projectionsBySession: {
+        ...initial.projectionsBySession,
+        [hiddenId]: { state: 'migration-required', error: null, values: {} },
+      },
+    }
+    render(<HeaderCatalog {...input} useSessions={select => select(state)} />)
+    fireEvent.click(screen.getByRole('button', { name: /\d+ 个子智能体$/ }))
+    expect(within(screen.getByRole('treeitem', { name: /worker/ })).getByText(routeText)).toBeTruthy()
+    expect(within(screen.getByRole('treeitem', { name: /hidden-row/ })).queryByText(routeText)).toBeNull()
+  })
+
+  it('renders the route on an expanded level-2 row inside the nested name column', () => {
+    const input = props(catalog({ entries: [workerEntry] }), {
+      [CHILD]: catalog({ entries: [{ id: GRANDCHILD, mode: 'continuable', label: 'indexer', activity: 'inactive' }] }),
+    }, {
+      [CHILD]: routeSummary({ lastUsed: maxEffort, next: maxEffort }),
+      [GRANDCHILD]: {
+        ...summary(GRANDCHILD, 1),
+        projectionValues: { subagentCatalog: [], modelSelection: { lastUsed: maxEffort, next: maxEffort } },
+      },
+    })
+    openCatalog(input)
+    fireEvent.click(screen.getByRole('button', { name: '展开 worker 的下级子智能体' }))
+    const nested = screen.getByRole('treeitem', { name: /indexer/ })
+    expect(nested.getAttribute('aria-level')).toBe('2')
+    const path = within(nested).getByText(routeText)
+    expect(within(nested).getByText('max')).toBeTruthy()
+    expect(nested.querySelector<HTMLElement>('[class*="clickarea"]')!.contains(path)).toBe(true)
+  })
+
+  it('shows the route on a one-shot row with a recorded selection', () => {
+    const input = props(catalog({ entries: [{ id: CHILD, mode: 'one-shot', label: 'worker', activity: 'inactive' }] }), {}, {
+      [CHILD]: routeSummary({ lastUsed: maxEffort, next: maxEffort }),
+    })
+    openCatalog(input)
+    expect(within(screen.getByRole('treeitem', { name: /worker/ })).getByText(routeText)).toBeTruthy()
+  })
+
+  it('hides the route when the list carries no summary for the row', () => {
+    const input = props(catalog({ entries: [workerEntry] }))
+    const initial = input.useSessions(state => state)
+    const byId = Object.fromEntries(Object.entries(initial.byId).filter(([id]) => id !== CHILD))
+    const state: SessionListState = { ...initial, byId }
+    render(<HeaderCatalog {...input} useSessions={select => select(state)} />)
+    fireEvent.click(screen.getByRole('button', { name: /\d+ 个子智能体$/ }))
+    expect(within(screen.getByRole('treeitem', { name: /worker/ })).queryByText(routeText)).toBeNull()
+  })
+
+  it('shows a fork child\'s inherited route from creation', () => {
+    const fork = 'forked' as SessionId
+    const inherited = { provider: 'deepseek-official', model: 'deepseek-v4-flash' }
+    const input = props(catalog({ entries: [{ id: fork, mode: 'continuable', label: 'forked task', name: 'forked-worker', activity: 'inactive' }] }), {}, {
+      [fork]: { ...summary(fork, 1), projectionValues: { subagentCatalog: [], modelSelection: { lastUsed: inherited, next: inherited } } },
+    })
+    openCatalog(input)
+    const row = screen.getByRole('treeitem', { name: /forked-worker/ })
+    expect(within(row).getByText('deepseek-official/deepseek-v4-flash')).toBeTruthy()
+    expect(within(row).getByText('默认')).toBeTruthy()
+  })
+
+  it.each([
+    { dictionary: zh, title: '模型路由：' },
+    { dictionary: en, title: 'Model route: ' },
+  ])('includes the full route and effort in the row accessible name: $title', ({ dictionary, title }) => {
+    const input = props(catalog({ entries: [workerEntry] }), {}, {
+      [CHILD]: routeSummary({ lastUsed: maxEffort, next: maxEffort }),
+    })
+    render(<HeaderCatalog {...input} t={makeTranslate(dictionary)} />)
+    fireEvent.click(screen.getByRole('button', { name: dictionary === zh ? '1 个子智能体' : '1 subagent' }))
+    const label = screen.getByRole('treeitem', { name: /worker/ }).getAttribute('aria-label')!
+    expect(label).toContain(`${title}${routeText}`)
+    expect(label).toContain('max')
+  })
+
+  it('pins the full route tooltip on tap without opening the child', () => {
+    enableTooltips()
+    vi.useFakeTimers()
+    const input = props(catalog({ entries: [workerEntry] }), {}, {
+      [CHILD]: routeSummary({ lastUsed: maxEffort, next: maxEffort }),
+    })
+    openCatalog(input)
+    const path = screen.getByText(routeText)
+    fireEvent.pointerDown(path, { pointerType: 'touch' })
+    fireEvent.click(path)
+    const bubble = screen.getByRole('tooltip')
+    expect(bubble.textContent).toBe(`模型路由：${routeText}`)
+    expect(path.getAttribute('aria-describedby')).toBe(bubble.id)
+    expect(input.openChild).not.toHaveBeenCalled()
+    expect(screen.getByRole('dialog')).toBeTruthy()
+  })
+
+  it('shows the full route tooltip after the catalog hover delay', () => {
+    enableTooltips()
+    vi.useFakeTimers()
+    const input = props(catalog({ entries: [workerEntry] }), {}, {
+      [CHILD]: routeSummary({ lastUsed: maxEffort, next: maxEffort }),
+    })
+    openCatalog(input)
+    const path = screen.getByText(routeText)
+    fireEvent.pointerEnter(path, { pointerType: 'mouse' })
+    expect(screen.queryByRole('tooltip')).toBeNull()
+    act(() => { vi.advanceTimersByTime(500) })
+    expect(screen.getByRole('tooltip').textContent).toBe(`模型路由：${routeText}`)
+  })
+
+  it('keeps rows without a recorded selection unchanged', () => {
+    const input = props(catalog())
+    openCatalog(input)
+    const row = screen.getByRole('treeitem', { name: /worker/ })
+    const expected = ['worker', ['child', zh['mode.continuable'], zh['activity.running']].join(' · ')].join(' ')
+    expect(row.getAttribute('aria-label')).toBe(expected)
+  })
 })
