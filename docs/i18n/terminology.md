@@ -178,6 +178,7 @@
 | registry | 注册表 | | | |
 | replay | 回放 | | | |
 | resume | 恢复 | | | |
+| route (model) | 模型路由 | | | DSH 用语：`provider/model` 不含 effort，effort 单独成芯片；不要译作「路径」（该词保留给智能体路径） |
 | runtime | 运行时 | | | |
 | same-world subprocess | 与宿主共享文件系统和内核的子进程 | | 同世界子进程 | |
 | sandbox | 沙箱 | | | |
