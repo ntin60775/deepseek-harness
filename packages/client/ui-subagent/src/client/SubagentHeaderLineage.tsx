@@ -414,13 +414,16 @@ function CatalogRows({
                     <span className={css.route}>
                       <Tooltip label={routeTitle} delayMs={500} portal side="bottom" openOnClick>
                         <span
-                          className={css.routePath}
+                          className={css.routeAnchor}
                           onClick={(event) => { event.stopPropagation() }}
                         >
-                          {routeText}
+                          <span className={css.routeProvider}>{route.provider}</span>
+                          <span className={css.routeModelLine}>
+                            <span className={css.routeModel}>{route.model}</span>
+                            <span className={css.routeEffort}>{effortLabel}</span>
+                          </span>
                         </span>
                       </Tooltip>
-                      <span className={css.routeEffort}>{effortLabel}</span>
                     </span>
                   )}
                 </span>

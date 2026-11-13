@@ -2016,14 +2016,19 @@ describe('catalog route line', () => {
     })
     openCatalog(input)
     const row = screen.getByRole('treeitem', { name: /worker/ })
-    const path = within(row).getByText(routeText)
-    expect(within(row).getByText('max')).toBeTruthy()
+    const provider = within(row).getByText('deepseek-account')
+    const model = within(row).getByText('deepseek-flash')
+    const chip = within(row).getByText('max')
     const clickarea = row.querySelector<HTMLElement>('[class*="clickarea"]')!
-    expect(clickarea.contains(path)).toBe(true)
-    const nameColumn = path.closest('[class*="content"]')!
+    expect(clickarea.contains(provider)).toBe(true)
+    const nameColumn = provider.closest('[class*="content"]')!
     expect(nameColumn.contains(within(row).getByText('worker'))).toBe(true)
     const secondary = within(row).getByText(CHILD)
-    expect(secondary.compareDocumentPosition(path) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+    expect(secondary.compareDocumentPosition(provider) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+    expect(provider.compareDocumentPosition(model) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+    const modelLine = model.closest('[class*="routeModelLine"]')!
+    expect(modelLine.contains(chip)).toBe(true)
+    expect(provider.closest('[class*="routeModelLine"]')).toBeNull()
   })
 
   it('shows the effective next selection rather than the last used one', () => {
@@ -2033,8 +2038,9 @@ describe('catalog route line', () => {
     })
     openCatalog(input)
     const row = screen.getByRole('treeitem', { name: /worker/ })
-    expect(within(row).getByText('qwen-token-plan/qwen3.8-flash')).toBeTruthy()
-    expect(within(row).queryByText(routeText)).toBeNull()
+    expect(within(row).getByText('qwen-token-plan')).toBeTruthy()
+    expect(within(row).getByText('qwen3.8-flash')).toBeTruthy()
+    expect(within(row).queryByText('deepseek-account')).toBeNull()
     expect(within(row).getByText(zh['route.effortDefault'])).toBeTruthy()
   })
 
@@ -2080,8 +2086,8 @@ describe('catalog route line', () => {
         [hiddenId]: child,
       })
       openCatalog(input)
-      expect(within(screen.getByRole('treeitem', { name: /worker/ })).getByText(routeText)).toBeTruthy()
-      expect(within(screen.getByRole('treeitem', { name: /hidden-row/ })).queryByText(routeText)).toBeNull()
+      expect(within(screen.getByRole('treeitem', { name: /worker/ })).getByText('deepseek-account')).toBeTruthy()
+      expect(within(screen.getByRole('treeitem', { name: /hidden-row/ })).queryByText('deepseek-account')).toBeNull()
     },
   )
 
@@ -2100,8 +2106,8 @@ describe('catalog route line', () => {
     }
     render(<HeaderCatalog {...input} useSessions={select => select(state)} />)
     fireEvent.click(screen.getByRole('button', { name: /\d+ 个子智能体$/ }))
-    expect(within(screen.getByRole('treeitem', { name: /worker/ })).getByText(routeText)).toBeTruthy()
-    expect(within(screen.getByRole('treeitem', { name: /hidden-row/ })).queryByText(routeText)).toBeNull()
+    expect(within(screen.getByRole('treeitem', { name: /worker/ })).getByText('deepseek-account')).toBeTruthy()
+    expect(within(screen.getByRole('treeitem', { name: /hidden-row/ })).queryByText('deepseek-account')).toBeNull()
   })
 
   it('renders the route on an expanded level-2 row inside the nested name column', () => {
@@ -2118,9 +2124,10 @@ describe('catalog route line', () => {
     fireEvent.click(screen.getByRole('button', { name: '展开 worker 的下级子智能体' }))
     const nested = screen.getByRole('treeitem', { name: /indexer/ })
     expect(nested.getAttribute('aria-level')).toBe('2')
-    const path = within(nested).getByText(routeText)
+    const provider = within(nested).getByText('deepseek-account')
+    expect(within(nested).getByText('deepseek-flash')).toBeTruthy()
     expect(within(nested).getByText('max')).toBeTruthy()
-    expect(nested.querySelector<HTMLElement>('[class*="clickarea"]')!.contains(path)).toBe(true)
+    expect(nested.querySelector<HTMLElement>('[class*="clickarea"]')!.contains(provider)).toBe(true)
   })
 
   it('shows the route on a one-shot row with a recorded selection', () => {
@@ -2128,7 +2135,7 @@ describe('catalog route line', () => {
       [CHILD]: routeSummary({ lastUsed: maxEffort, next: maxEffort }),
     })
     openCatalog(input)
-    expect(within(screen.getByRole('treeitem', { name: /worker/ })).getByText(routeText)).toBeTruthy()
+    expect(within(screen.getByRole('treeitem', { name: /worker/ })).getByText('deepseek-account')).toBeTruthy()
   })
 
   it('hides the route when the list carries no summary for the row', () => {
@@ -2138,7 +2145,7 @@ describe('catalog route line', () => {
     const state: SessionListState = { ...initial, byId }
     render(<HeaderCatalog {...input} useSessions={select => select(state)} />)
     fireEvent.click(screen.getByRole('button', { name: /\d+ 个子智能体$/ }))
-    expect(within(screen.getByRole('treeitem', { name: /worker/ })).queryByText(routeText)).toBeNull()
+    expect(within(screen.getByRole('treeitem', { name: /worker/ })).queryByText('deepseek-account')).toBeNull()
   })
 
   it('shows a fork child\'s inherited route from creation', () => {
@@ -2149,7 +2156,8 @@ describe('catalog route line', () => {
     })
     openCatalog(input)
     const row = screen.getByRole('treeitem', { name: /forked-worker/ })
-    expect(within(row).getByText('deepseek-official/deepseek-v4-flash')).toBeTruthy()
+    expect(within(row).getByText('deepseek-official')).toBeTruthy()
+    expect(within(row).getByText('deepseek-v4-flash')).toBeTruthy()
     expect(within(row).getByText('默认')).toBeTruthy()
   })
 
@@ -2174,12 +2182,12 @@ describe('catalog route line', () => {
       [CHILD]: routeSummary({ lastUsed: maxEffort, next: maxEffort }),
     })
     openCatalog(input)
-    const path = screen.getByText(routeText)
+    const path = screen.getByText('deepseek-account')
     fireEvent.pointerDown(path, { pointerType: 'touch' })
     fireEvent.click(path)
     const bubble = screen.getByRole('tooltip')
     expect(bubble.textContent).toBe(`模型路由：${routeText}`)
-    expect(path.getAttribute('aria-describedby')).toBe(bubble.id)
+    expect(path.closest('[class*="routeAnchor"]')!.getAttribute('aria-describedby')).toBe(bubble.id)
     expect(input.openChild).not.toHaveBeenCalled()
     expect(screen.getByRole('dialog')).toBeTruthy()
   })
@@ -2191,7 +2199,7 @@ describe('catalog route line', () => {
       [CHILD]: routeSummary({ lastUsed: maxEffort, next: maxEffort }),
     })
     openCatalog(input)
-    const path = screen.getByText(routeText)
+    const path = screen.getByText('deepseek-account')
     fireEvent.pointerEnter(path, { pointerType: 'mouse' })
     expect(screen.queryByRole('tooltip')).toBeNull()
     act(() => { vi.advanceTimersByTime(500) })
