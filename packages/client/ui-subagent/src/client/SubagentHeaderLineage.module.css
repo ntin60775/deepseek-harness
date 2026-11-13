@@ -164,12 +164,15 @@
   --dsh-scrollbar-thumb-hover: var(--dsw-alias-scrollbar-hover-l2);
   --dsw-elevation-stroke-color: var(--dsw-alias-border-l1);
   box-shadow: var(--dsw-elevation-prominent);
-  /* The fixed card width lets CSS retain both the trigger edge and the window inset. */
-  --dsh-subagent-menu-width: min(360px, calc(100vw - 32px));
+  /* The width cap lets CSS retain both the trigger edge and the window inset;
+     the card itself sizes to its content between the floor and the cap. */
+  --dsh-subagent-menu-width: min(560px, calc(100vw - 32px));
   position-area: none;
   top: calc(anchor(bottom) + 5px);
   left: clamp(16px, anchor(left), calc(100vw - var(--dsh-subagent-menu-width) - 16px));
-  width: var(--dsh-subagent-menu-width);
+  width: fit-content;
+  min-width: min(360px, calc(100vw - 32px));
+  max-width: var(--dsh-subagent-menu-width);
   position-try-fallbacks: --dsh-subagents-above, --dsh-subagents-window;
   height: fit-content;
   min-height: 0;
@@ -369,11 +372,11 @@
   color: var(--dsw-alias-label-tertiary);
 }
 
-/* Recorded model route under the name column; the row's hover fill covers it. */
+/* Recorded model route under the name column; the row's hover fill covers it.
+   Provider owns the first line, model plus effort chip the second. */
 .route {
   display: flex;
-  align-items: center;
-  gap: 6px;
+  flex-direction: column;
   min-width: 0;
   margin-top: 1px;
   color: var(--dsw-alias-label-tertiary);
@@ -381,7 +384,26 @@
   line-height: 16px;
 }
 
-.routePath {
+.routeAnchor {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.routeProvider {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.routeModelLine {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.routeModel {
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
