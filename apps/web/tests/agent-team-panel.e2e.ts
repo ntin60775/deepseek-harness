@@ -13,7 +13,7 @@ import {
   acknowledgeReloadConnectionLoss, assertFixtureInventory, captureStableAria, compareOrRefreshGolden,
   launchWebScaffold, watchConsole, webSnapshotMode, type WebScaffold,
 } from './scaffold.ts'
-import { assertWarningDialogLayout, connectFreshWorkspace, connectFreshWorkspaceZh, newEnglishPage, saveFailureShot, writeComposerDraft } from './support.ts'
+import { assertSubagentMenuWidth, assertWarningDialogLayout, connectFreshWorkspace, connectFreshWorkspaceZh, newEnglishPage, saveFailureShot, writeComposerDraft } from './support.ts'
 
 const SNAPSHOT_DIR = fileURLToPath(new URL('./snapshots/agent-team-panel', import.meta.url))
 const PANEL_EXPECTED = join(SNAPSHOT_DIR, 'task.expected.md')
@@ -248,7 +248,7 @@ describe('web e2e: agent teamwork panel', () => {
     await panel.getByText('No subagents', { exact: true }).waitFor()
     expect(await panel.locator('[data-subagent-section-header]').textContent()).toBe('Subagents')
     expect(await panel.locator('[data-subagent-section-header] button, h3 button').count()).toBe(0)
-    expect(await panel.evaluate(element => element.getBoundingClientRect().width)).toBe(360)
+    await assertSubagentMenuWidth(page, panel)
     expect(await board.locator('[data-team-task-details]').count()).toBe(0)
     expect(await board.getByRole('button', { expanded: false }).count()).toBe(1)
     expect(await board.evaluate((element) => {
@@ -297,7 +297,10 @@ describe('web e2e: agent teamwork panel', () => {
     await action.getByRole('treeitem', { name: /Researcher/u }).waitFor()
     expect(await action.locator('[data-team-panel], [data-subagent-section-header]').count()).toBe(0)
     expect(await action.getByText('No shared tasks yet. Create them through the conversation.').count()).toBe(0)
-    expect(await action.evaluate(element => element.getBoundingClientRect().width)).toBe(360)
+    await assertSubagentMenuWidth(page, action)
+    // The wide researcher content grows the menu past the 360px floor, proving
+    // fit-content sizing rather than a fixed 360px panel.
+    expect(await action.evaluate(element => element.getBoundingClientRect().width)).toBeGreaterThan(360)
     expect(await action.locator('[data-subagent-section-header] button, h3 button').count()).toBe(0)
     expect(await action.getByRole('heading', { name: 'Members', exact: true }).count()).toBe(0)
     expect(projectionReads).not.toHaveBeenCalled()
@@ -327,7 +330,7 @@ describe('web e2e: agent teamwork panel', () => {
     expect(await row.evaluate(element => ({ tag: element.tagName, parent: element.parentElement?.tagName })))
       .toEqual({ tag: 'LI', parent: 'UL' })
     expect(await action.locator('[data-team-task-details], article').count()).toBe(0)
-    expect(await action.evaluate(element => element.getBoundingClientRect().width)).toBe(360)
+    await assertSubagentMenuWidth(page, action)
     await action.getByRole('heading', { name: 'Shared tasks 1 pending', exact: true }).waitFor()
     expect(await action.evaluate(element => getComputedStyle(element).padding)).toBe('6px')
     expect(await action.locator('[data-subagent-section-header]').evaluate((element) => {
@@ -415,7 +418,7 @@ describe('web e2e: agent teamwork panel', () => {
     expect(await row.locator('[data-team-task-details] p, [data-team-task-owner]')
       .evaluateAll(elements => elements.every(element => getComputedStyle(element).fontSize === '12px'))).toBe(true)
     expect(await row.getByRole('button').getAttribute('aria-expanded')).toBe('true')
-    expect(await action.evaluate(element => element.getBoundingClientRect().width)).toBe(360)
+    await assertSubagentMenuWidth(page, action)
     await scaffold.ctx.agentTeams.updateTask(agent, {
       taskId: task.id, expectedRevision: task.revision, action: 'claim',
     })
@@ -443,7 +446,7 @@ describe('web e2e: agent teamwork panel', () => {
     await page.locator('[data-subagent-action]').getByRole('button', { name: '1 subagent', exact: true }).click()
     await page.getByRole('treeitem', { name: /Researcher/u }).waitFor()
     expect(await page.locator('[data-team-panel]').count()).toBe(0)
-    expect(await page.locator('[data-subagent-panel]').evaluate(element => element.getBoundingClientRect().width)).toBe(360)
+    await assertSubagentMenuWidth(page, page.locator('[data-subagent-panel]'))
     expect(await page.locator('[data-subagent-section-header]').count()).toBe(0)
     await page.keyboard.press('Escape')
     await page.getByRole('button', { name: /^Select model/u }).click()
@@ -647,7 +650,7 @@ describe('web e2e: agent teamwork panel', () => {
     await page.setViewportSize({ width: viewport.width, height: 540 })
     await trigger.click()
     await row.waitFor()
-    expect(await panel.evaluate(element => element.getBoundingClientRect().width)).toBe(360)
+    await assertSubagentMenuWidth(page, panel)
     expect(await board.locator('[data-team-task-details], article').count()).toBe(0)
     expect(await board.getByRole('button', { expanded: false }).count()).toBe(4)
     expect(await board.locator('[data-team-task]').evaluateAll(elements => elements.map(element => element.getAttribute('data-status'))))
@@ -694,7 +697,7 @@ describe('web e2e: agent teamwork panel', () => {
     expect(expandedScroll.arrowsBeforeTrack).toBe(true)
     expect(expandedScroll.trackLeft).toBeGreaterThanOrEqual(expandedScroll.panelRight - 6)
     expect(expandedScroll.trackRight).toBeLessThanOrEqual(expandedScroll.panelRight - 1)
-    expect(await panel.evaluate(element => element.getBoundingClientRect().width)).toBe(360)
+    await assertSubagentMenuWidth(page, panel)
     const details = row.locator('[data-team-task-details]')
     expect(await details.locator('p:not([data-team-task-owner])').textContent()).toBe(description)
     expect(await details.locator('[data-team-task-owner]').textContent()).toBe('Owner: Unowned')
@@ -769,7 +772,7 @@ describe('web e2e: agent teamwork panel', () => {
       await emptyRow.getByRole('button').click()
       expect(await board.locator('[data-team-task-details]').count()).toBe(0)
       await page.setViewportSize(viewport)
-      expect(await panel.evaluate(element => element.getBoundingClientRect().width)).toBe(360)
+      await assertSubagentMenuWidth(page, panel)
     } finally {
       await page.keyboard.press('Escape')
       await page.setViewportSize(viewport)
@@ -835,7 +838,7 @@ describe('web e2e: agent teamwork panel', () => {
     expect(await panel.getByRole('heading').count()).toBe(0)
     expect(await panel.getByText('No shared tasks yet. Create them through the conversation.').count()).toBe(0)
     expect(await panel.getByRole('treeitem', { name: /Researcher/u }).count()).toBe(1)
-    expect(await panel.evaluate(element => element.getBoundingClientRect().width)).toBe(360)
+    await assertSubagentMenuWidth(page, panel)
     await page.keyboard.press('Escape')
   })
 
@@ -981,7 +984,7 @@ it('shows the Chinese empty subagent section above compact shared tasks', async 
     await panel.getByText('暂无子智能体', { exact: true }).waitFor()
     expect(await panel.locator('[data-subagent-section-header]').textContent()).toBe('子智能体')
     expect(await panel.locator('[data-subagent-section-header] button, h3 button').count()).toBe(0)
-    expect(await panel.evaluate(element => element.getBoundingClientRect().width)).toBe(360)
+    await assertSubagentMenuWidth(page, panel)
     await panel.getByRole('heading', { name: '共享任务 1 待处理', exact: true }).waitFor()
     expect(await panel.locator('[data-team-task-details]').count()).toBe(0)
   })
