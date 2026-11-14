@@ -1,6 +1,7 @@
-/* Capsule geometry is fixed: a tag reads as one size everywhere, and only its
- * palette varies. Tone colors ride background/border/color so a render site can
- * still position the tag with its own class without touching the palette. */
+/* Geometry is fixed per size (regular capsule, compact chip); the palette is
+ * chosen independently by tone. Tone colors ride background/border/color so a
+ * render site can still position the tag with its own class without touching
+ * the palette. */
 .tag {
   display: inline-flex;
   align-items: center;
@@ -11,6 +12,18 @@
   line-height: 17px;
   font-weight: 500;
   white-space: nowrap;
+}
+
+/* The compact size is the raised 10px chip; tones still supply the palette so
+ * a compact neutral tag reads as a quiet fact on the module fill. */
+.tag[data-size='compact'] {
+  padding: 0 5px;
+  border-radius: var(--dsw-radius-xs);
+  font-size: 10px;
+  line-height: 14px;
+  /* The compact chip reads at the surrounding text weight, not the regular
+   * capsule's 500, matching the catalog route chip it consolidates. */
+  font-weight: 400;
 }
 
 .tag[data-tone='outline'] {

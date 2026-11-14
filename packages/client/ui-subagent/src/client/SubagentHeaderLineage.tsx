@@ -8,7 +8,7 @@ import type { SubagentAddress } from '@deepseek-ai/dsh-subagent/client'
 import type { SessionId } from '@deepseek-ai/dsh-session/types'
 import {
   IconChevronRightOutlineRegular, IconRefreshOutlineRegular, IconUsersOutlineRegular,
-  IconCheckOutlineRegular, MenuSurface, StateDot, Tooltip,
+  IconCheckOutlineRegular, MenuSurface, StateDot, Tag, Tooltip,
 } from '@deepseek-ai/dsh-client-ui-primitives'
 import type { HostObservable, InjectFace, PropsLocale, PropsRenderSlots, PropsRuntime, TranslateNS } from '@deepseek-ai/dsh-client-ui-slots'
 import { NS } from './locales.ts'
@@ -420,7 +420,7 @@ function CatalogRows({
                           <span className={css.routeProvider}>{route.provider}</span>
                           <span className={css.routeModelLine}>
                             <span className={css.routeModel}>{route.model}</span>
-                            <span className={css.routeEffort}>{effortLabel}</span>
+                            <Tag tone="neutral" size="compact" className={css.routeEffort}>{effortLabel}</Tag>
                           </span>
                         </span>
                       </Tooltip>

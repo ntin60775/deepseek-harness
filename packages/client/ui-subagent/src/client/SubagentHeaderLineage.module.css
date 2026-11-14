@@ -410,15 +410,9 @@
   white-space: nowrap;
 }
 
+/* Placement only; the compact neutral Tag owns the chip palette and geometry. */
 .routeEffort {
   flex: none;
-  padding: 0 5px;
-  border-radius: var(--dsw-radius-xs);
-  background: var(--dsw-alias-bg-module-platform);
-  color: var(--dsw-alias-label-secondary);
-  font-size: 10px;
-  line-height: 14px;
-  white-space: nowrap;
 }
 
 .metrics {
