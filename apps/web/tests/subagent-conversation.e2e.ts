@@ -21,7 +21,7 @@ import {
   launchWebScaffold, readPersistedEvents, realizeSeedFixture, seedSession, selectedSessionFixture, watchConsole,
   webSnapshotMode, type WebScaffold,
 } from './scaffold.ts'
-import { connectFreshWorkspace, expandOwningTurnProcess, newEnglishPage, pinBrowserClock, pinHostClock, saveFailureShot, writeComposerDraft } from './support.ts'
+import { assertSubagentMenuWidth, connectFreshWorkspace, expandOwningTurnProcess, newEnglishPage, pinBrowserClock, pinHostClock, saveFailureShot, writeComposerDraft } from './support.ts'
 
 const BASE_FIXTURE = fileURLToPath(new URL('../../../snapshots/web/live-interactions/session.v3.jsonl', import.meta.url))
 const AVAILABLE_CHILD_EXPECTED = fileURLToPath(new URL('../../../snapshots/web/subagent-conversation/ui.expected.md', import.meta.url))
@@ -346,6 +346,14 @@ describe('web e2e: persisted subagent conversation and human continuation', () =
       expect(observed.projections?.values.subagentCatalog).toEqual([
         { id: grandchildId, createdAt: authoredAt, mode: 'continuable', label: NESTED_LABEL },
       ])
+      // Cold-read data-channel invariant: the child's recorded request/header
+      // (live-interactions fixture) folds into modelSelection on a cold read,
+      // the same value the catalog row and spawn-card chip display. toEqual pins
+      // the omitted effort (adapter default) that renders the localized chip.
+      expect(observed.projections?.values.modelSelection).toEqual({
+        lastUsed: { provider: 'deepseek-official', model: 'deepseek-v4-flash' },
+        next: { provider: 'deepseek-official', model: 'deepseek-v4-flash' },
+      })
     }
     await waitForCacheRow(scaffold, childHeader)
     const cache = scaffold.ctx.storageDomain.get(projectionCacheDomainSpec.name)
@@ -991,7 +999,7 @@ describe('web e2e: persisted subagent conversation and human continuation', () =
     const panel = page.locator('[data-subagent-panel]')
     await panel.getByRole('treeitem', { name: new RegExp(ONE_SHOT_LABEL) }).waitFor()
     expect(await panel.locator('[data-team-panel]').count()).toBe(0)
-    expect(await panel.evaluate(element => element.getBoundingClientRect().width)).toBe(360)
+    await assertSubagentMenuWidth(page, panel)
     const header = panel.locator('[data-subagent-section-header]')
     expect(await header.count()).toBe(0)
     expect(await switcher.textContent()).toBe(LABEL)

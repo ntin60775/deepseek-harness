@@ -118,6 +118,20 @@ export async function assertWarningDialogLayout(dialog: Locator): Promise<void> 
 }
 
 /**
+ * The subagent catalog menu sizes to its content between the accepted 360px
+ * floor and 560px cap, each clamped to the window inset. Reads the measured
+ * width so a regression prints the actual pixels, not a boolean.
+ * @param page - page owning the viewport the clamp derives from.
+ * @param menu - the `[data-subagent-panel]` menu element.
+ */
+export async function assertSubagentMenuWidth(page: Page, menu: Locator): Promise<void> {
+  const width = await menu.evaluate(element => element.getBoundingClientRect().width)
+  const viewport = page.viewportSize()!
+  expect(width).toBeGreaterThanOrEqual(Math.min(360, viewport.width - 32))
+  expect(width).toBeLessThanOrEqual(Math.min(560, viewport.width - 32))
+}
+
+/**
  * The built copy of a workspace package, as the dsh installation resolves it.
  * The Host plugins a scaffold profile loads run from built packages through
  * Node's own loader; a scaffold call that must share their module state
