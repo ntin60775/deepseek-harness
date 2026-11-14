@@ -36,4 +36,14 @@ describe('Tag.module.css', () => {
     expect(base).toContain('padding: 1px 8px')
     for (const tone of TONES) expect(declarations(tone)).not.toContain('border-radius')
   })
+
+  it('gives the compact size the raised 10px chip recipe, palette left to the tone', () => {
+    const compact = /\.tag\[data-size='compact'\]\s*\{([^}]*)\}/.exec(css)?.[1] ?? ''
+    expect(compact).toContain('padding: 0 5px')
+    expect(compact).toContain('border-radius: var(--dsw-radius-xs)')
+    expect(compact).toContain('font-size: 10px')
+    expect(compact).toContain('line-height: 14px')
+    expect(compact).not.toContain('background:')
+    expect(compact).not.toContain('color:')
+  })
 })

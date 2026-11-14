@@ -1,0 +1,24 @@
+/* Placement only: the compact neutral Tag owns the capsule palette and geometry.
+ * The host anchor carries the Tooltip ref and lets the route text clip before
+ * the effort label. */
+.routeChipAnchor {
+  display: inline-flex;
+  flex: none;
+  max-width: 60%;
+  min-width: 0;
+}
+
+.routeChip {
+  gap: 5px;
+  min-width: 0;
+}
+
+.routeChipText {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.routeChipEffort {
+  flex: none;
+}

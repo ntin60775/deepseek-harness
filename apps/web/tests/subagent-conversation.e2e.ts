@@ -7,6 +7,7 @@ import type { Browser, Page } from 'playwright'
 import { chromium } from 'playwright'
 import { afterAll, beforeAll, describe, expect, it, onTestFailed, onTestFinished, vi } from 'vitest'
 import { prepareSessionSnapshotFixtureForComparison } from '@deepseek-ai/dsh-llm-replay'
+import { createToolResultMessage, ToolCallId } from '@deepseek-ai/dsh-llm'
 import {
   SESSION_FORMAT_VERSION, SessionId as sessionId, SessionLogOffset, SessionSeq,
   type SessionEvent, type SessionHeader, type SessionId,
@@ -20,7 +21,7 @@ import {
   launchWebScaffold, readPersistedEvents, realizeSeedFixture, seedSession, selectedSessionFixture, watchConsole,
   webSnapshotMode, type WebScaffold,
 } from './scaffold.ts'
-import { connectFreshWorkspace, newEnglishPage, pinBrowserClock, pinHostClock, saveFailureShot, writeComposerDraft } from './support.ts'
+import { connectFreshWorkspace, expandOwningTurnProcess, newEnglishPage, pinBrowserClock, pinHostClock, saveFailureShot, writeComposerDraft } from './support.ts'
 
 const BASE_FIXTURE = fileURLToPath(new URL('../../../snapshots/web/live-interactions/session.v3.jsonl', import.meta.url))
 const AVAILABLE_CHILD_EXPECTED = fileURLToPath(new URL('../../../snapshots/web/subagent-conversation/ui.expected.md', import.meta.url))
@@ -33,6 +34,7 @@ const BRANCHLESS_EXPECTED = fileURLToPath(new URL('../../../snapshots/web/subage
 const SIDEBAR_EXPECTED = fileURLToPath(new URL('../../../snapshots/web/subagent-conversation/sidebar.expected.md', import.meta.url))
 const SIDEBAR_CHAT_EXPECTED = fileURLToPath(new URL('../../../snapshots/web/subagent-conversation/sidebar-chat.expected.md', import.meta.url))
 const GRANDCHILD_EXPECTED = fileURLToPath(new URL('../../../snapshots/web/subagent-conversation/nested.expected.md', import.meta.url))
+const SPAWN_CARD_EXPECTED = fileURLToPath(new URL('../../../snapshots/web/subagent-conversation/spawn-card.expected.md', import.meta.url))
 const FORK_EXPECTED = fileURLToPath(new URL('../../../snapshots/web/subagent-conversation/fork.expected.md', import.meta.url))
 const MIGRATING_CHILD_EXPECTED = fileURLToPath(new URL(
   './expected/subagent-conversation/migration-required-child.expected.md', import.meta.url,
@@ -161,6 +163,22 @@ describe('web e2e: persisted subagent conversation and human continuation', () =
     })
     childId = started.childId
     await waitForAgentToSettle(scaffold, childId)
+    // D1 chip carrier: a recorded spawn call whose result metadata names the live
+    // catalog child, so the card chips the child's recorded route without expanding.
+    const carrierCallId = ToolCallId('spawn-carrier-1')
+    const carrierCall = parent.session.append('tool/call', {
+      turn: 1, step: 1, callId: carrierCallId, name: 'subagent',
+      arguments: JSON.stringify({ description: 'Recorded spawn carrier', prompt: INITIAL_PROMPT }),
+    })
+    parent.session.append('tool/result', {
+      turn: 1, step: 1,
+      message: createToolResultMessage({
+        callId: carrierCallId,
+        content: [{ type: 'text', text: `started subagent ${CHILD_NAME}` }],
+        isError: false,
+      }),
+      meta: { kind: 'activation', name: CHILD_NAME },
+    }, { surfaceOp: 'append', sourceEventSeqs: [carrierCall.seq] })
     const liveInput = page.locator('[data-composer-input][contenteditable="true"]').first()
     const liveMenu = page.getByRole('listbox', { name: 'Trigger suggestions' })
     await writeComposerDraft(page, liveInput, '@')
@@ -363,6 +381,23 @@ describe('web e2e: persisted subagent conversation and human continuation', () =
     hostClock?.mockRestore()
     if (failures.length === 1) throw failures[0]
     if (failures.length > 1) throw new AggregateError(failures, 'subagent Web teardown failed')
+  })
+
+  it('chips the recorded spawn card route in the collapsed header', async () => {
+    onTestFailed(() => saveFailureShot(page, 'web-e2e-subagent-spawn-card-chip'))
+    await page.getByRole('tree', { name: 'Sessions' })
+      .getByRole('treeitem', { name: /Ask a research subagent to/ }).click()
+    const card = page.locator('[data-chat-call-id="spawn-carrier-1"]')
+    await card.waitFor({ state: 'attached', timeout: 15_000 })
+    // The card lives in a collapsed turn process; open that, not the card itself.
+    await expandOwningTurnProcess(page, card)
+    await card.waitFor({ state: 'visible', timeout: 15_000 })
+    // The chip is visible without expanding the card and carries the child's route.
+    expect(await card.locator('[aria-expanded="true"]').count()).toBe(0)
+    await card.getByText('deepseek-official/deepseek-v4-flash', { exact: true }).waitFor()
+    await card.getByText('Default', { exact: true }).waitFor()
+    expect(await card.getByText('agent-1', { exact: true }).count()).toBe(0)
+    await compareOrRefreshGolden(SPAWN_CARD_EXPECTED, await card.ariaSnapshot(), MODE)
   })
 
   it('retries a failed cold catalog and discovers descendants without reopening the menu', async () => {

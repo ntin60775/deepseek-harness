@@ -4,15 +4,18 @@ import type { Context } from '@deepseek-ai/cordis'
 import {
   IconAgentPresetOutlineRegular, IconBranchOutlineRegular, IconChecklistOutlineRegular, IconClockOutlineRegular,
   IconCodeOutlineRegular, IconCordisPluginOutlineRegular, IconGoalOutlineRegular, IconSearchOutlineRegular,
-  IconUsersOutlineRegular,
+  IconUsersOutlineRegular, Tag, Tooltip,
 } from '@deepseek-ai/dsh-client-ui-primitives'
 import type { PropsLocale } from '@deepseek-ai/dsh-client-ui-slots'
 import type { ToolCallViewProps } from '../../contract/slots.ts'
 import { CONVERSATION_NS as NS } from '../../locale.ts'
 import { ToolRow } from '../components/ToolRow.tsx'
 import { detailsCardModel } from '../models/details-card-model.ts'
+import { detailRecord, nonempty } from '../models/detail-model-shared.ts'
 import { parsedToolCall } from '../models/raw-tool-call.ts'
+import { catalogChildId, matchCatalogEntry, spawnCardRoute } from '../models/subagent-route.ts'
 import { toolRowModel } from '../models/tool-call-model.ts'
+import css from './details-row.module.css'
 
 type DetailsRowProps = ToolCallViewProps & PropsLocale<'conversation'>
 
@@ -48,13 +51,54 @@ function subagentSummary(block: ToolCallViewProps['block']): string {
 
 /**
  * Present recorded entities, receipts, and report fields in the existing expandable row.
+ * Subagent spawn cards additionally chip the child's recorded model route between
+ * the title and the summary; the resolution lives in {@link spawnCardRoute}.
  * @param props - Tool call, row actions, and locale supplied by the keyed slot.
  * @returns A Tool row with structured details or generic input/output.
  */
-export function DetailsRow({ toolName, block, cwd, home, openFile, inspect, useDisclosure, t }: DetailsRowProps) {
+export function DetailsRow({ toolName, block, cwd, home, openFile, inspect, useDisclosure, sessionId, useSessions, t }: DetailsRowProps) {
   const model = toolRowModel(toolName, block, cwd, home)
   const locale = document.documentElement.lang
-  const taskSummary = toolName === 'subagent' || toolName === 'subagent_fork' ? subagentSummary(block) : undefined
+  const isSpawn = toolName === 'subagent' || toolName === 'subagent_fork'
+  const taskSummary = isSpawn ? subagentSummary(block) : undefined
+  const meta = 'kind' in block ? block.meta : undefined
+  const childName = (detailRecord(meta) && meta.kind === 'activation' && nonempty(meta.name) ? meta.name : undefined) ?? block.args.text('name')
+  const catalog = useSessions(state => state.projectionsBySession[sessionId]?.values.subagentCatalog)
+  const entry = useMemo(() => matchCatalogEntry(catalog, childName), [catalog, childName])
+  const childId = catalogChildId(entry)
+  const selection = useSessions(state => childId === undefined ? undefined : state.byId[childId]?.projectionValues?.modelSelection?.next)
+  const routeArgs = useMemo(() => ({
+    provider: block.args.text('provider'),
+    model: block.args.text('model'),
+    reasoning_effort: block.args.text('reasoning_effort'),
+  }), [block])
+  const route = useMemo(
+    () => isSpawn ? spawnCardRoute(entry, selection ?? undefined, routeArgs) : undefined,
+    [isSpawn, entry, selection, routeArgs],
+  )
+  const headerChip = useMemo(() => route === undefined ? undefined : (
+    <Tooltip
+      label={t('tool.route.title', { route: `${route.provider}/${route.model}` })}
+      delayMs={500}
+      portal
+      side="bottom"
+      openOnClick
+    >
+      {/* The anchor is a host element for the Tooltip ref; stopPropagation keeps a
+          chip tap from also toggling the row, and the decoration marker lets the
+          running shimmer tint the capsule fill like the adjacent separator. */}
+      <span
+        className={css.routeChipAnchor}
+        data-shimmer-decoration
+        onClick={(event) => { event.stopPropagation() }}
+      >
+        <Tag tone="neutral" size="compact" className={css.routeChip}>
+          <span className={css.routeChipText}>{route.provider}/{route.model}</span>
+          <span className={css.routeChipEffort}>{route.reasoningEffort ?? t('tool.route.effortDefault')}</span>
+        </Tag>
+      </span>
+    </Tooltip>
+  ), [route, t])
   const details = useMemo(() => {
     const result = detailsCardModel(block, t, locale)
     return result !== null && taskSummary !== undefined
@@ -74,6 +118,7 @@ export function DetailsRow({ toolName, block, cwd, home, openFile, inspect, useD
       toolName={toolName}
       icon={detailIcon(toolName)}
       title={isWait ? details?.summary ?? t(titleKey) : t(titleKey)}
+      headerChip={headerChip}
       summary={isWait ? '' : taskSummary ?? details?.summary ?? details?.items[0]?.title ?? details?.empty ?? model.summary}
       details={details}
       bodyRaw={model.bodyRaw}

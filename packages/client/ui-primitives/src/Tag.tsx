@@ -5,6 +5,13 @@ import type { ReactNode } from 'react'
 import clsx from 'clsx'
 import css from './Tag.module.css'
 
+/** Capsule size selector; the palette is chosen independently by {@link TagTone}. */
+export type TagSize =
+  /** The 11px capsule used by inventory and status badges. */
+  | 'regular'
+  /** The 10px chip for a quiet inline fact beside a row or card title. */
+  | 'compact'
+
 /** Palette selector; each tone names one shipped appearance. */
 export type TagTone =
   /** Hairline outline on tertiary text: the read-only default. */
@@ -27,16 +34,18 @@ export type TagTone =
 /**
  * Render a read-only tag.
  * @param props.tone - which palette to use (default `outline`).
+ * @param props.size - which capsule size to use (default `regular`).
  * @param props.className - extra class for layout placement.
  * @param props.children - the localized label, owned by the render site.
  * @returns the tag element.
  */
-export function Tag({ tone = 'outline', className, children }: {
+export function Tag({ tone = 'outline', size = 'regular', className, children }: {
   tone?: TagTone
+  size?: TagSize
   // `| undefined` so a caller can forward an optional class straight through
   // under exactOptionalPropertyTypes (a CSS-module lookup is string|undefined).
   className?: string | undefined
   children?: ReactNode
 }) {
-  return <span className={clsx(css.tag, className)} data-tone={tone}>{children}</span>
+  return <span className={clsx(css.tag, className)} data-tone={tone} data-size={size}>{children}</span>
 }

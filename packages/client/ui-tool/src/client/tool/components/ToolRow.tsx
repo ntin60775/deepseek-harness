@@ -38,6 +38,13 @@ export interface ToolRowProps {
   toolName?: string | undefined
   icon: ReactNode
   title: string
+  /**
+   * Read-only chip rendered between the title and the summary, inside the header
+   * shimmer. A package-internal presentational node (like `icon`), built by the
+   * owning view from plain route data — not a slot owner/inject channel, so the
+   * no-ReactNode-props rule for cross-slot currency does not apply.
+   */
+  headerChip?: ReactNode
   summary: string
   /**
    * Trailing summary fragment rendered outside the ellipsized summary text, so
@@ -169,6 +176,7 @@ export const ToolRow = memo(function ToolRow({
   toolName,
   icon,
   title,
+  headerChip,
   summary,
   summarySuffix,
   bodyRaw,
@@ -255,12 +263,13 @@ export const ToolRow = memo(function ToolRow({
   // The code variant's program renders through CodeBlock (shiki), so only its
   // output joins the IN/OUT card; every other variant's input does too.
   const cardBody = variant === 'code' ? null : bodyText
-  const collapsedContent = useMemo(() => summaryText !== '' && (
-    /* An empty summary drops the separator with it (a row that is only
-       its title shows no trailing dot). */
+  const collapsedContent = useMemo(() => (summaryText !== '' || headerChip != null) && (
     <>
-      <span className={css.sep} data-shimmer-decoration aria-hidden />
-      {exitLabel === null && fileTargets !== undefined && openTarget !== undefined ? (
+      {headerChip}
+      {/* An empty summary drops the separator with it (a row that is only
+          its title shows no trailing dot). */}
+      {summaryText !== '' && <span className={css.sep} data-shimmer-decoration aria-hidden />}
+      {summaryText !== '' && (exitLabel === null && fileTargets !== undefined && openTarget !== undefined ? (
         <span className={css.fileLinks}>
           {fileTargets.map((target, index) => (
             <Fragment key={target.id}>
@@ -316,7 +325,7 @@ export const ToolRow = memo(function ToolRow({
         >
           <TextShimmer>{summaryText}</TextShimmer>
         </span>
-      )}
+      ))}
       {exitLabel !== null && <ExitCodeBadge label={exitLabel} />}
       {suffix !== null && (
         <TextShimmer className={css.summarySuffix}>{suffix}</TextShimmer>
@@ -328,7 +337,7 @@ export const ToolRow = memo(function ToolRow({
       )}
     </>
   ), [summaryLinkKeyDown, fileContextMenuProps, urlContextMenuProps, linkHref, openFile, fileTargets, openTarget,
-    fileTargetContextMenuProps, state, suffix, totals, summaryText, exitLabel])
+    fileTargetContextMenuProps, state, suffix, totals, summaryText, exitLabel, headerChip])
   const expandedContent = useMemo(() => open ? (
     <div className={clsx(css.bodyWrap, detailsBody !== null && css.detailsBodyWrap)}>
       {askQuestionBody !== null

@@ -4,7 +4,10 @@ import { cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import type { ToolResultNode } from '@deepseek-ai/dsh-client-ui-chat/client'
 import { IconUsersOutlineRegular } from '@deepseek-ai/dsh-client-ui-primitives'
-import { makeTranslate } from '@deepseek-ai/dsh-client-test-runtime'
+import { bindSnapshotSelector, makeTranslate } from '@deepseek-ai/dsh-client-test-runtime'
+import { createSnapshotStore } from '@deepseek-ai/dsh-client-store'
+import type { SessionListState } from '@deepseek-ai/dsh-api-session-controller/client'
+import type { SessionId } from '@deepseek-ai/dsh-session/types'
 import { en } from '@deepseek-ai/dsh-client-ui-conversation/src/client/locales.ts'
 import { en as commonEn } from '@deepseek-ai/dsh-client-locale/src/locales/en.ts'
 import { detailsCardModel, todosDetail } from '../src/client/tool/models/details-card-model.ts'
@@ -14,6 +17,10 @@ import { PartialArguments } from '@deepseek-ai/dsh-util-values'
 import { ToolDetails } from '../src/client/tool/components/ToolDetails.tsx'
 
 const t = makeTranslate(en, commonEn)
+const seat = {
+  sessionId: 'root-1' as SessionId,
+  useSessions: bindSnapshotSelector(createSnapshotStore<SessionListState>({ ids: [], byId: {}, phase: 'ready', projectionsBySession: {} })),
+}
 const goal = { id: 'goal-1', revision: 2, objective: 'Ship compact cards', phase: 'active', roundsStarted: 2, maxGoalRounds: 8 }
 const schedule = { id: 'schedule-1', prompt: 'Review the build', kind: 'every', everySeconds: 3600, scheduledAt: '2026-09-10T09:00:00.000Z', state: 'scheduled', deliveryMode: 'session-local' }
 const task = {
@@ -168,7 +175,7 @@ describe('DetailsRow', () => {
 
   it('expands fields with the keyboard and keeps Inspect available', () => {
     const inspect = vi.fn()
-    render(<DetailsRow {...{ useDisclosure, toolName: 'get_goal', block: result('get_goal', { goal, activation: 'armed' }), inspect, t } as Parameters<typeof DetailsRow>[0]} />)
+    render(<DetailsRow {...{ ...seat, useDisclosure, toolName: 'get_goal', block: result('get_goal', { goal, activation: 'armed' }), inspect, t } as Parameters<typeof DetailsRow>[0]} />)
     expect(screen.queryByText('Rounds')).toBeNull()
     fireEvent.keyDown(screen.getByRole('button', { expanded: false }), { key: 'Enter' })
     expect(screen.getByText('Rounds')).toBeTruthy()
@@ -185,7 +192,9 @@ describe('DetailsRow', () => {
   ])('%s uses the two-person icon and its own title', (name, title) => {
     const inspect = vi.fn()
     const expectedIcon = render(<IconUsersOutlineRegular size={14} />).container.querySelector('svg')!.outerHTML
-    const props = { useDisclosure, toolName: name, block: result(name, { timedOut: true }), inspect, t } as Parameters<typeof DetailsRow>[0]
+    const props = {
+      ...seat, useDisclosure, toolName: name, block: result(name, { timedOut: true }), inspect, t,
+    } as Parameters<typeof DetailsRow>[0]
     const view = render(<DetailsRow {...props} />)
     expect(screen.getByText(title)).toBeTruthy()
     expect(view.container.querySelector('svg')?.outerHTML).toBe(expectedIcon)
@@ -194,7 +203,7 @@ describe('DetailsRow', () => {
   it.each([[false, 'Wait ended'], [true, 'Wait timed out']] as const)('shows one settled wait label with the team icon (%s)', (timedOut, label) => {
     const inspect = vi.fn()
     const expectedIcon = render(<IconUsersOutlineRegular size={14} />).container.querySelector('svg')!.outerHTML
-    const view = render(<DetailsRow {...{ useDisclosure, toolName: 'wait_agent', block: result('wait_agent', { timedOut }), inspect, t } as Parameters<typeof DetailsRow>[0]} />)
+    const view = render(<DetailsRow {...{ ...seat, useDisclosure, toolName: 'wait_agent', block: result('wait_agent', { timedOut }), inspect, t } as Parameters<typeof DetailsRow>[0]} />)
     const header = screen.getByRole('button', { expanded: false })
     expect(header.textContent).toBe(label)
     expect(view.container.querySelector('svg')?.outerHTML).toBe(expectedIcon)
@@ -206,7 +215,7 @@ describe('DetailsRow', () => {
 
   it('shows a running wait without appending its timeout arguments', () => {
     const block = { phase: 'start' as const, args: PartialArguments.fromText('{"timeout_ms":30000}'), callId: 'wait', name: 'wait_agent', argsRaw: '{"timeout_ms":30000}', turn: 1, step: 1, time: 1000, subCalls: [] }
-    render(<DetailsRow {...{ useDisclosure, toolName: 'wait_agent', block, t } as Parameters<typeof DetailsRow>[0]} />)
+    render(<DetailsRow {...{ ...seat, useDisclosure, toolName: 'wait_agent', block, t } as Parameters<typeof DetailsRow>[0]} />)
     const header = screen.getByRole('button', { expanded: false })
     expect(header.textContent).toBe('Waiting for messages…')
   })

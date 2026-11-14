@@ -33,6 +33,8 @@ kind: "package-reference"
 
 `subagent` 与 `subagent_fork` 的创建行逐步显示 `description` 的首行，执行中、创建完成后和展开时均保留。准备阶段结束后，缺少描述的调用回退到 `prompt` 的首个非空行；参数不可用时仅显示工具标题。两个工具与 `list_subagent_models` 均使用现有的 Users 图标；`subagent_fork` 使用独立标题“派生子智能体”。创建回执显示已启动状态、作为智能体任务描述的完整 `description`、智能体名称，以及完整任务指令。当前回执从结果 metadata 读取 `kind: activation` 与 `name`。含有 `subagentId` 的历史 metadata 还会显示智能体 Session id；仅缺少 metadata 的历史结果使用文本解析。metadata 无效时保留通用结果视图。同步返回的 agent 回复仍放在结果正文中；失败时保留错误摘要。
 
+折叠的创建行在标题与摘要之间以小型中性 `Tag` 展示子智能体已记录的模型路由：逐字的 `provider/model` 加 effort 标签，记录中没有 effort 时显示本地化的“默认”。路由仅在客户端解析：activation 回执或调用参数中的子智能体名称匹配父会话 `subagentCatalog` 的行，由该子会话 summary 的 `modelSelection` 投影提供已记录的选择；子智能体首个请求之前回退到显式 `provider`/`model` 参数，且两者都读到后才显示。芯片要求匹配到本地行，因此无名称的历史行与 external 执行不显示；fork 自创建起即展示继承的路由。芯片文本计入折叠行的无障碍名称，共享 `Tooltip` 在悬停与点按时携带完整 `provider/model` 且不触发行展开。路由只经现有客户端投影传递；工具 output schema 与 `presentationMeta` 不携带路由。
+
 文件和 URL 工具视图 Slot 直接获取 `useContextMenu`，向 `ToolRow` 提供已绑定的 `fileContextMenuProps` 或 `urlContextMenuProps`；文件行还为补丁的每个文件链接提供 `fileTargetContextMenuProps`。文件注册注入在触发时读取原始 Session 工作目录的路径解析器，工作目录缺失时使用工作区根目录。`ToolCallTree` 向普通 `GenericToolCard` fallback 显式提供文件适配函数，包含嵌套调用。无需 Markdown Provider。鼠标和键盘手势保留捕获的路径、行号、URL 与 Session，不会展开工具行或打开文件。
 
 ### 注册业务工具视图
