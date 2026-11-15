@@ -9,21 +9,9 @@
   box-sizing: border-box;
 }
 
-/* The expanded section is at most one shell viewport tall: once the shell has
-   scrolled the navigation away, the toolbar sits at the top and the list below
-   it scrolls on its own. A section that fits leaves the shell nothing to scroll.
-   `flex: none` keeps the size; the parent column has no definite height, so a
-   percentage flex basis would size it to content. */
-.root:not(.rail) {
-  flex: none;
-  max-height: 100cqh;
-}
-
-/* Search keeps the full viewport height, so few or no results do not shorten the
-   section and pull the navigation back under a toolbar already at the top. */
-.root:not(.rail):has(.searchExpanded) {
-  height: 100cqh;
-}
+/* The expanded section fills the column height left by the pinned navigation
+   (base flex: 1), so few or no search results never shorten it; the list below
+   the toolbar is the column's only vertical scroller. */
 
 .iconButton {
   flex: none;
@@ -333,7 +321,21 @@
   }
 }
 
-/* List seat: always mounted so the shell foot never moves. */
+/* List seat: always mounted so the shell foot never moves; carries the
+   scroller's edge offsets and hosts the rail-end arrow overlay. */
+.listSeat {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.root:not(.rail) .listSeat {
+  margin-left: -4px;
+  margin-right: calc(2px - var(--dsh-sidebar-inline-padding));
+}
+
 .listArea {
   flex: 1;
   min-height: 0;
@@ -342,28 +344,83 @@
   overflow: visible;
 }
 
-/* Expanded, the seat is the section's own vertical scroller below the toolbar;
-   its rows keep their natural height. The left margin and padding keep 4px of
-   unclipped room for insertion markers. On the right, the seat reaches 2px from
-   the sidebar edge, where its scrollbar sits, and its padding returns rows to the
-   sidebar's inline padding. */
+/* Expanded, the seat is the column's only vertical scroller below the toolbar;
+   its rows keep their natural height and its scrollbar stays drawn whenever
+   they overflow. The left padding keeps 4px of unclipped room for insertion
+   markers. On the right, the seat reaches 2px from the sidebar edge, where its
+   scrollbar sits; its padding returns rows to the sidebar's inline padding
+   while the rail fits, and clamps to zero for a wider drag rail. */
 .root:not(.rail) .listArea {
   display: block;
-  margin-left: -4px;
-  margin-right: calc(2px - var(--dsh-sidebar-inline-padding));
   padding-left: 4px;
-  padding-right: calc(var(--dsh-sidebar-inline-padding) - var(--dsh-scrollbar-width) - 2px);
+  padding-right: max(0px, calc(var(--dsh-sidebar-inline-padding) - var(--dsh-scrollbar-width) - 2px));
   overflow-x: hidden;
   overflow-y: auto;
   scrollbar-gutter: stable;
 }
 
-/* While the sidebar viewport can still scroll down, the seat does not take user
-   scrolling, so touch and native scrolling move the navigation away first. */
-@container scroll-state(scrollable: bottom) {
-  .root:not(.rail) .listArea {
-    overflow-y: hidden;
+/* Rail-end arrows sit over the native scrollbar's ends; the shell's track
+   margin keeps the thumb between them. The overlay itself never intercepts
+   pointer input, so thumb dragging and wheel scrolling stay native. */
+.railControls {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  width: var(--dsh-scrollbar-width);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  pointer-events: none;
+}
+
+/* The arrows rest on the elevated button fill with primary ink, so they read
+   as lit controls without hover; hover and press step the fill forward. */
+.railArrow {
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--dsh-scrollbar-width);
+  height: 16px;
+  padding: 0;
+  border: none;
+  border-radius: var(--dsw-radius-xs);
+  background: var(--dsw-alias-button-elevated-fill);
+  color: var(--dsw-alias-label-primary);
+  cursor: pointer;
+}
+
+@media (hover: hover) {
+  .railArrow:hover:not(:disabled) {
+    background: var(--dsw-alias-button-floating-hover);
   }
+}
+
+.railArrow:active:not(:disabled) {
+  background: var(--dsw-alias-interactive-bg-hover);
+}
+
+.railArrow:disabled {
+  background: transparent;
+  color: var(--dsw-alias-label-dimmed);
+  cursor: default;
+}
+
+/* macOS vibrancy: the same glass washes the shell uses for New Session. */
+:global([data-platform='darwin']) .railArrow:not(:disabled) {
+  background: var(--dsw-specific-sidebar-glass-fill);
+}
+
+@media (hover: hover) {
+  :global([data-platform='darwin']) .railArrow:hover:not(:disabled) {
+    background: var(--dsw-specific-sidebar-glass-hover);
+  }
+}
+
+.railArrow:focus-visible {
+  outline: var(--dsw-focus-ring-width) solid var(--dsw-focus-ring-color, var(--dsw-alias-state-business-primary));
+  outline-offset: -2px;
 }
 
 /* Positions the top insertion marker and the exit overlay of animated rows. */

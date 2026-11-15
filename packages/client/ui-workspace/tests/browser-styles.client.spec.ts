@@ -45,9 +45,7 @@ describe('WorkspaceBrowser.module.css list', () => {
   const listArea = declarations('.listArea')
   const list = declarations('.list')
 
-  // The scroll-state rule repeats the expanded list-area selector, so ordinary rules are read before it.
-  const [ordinaryCss = '', scrollStateCss = ''] = css.split('@container scroll-state(scrollable: bottom)')
-  const expandedListArea = declarationsFrom(ordinaryCss, '.root:not(.rail) .listArea')
+  const expandedListArea = declarations('.root:not(.rail) .listArea')
 
   it('scrolls the expanded list area as the section\'s own scroller while rows keep natural height', () => {
     expect(list?.get('overflow')).toBe('visible')
@@ -59,28 +57,44 @@ describe('WorkspaceBrowser.module.css list', () => {
     expect(expandedListArea?.get('overflow-x')).toBe('hidden')
     expect(expandedListArea?.get('overflow-y')).toBe('auto')
     expect(expandedListArea?.get('scrollbar-gutter')).toBe('stable')
-    expect(expandedListArea?.get('margin-left')).toBe('-4px')
+    const expandedSeat = declarations('.root:not(.rail) .listSeat')
+    expect(expandedSeat?.get('margin-left')).toBe('-4px')
+    expect(expandedSeat?.get('margin-right')).toBe('calc(2px - var(--dsh-sidebar-inline-padding))')
+    expect(expandedListArea?.get('margin-left')).toBeUndefined()
     expect(expandedListArea?.get('padding-left')).toBe('4px')
-    expect(expandedListArea?.get('margin-right')).toBe('calc(2px - var(--dsh-sidebar-inline-padding))')
     expect(expandedListArea?.get('padding-right'))
-      .toBe('calc(var(--dsh-sidebar-inline-padding) - var(--dsh-scrollbar-width) - 2px)')
+      .toBe('max(0px, calc(var(--dsh-sidebar-inline-padding) - var(--dsh-scrollbar-width) - 2px))')
     expect(root?.get('padding-right')).toBeUndefined()
     expect(declarations('.rail .listArea')).toBeUndefined()
     expect(declarations('.list::-webkit-scrollbar')).toBeUndefined()
   })
 
-  it('leaves user scrolling to the sidebar viewport until it reaches its end', () => {
-    const block = /^ \{([\s\S]*?)\n\}/.exec(scrollStateCss)?.[1] ?? ''
-    expect(declarationsFrom(block, '.root:not(.rail) .listArea')?.get('overflow-y')).toBe('hidden')
+  it('overlays Windows-style rail arrows without intercepting the native bar', () => {
+    const controls = declarations('.railControls')
+    expect(controls?.get('pointer-events')).toBe('none')
+    expect(controls?.get('width')).toBe('var(--dsh-scrollbar-width)')
+    expect(controls?.get('justify-content')).toBe('space-between')
+    const arrow = declarations('.railArrow')
+    expect(arrow?.get('pointer-events')).toBe('auto')
+    expect(arrow?.get('height')).toBe('16px')
+    expect(arrow?.get('width')).toBe('var(--dsh-scrollbar-width)')
+    // Lit at rest, not only under the pointer.
+    expect(arrow?.get('background')).toBe('var(--dsw-alias-button-elevated-fill)')
+    expect(arrow?.get('color')).toBe('var(--dsw-alias-label-primary)')
+    expect(declarations('.railArrow:disabled')?.get('background')).toBe('transparent')
   })
 
-  it('keeps the expanded section at most one viewport tall, and exactly that tall while searching', () => {
-    const expanded = declarations('.root:not(.rail)')
+  it('keeps the list scrollable without a scroll-state handoff to the viewport', () => {
+    expect(css).not.toContain('@container scroll-state')
+    expect(expandedListArea?.get('overflow-y')).toBe('auto')
+  })
+
+  it('fills the column height left by the pinned navigation, also while searching', () => {
     expect(root?.get('position')).toBe('relative')
-    expect(expanded?.get('flex')).toBe('none')
-    expect(expanded?.get('max-height')).toBe('100cqh')
-    expect(expanded?.get('height')).toBeUndefined()
-    expect(declarations('.root:not(.rail):has(.searchExpanded)')?.get('height')).toBe('100cqh')
+    expect(root?.get('flex')).toBe('1')
+    expect(root?.get('min-height')).toBe('0')
+    expect(declarations('.root:not(.rail)')).toBeUndefined()
+    expect(css).not.toContain('100cqh')
     expect(declarations('.sectionHeader')?.get('background')).toBeUndefined()
     expect(root?.get('--workspace-toolbar-height')).toBe('36px')
     expect(root?.get('--workspace-toolbar-gap')).toBe('0px')

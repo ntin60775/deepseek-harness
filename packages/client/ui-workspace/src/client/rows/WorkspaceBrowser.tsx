@@ -14,12 +14,16 @@
  * are slot entries with their own behavior, so this component threads no
  * action callbacks and hosts no action surface.
  */
-import { type CSSProperties, type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import {
+  type CSSProperties, type MouseEvent as ReactMouseEvent, type PointerEvent as ReactPointerEvent,
+  type ReactNode, type RefObject, useCallback, useEffect, useMemo, useRef, useState,
+} from 'react'
 import clsx from 'clsx'
 import { WorkspaceDialogs } from './WorkspaceDialogs.tsx'
 import {
   AnimatedRows, HoverCardGroup, IconArchiveCheckOutlineRegular, IconArchiveOffOutlineRegular, IconArchiveOutlineRegular,
-  IconChevronsUpDownOutlineRegular, IconClockOutlineRegular, IconCloseFillRegular,
+  IconChevronDownOutlineRegular, IconChevronUpOutlineRegular, IconChevronsUpDownOutlineRegular,
+  IconClockOutlineRegular, IconCloseFillRegular,
   IconFlatListOutlineRegular, IconFolderCloseRegular, IconProjectAddOutlineRegular,
   IconQueueOutlineRegular, IconSearchOutlineRegular, IconSlidersTwoOutlineRegular,
   IconWorkspaceTreeOutlineRegular, Menu, Tooltip,
@@ -885,6 +889,92 @@ function SearchResults({
   )
 }
 
+/** Session rows are 32px tall with a 2px gap; rail steps move whole rows. */
+const RAIL_ROW_PIXELS = 34
+/** An arrow click steps three rows; holding repeats one row per tick until release. */
+const RAIL_CLICK_ROWS = 3
+const RAIL_HOLD_DELAY_MS = 400
+const RAIL_HOLD_TICK_MS = 70
+
+/**
+ * Windows-style arrows at the scrollbar rail ends: a click steps a few rows,
+ * holding repeats until the pointer is released, and the matching arrow
+ * disables at its scroll edge. The native thumb keeps the track between the
+ * two buttons through the shell's track margin.
+ * @param props - the bound list scroller and the localized arrow labels.
+ * @returns the rail-end arrow controls.
+ */
+function RailArrows({ listRef, upLabel, downLabel }: {
+  listRef: RefObject<HTMLDivElement | null>
+  upLabel: string
+  downLabel: string
+}) {
+  const [edges, setEdges] = useState({ top: true, bottom: true })
+  const hold = useRef<{ delay?: number; repeat?: number }>({})
+  const sync = useCallback((): void => {
+    const list = listRef.current
+    if (list === null) return
+    const top = list.scrollTop <= 0
+    const bottom = list.scrollTop + list.clientHeight >= list.scrollHeight - 1
+    setEdges(previous => (previous.top === top && previous.bottom === bottom ? previous : { top, bottom }))
+  }, [listRef])
+  useEffect(() => {
+    const list = listRef.current
+    if (list === null) return
+    sync()
+    list.addEventListener('scroll', sync, { passive: true })
+    const observer = new ResizeObserver(sync)
+    observer.observe(list)
+    if (list.firstElementChild !== null) observer.observe(list.firstElementChild)
+    return () => {
+      list.removeEventListener('scroll', sync)
+      observer.disconnect()
+    }
+  }, [listRef, sync])
+  const stopHold = useCallback((): void => {
+    window.clearTimeout(hold.current.delay)
+    window.clearInterval(hold.current.repeat)
+    hold.current = {}
+  }, [])
+  useEffect(() => stopHold, [stopHold])
+  const step = (rows: number): boolean => {
+    const list = listRef.current
+    if (list === null) return false
+    const before = list.scrollTop
+    list.scrollTop += rows * RAIL_ROW_PIXELS
+    return list.scrollTop !== before
+  }
+  const press = (direction: 1 | -1) => (event: ReactPointerEvent<HTMLButtonElement>): void => {
+    if (event.button !== 0) return
+    event.currentTarget.setPointerCapture(event.pointerId)
+    step(direction * RAIL_CLICK_ROWS)
+    stopHold()
+    hold.current.delay = window.setTimeout(() => {
+      hold.current.repeat = window.setInterval(() => {
+        if (!step(direction)) stopHold()
+      }, RAIL_HOLD_TICK_MS)
+    }, RAIL_HOLD_DELAY_MS)
+  }
+  const keyClick = (direction: 1 | -1) => (event: ReactMouseEvent<HTMLButtonElement>): void => {
+    // Pointer presses already stepped on pointerdown; detail 0 is keyboard activation.
+    if (event.detail === 0) step(direction * RAIL_CLICK_ROWS)
+  }
+  return (
+    <div className={css.railControls}>
+      <button type="button" className={css.railArrow} aria-label={upLabel} disabled={edges.top}
+        onPointerDown={press(-1)} onPointerUp={stopHold} onPointerCancel={stopHold}
+        onLostPointerCapture={stopHold} onClick={keyClick(-1)}>
+        <IconChevronUpOutlineRegular size={12} />
+      </button>
+      <button type="button" className={css.railArrow} aria-label={downLabel} disabled={edges.bottom}
+        onPointerDown={press(1)} onPointerUp={stopHold} onPointerCancel={stopHold}
+        onLostPointerCapture={stopHold} onClick={keyClick(1)}>
+        <IconChevronDownOutlineRegular size={12} />
+      </button>
+    </div>
+  )
+}
+
 /**
  * Render the browsing region.
  * @param props - composed slot props (shell owner share + store + injected actions).
@@ -894,7 +984,6 @@ export function WorkspaceBrowser({
   wide,
   usePanelInfo,
   expandSidebar,
-  useSectionScroller,
   useSessions,
   useSessionStatus,
   useSessionAccess,
@@ -1100,9 +1189,7 @@ export function WorkspaceBrowser({
   })
   const searchRoot = useRef<HTMLDivElement | null>(null)
   const searchInput = useRef<HTMLInputElement | null>(null)
-  // The list area is this section's own vertical scroller; the sidebar hands wheel
-  // scrolling over its viewport to it once the navigation has moved away.
-  const { bindScrollerRef } = useSectionScroller()
+  const listRef = useRef<HTMLDivElement | null>(null)
   const focusSearch = useCallback(() => {
     searchInput.current?.focus({ preventScroll: true })
   }, [])
@@ -1350,81 +1437,84 @@ export function WorkspaceBrowser({
       </div>}
 
       {/* Always-mounted seat keeps the region's flex slot while the list
-          itself is wide-only. */}
-      <div ref={wide ? bindScrollerRef : undefined} className={css.listArea} data-sidebar-list-area="">
-        {wide && (normalizedQuery !== ''
-          ? (
-            <SearchResults
-              usePanelInfo={usePanelInfo}
-              useSessionAccess={useSessionAccess}
-              useSessions={useSessions}
-              useSessionStatus={useSessionStatus}
-              open={openSearchResult}
-              onUnarchive={onSessionUnarchive}
-              workspaces={workspaces}
-              archivedSessionIds={archivedSessionIds}
-              archivedFilter={archivedFilter}
-              query={normalizedQuery}
-              remote={remoteSearch}
-              resultLimit={searchResultLimit}
-              t={t}
-            />
-          )
-          : groupBy === 'flat'
+          itself is wide-only; the rail arrows overlay its scrollbar ends. */}
+      <div className={css.listSeat}>
+        <div ref={listRef} className={css.listArea} data-sidebar-list-area="">
+          {wide && (normalizedQuery !== ''
             ? (
-              <FlatList
-                useSessionAccess={useSessionAccess}
+              <SearchResults
                 usePanelInfo={usePanelInfo}
-                list={list}
-                sessionIds={orderedFlatSessionIds}
-                rowState={rowState}
-                onLeaveArchivedOnly={leaveArchivedOnly}
-                workspaceReady={workspaceReady}
-                animationResetKey={`${groupBy}/${orderBy}/${archivedFilter}`}
+                useSessionAccess={useSessionAccess}
+                useSessions={useSessions}
                 useSessionStatus={useSessionStatus}
-                open={guardedOpen}
-                onSessionRenameRequest={requestSessionRename}
-                renderSlot={renderSlot}
-                renderFactorySlot={renderFactorySlot} useContextMenu={useContextMenu}
-                useContextMenuTarget={useContextMenuTarget}
-                setSessionOrder={saveSessionOrder}
-                revealSessionId={revealSessionId}
-                onSessionRevealed={acknowledgeSessionReveal}
-                home={home}
+                open={openSearchResult}
+                onUnarchive={onSessionUnarchive}
+                workspaces={workspaces}
+                archivedSessionIds={archivedSessionIds}
+                archivedFilter={archivedFilter}
+                query={normalizedQuery}
+                remote={remoteSearch}
+                resultLimit={searchResultLimit}
                 t={t}
               />
             )
-            : (
-              <SessionTree
-                useSessionAccess={useSessionAccess}
-                useWorkspaceAccess={useWorkspaceAccess}
-                usePanelInfo={usePanelInfo}
-                list={list}
-                shortcuts={shortcuts}
-                useSessionStatus={useSessionStatus}
-                onSessionRenameRequest={requestSessionRename}
-                renderSlot={renderSlot}
-                renderFactorySlot={renderFactorySlot} useContextMenu={useContextMenu}
-                useContextMenuTarget={useContextMenuTarget}
-                workspaces={orderedWorkspaces}
-                ungroupedSessionIds={orderedUngroupedSessionIds}
-                workspaceReady={workspaceReady}
-                nestWorkspaces={groupBy === 'workspace-tree'}
-                animationResetKey={`${groupBy}/${orderBy}/${archivedFilter}`}
-                groupExpansion={groupExpansion}
-                setGroupExpanded={actions.setGroupExpanded}
-                setSessionOrder={saveSessionOrder}
-                rowState={rowState}
-                onLeaveArchivedOnly={leaveArchivedOnly}
-                startSession={startSession}
-                open={guardedOpen}
-                insertWorkspaceBefore={insertWorkspaceBefore}
-                revealSessionId={revealSessionId}
-                onSessionRevealed={acknowledgeSessionReveal}
-                home={home}
-                t={t}
-              />
-            ))}
+            : groupBy === 'flat'
+              ? (
+                <FlatList
+                  useSessionAccess={useSessionAccess}
+                  usePanelInfo={usePanelInfo}
+                  list={list}
+                  sessionIds={orderedFlatSessionIds}
+                  rowState={rowState}
+                  onLeaveArchivedOnly={leaveArchivedOnly}
+                  workspaceReady={workspaceReady}
+                  animationResetKey={`${groupBy}/${orderBy}/${archivedFilter}`}
+                  useSessionStatus={useSessionStatus}
+                  open={guardedOpen}
+                  onSessionRenameRequest={requestSessionRename}
+                  renderSlot={renderSlot}
+                  renderFactorySlot={renderFactorySlot} useContextMenu={useContextMenu}
+                  useContextMenuTarget={useContextMenuTarget}
+                  setSessionOrder={saveSessionOrder}
+                  revealSessionId={revealSessionId}
+                  onSessionRevealed={acknowledgeSessionReveal}
+                  home={home}
+                  t={t}
+                />
+              )
+              : (
+                <SessionTree
+                  useSessionAccess={useSessionAccess}
+                  useWorkspaceAccess={useWorkspaceAccess}
+                  usePanelInfo={usePanelInfo}
+                  list={list}
+                  shortcuts={shortcuts}
+                  useSessionStatus={useSessionStatus}
+                  onSessionRenameRequest={requestSessionRename}
+                  renderSlot={renderSlot}
+                  renderFactorySlot={renderFactorySlot} useContextMenu={useContextMenu}
+                  useContextMenuTarget={useContextMenuTarget}
+                  workspaces={orderedWorkspaces}
+                  ungroupedSessionIds={orderedUngroupedSessionIds}
+                  workspaceReady={workspaceReady}
+                  nestWorkspaces={groupBy === 'workspace-tree'}
+                  animationResetKey={`${groupBy}/${orderBy}/${archivedFilter}`}
+                  groupExpansion={groupExpansion}
+                  setGroupExpanded={actions.setGroupExpanded}
+                  setSessionOrder={saveSessionOrder}
+                  rowState={rowState}
+                  onLeaveArchivedOnly={leaveArchivedOnly}
+                  startSession={startSession}
+                  open={guardedOpen}
+                  insertWorkspaceBefore={insertWorkspaceBefore}
+                  revealSessionId={revealSessionId}
+                  onSessionRevealed={acknowledgeSessionReveal}
+                  home={home}
+                  t={t}
+                />
+              ))}
+        </div>
+        {wide && <RailArrows listRef={listRef} upLabel={t('scroll.up')} downLabel={t('scroll.down')} />}
       </div>
 
       {workspaceActionRequest !== null && <WorkspaceDialogs key={`${workspaceActionRequest.action}/${workspaceActionRequest.workspaceId}`}

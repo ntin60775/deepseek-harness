@@ -2,7 +2,9 @@
 // Chromium uses overlay scrollbars, so the reserved band and `timeCoveredBy`
 // together distinguish reserved space from a bar painted over content. Its
 // computed pseudo-element style also folds in `:hover`, so the test reads that
-// declaration from the cascade.
+// declaration from the cascade. The session list is the column's only vertical
+// scroller: its bar stays drawn whenever the rows overflow, independent of the
+// pointer, and the navigation stays pinned while the list scrolls natively.
 import { readFile } from 'node:fs/promises'
 import { fileURLToPath } from 'node:url'
 import { join } from 'node:path'
@@ -147,30 +149,22 @@ function measureRowInset(page: Page): Promise<Pick<ListMetrics, 'overflows' | 'r
   })
 }
 
-/** One palette's readings, taken at both pointer positions. */
+/** One palette's readings, with the thumb resolved while the pointer is away. */
 interface PaletteMetrics {
-  hovered: ListMetrics
-  quietThumb: string
+  metrics: ListMetrics
+  awayThumb: string
 }
 
 /**
- * Read one palette at both pointer positions, ending with the pointer back
- * over the list so a caller measuring further leaves it revealed.
+ * Read one palette with the pointer outside the column: the bar must stay
+ * drawn there, so the away reading is the subject rather than a quiet state.
  * @param page - the page under test.
- * @returns the palette's quiet thumb and its hovered metrics.
+ * @returns the palette's away thumb and its list metrics.
  */
 async function measurePalette(page: Page): Promise<PaletteMetrics> {
   await pointAt(page, 'away')
-  // Poll rather than sleep the linger out: the wait is the column's, and a
-  // fixed sleep would either race it or pad every palette.
-  await expect.poll(async () => resolveThumb(page), { timeout: 10_000 }).toBe(NO_THUMB)
-  const quietThumb = await resolveThumb(page)
-  await pointAt(page, 'list')
-  // Poll the reveal too: the reading below is a colour, and taking it in the
-  // same tick as the pointer move would race React's flush and land a
-  // transparent thumb in the golden.
-  await expect.poll(async () => resolveThumb(page), { timeout: 10_000 }).not.toBe(NO_THUMB)
-  return { hovered: await measureList(page), quietThumb }
+  const awayThumb = await resolveThumb(page)
+  return { metrics: await measureList(page), awayThumb }
 }
 
 /**
@@ -181,10 +175,10 @@ async function measurePalette(page: Page): Promise<PaletteMetrics> {
  * @returns the golden body, without a trailing newline.
  */
 function renderGeometry(light: PaletteMetrics, dark: PaletteMetrics): string {
-  const palette = (name: string, { hovered: metrics, quietThumb }: PaletteMetrics): string[] => [
+  const palette = (name: string, { metrics, awayThumb }: PaletteMetrics): string[] => [
     `## ${name}`,
     '',
-    `- --dsh-scrollbar-thumb, pointer outside the sidebar: ${quietThumb}`,
+    `- --dsh-scrollbar-thumb, pointer outside the sidebar: ${awayThumb}`,
     `- scrollbar-gutter: ${metrics.gutter}`,
     `- ::-webkit-scrollbar width: ${metrics.width}`,
     `- ::-webkit-scrollbar-track background: ${metrics.track}`,
@@ -231,13 +225,11 @@ function resolveThumb(page: Page): Promise<string> {
   })
 }
 
-/** Fully transparent, which is how the quiet column spells "no thumb". */
+/** Fully transparent, which is how a hidden bar would spell "no thumb". */
 const NO_THUMB = 'rgba(0, 0, 0, 0)'
 
 /**
- * Park the pointer over the session list or outside the sidebar entirely. The
- * column reveals its scrollbars from real pointer movement, so a scenario that
- * never moves the mouse measures the quiet state whatever it intended to.
+ * Park the pointer over the session list or outside the sidebar entirely.
  * @param page - the page under test.
  * @param where - `list` to point at the session list, `away` for the far side
  * of the viewport (the conversation column).
@@ -310,12 +302,11 @@ function nestedScrollGeometry(page: Page) {
 }
 
 /**
- * Return both scrollers to their tops.
+ * Return the session list to its top; the viewport no longer scrolls.
  * @param page - the page under test.
  */
 async function resetNestedScroll(page: Page): Promise<void> {
   await page.locator('[data-sidebar-list-area]').evaluate((el) => { el.scrollTop = 0 })
-  await page.locator('[data-sidebar-scrollport]').evaluate((el) => { el.scrollTop = 0 })
 }
 
 /**
@@ -327,6 +318,33 @@ async function pointInto(page: Page, selector: string): Promise<void> {
   const box = await page.locator(selector).first().boundingBox()
   if (box === null) throw new Error(`${selector} has no layout box`)
   await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2)
+}
+
+/** Drag geometry of the list's WebKit thumb, in page coordinates. */
+interface ThumbDrag {
+  x: number
+  y: number
+  range: number
+  travel: number
+}
+
+/**
+ * Locate the thumb center and the scroll range a full track travel maps to.
+ * @param page - the page under test.
+ * @returns the drag start point, the list's scroll range, and the track travel.
+ */
+function thumbDrag(page: Page): Promise<ThumbDrag> {
+  return page.evaluate(() => {
+    const list = document.querySelector<HTMLElement>('[data-sidebar-list-area]')!
+    const rect = list.getBoundingClientRect()
+    const barWidth = Number.parseFloat(getComputedStyle(list, '::-webkit-scrollbar').width)
+    const trackMargin = Number.parseFloat(getComputedStyle(list, '::-webkit-scrollbar-track').marginTop)
+    const track = list.clientHeight - trackMargin * 2
+    const thumb = Math.max(track * (list.clientHeight / list.scrollHeight), 20)
+    const range = list.scrollHeight - list.clientHeight
+    const top = rect.top + trackMargin + (list.scrollTop / range) * (track - thumb)
+    return { x: rect.right - barWidth / 2, y: top + thumb / 2, range, travel: track - thumb }
+  })
 }
 
 describe('web e2e: sidebar session list scrollbar (reserved gutter / themed thumb)', () => {
@@ -341,7 +359,10 @@ describe('web e2e: sidebar session list scrollbar (reserved gutter / themed thum
     for (let index = 0; index < SEED_COUNT; index += 1) {
       await seedSession(scaffold, fixture, `sidebar-scrollbar-web-e2e-${String(index).padStart(2, '0')}`)
     }
-    browser = await chromium.launch()
+    // Playwright's headless default args hide scrollbars, which would leave
+    // the styled bar unpainted and its thumb undraggable; headful browsers
+    // draw it, so the scenario opts out of the hiding.
+    browser = await chromium.launch({ ignoreDefaultArgs: ['--hide-scrollbars'] })
     // Shorter than the other scenarios' 1000px so SEED_COUNT rows overflow
     // the list with room to spare.
     page = await newEnglishPage(browser, 800)
@@ -349,10 +370,6 @@ describe('web e2e: sidebar session list scrollbar (reserved gutter / themed thum
     await page.goto(scaffold.authenticatedUrl, { waitUntil: 'load' })
     await page.waitForSelector('[class*="frame"]', { timeout: 30_000 })
     await expandSeededSessions(page)
-    // Every assertion about a thumb colour needs a drawn thumb, and the column
-    // only draws one under the pointer; the quiet state is asserted where it is
-    // the subject rather than left as an ambient condition of the whole file.
-    await pointAt(page, 'list')
   }, 180_000)
 
   afterAll(async () => {
@@ -376,8 +393,10 @@ describe('web e2e: sidebar session list scrollbar (reserved gutter / themed thum
     // Pin presence, not width, because the width is platform-dependent.
     expect(metrics.band).toBeGreaterThan(0)
     expect(metrics.scrollbarEdgeOffset).toBe(2)
-    expect(metrics.rowEdgeInset).toBe(8)
-    expect(metrics.rowPaintInset).toBe(11)
+    // The 14px drag rail plus the 2px edge offset reserve the trailing band;
+    // rows stop clear of it instead of sliding under the thumb.
+    expect(metrics.rowEdgeInset).toBe(16)
+    expect(metrics.rowPaintInset).toBe(19)
     // Measure against the bar because overlay scrollbars do not move the client edge.
     expect(metrics.timeCoveredBy).toBe(0)
     expect(metrics.timeRight).toBeLessThanOrEqual(metrics.clientRight)
@@ -385,46 +404,35 @@ describe('web e2e: sidebar session list scrollbar (reserved gutter / themed thum
     expect(tripwire.pageErrors).toEqual([])
   }, 60_000)
 
-  it('draws no thumb until the pointer is over the column, and lingers on the way out', async () => {
+  it('keeps the thumb drawn with the pointer away and while scrolling without a pointer', async () => {
     onTestFailed(() => saveFailureShot(page, 'web-e2e-sidebar-scrollbar-pointer'))
-    const revealed = await resolveThumb(page)
-    expect(revealed).not.toBe(NO_THUMB)
     await pointAt(page, 'away')
-    // The linger, measured as a state rather than a duration: the thumb is
-    // still drawn on the leave itself, and gone once the window has passed. A
-    // tighter timing assertion would pin the wall clock of a CI machine.
-    expect(await resolveThumb(page)).toBe(revealed)
-    await expect.poll(async () => resolveThumb(page), { timeout: 10_000 }).toBe(NO_THUMB)
-    // The reservation is unconditional, so nothing moved while the bar was
-    // hidden — this is what buys `transparent` over hiding the bar itself.
-    const quiet = await measureList(page)
-    expect(quiet.gutter).toBe('stable')
-    expect(quiet.band).toBeGreaterThan(0)
-    expect(quiet.timeCoveredBy).toBe(0)
+    const away = await resolveThumb(page)
+    expect(away).not.toBe(NO_THUMB)
+    expect(away).toBe((await measureList(page)).token)
     // Scrolling without a pointer — what a keyboard or a touch drag does —
-    // leaves the column quiet. This is the one deliberate loss, and
-    // it is pinned here rather than only described, so making a scroll
-    // re-reveal the bar has to be a decision rather than a side effect.
+    // keeps the bar drawn: it is the list's permanent affordance now.
     await page.locator('[data-sidebar-list-area]').evaluate((el) => { el.scrollTop += 200 })
     await page.waitForTimeout(500)
-    expect(await resolveThumb(page)).toBe(NO_THUMB)
+    expect(await resolveThumb(page)).toBe(away)
     await pointAt(page, 'list')
-    await expect.poll(async () => resolveThumb(page), { timeout: 10_000 }).toBe(revealed)
+    expect(await resolveThumb(page)).toBe(away)
+    await resetNestedScroll(page)
     expect(tripwire.pageErrors).toEqual([])
   }, 60_000)
 
-  it('removes both scroll ranges without moving row edges when grouped content fits', async () => {
+  it('removes the list scroll range without moving row edges when grouped content fits', async () => {
     onTestFailed(() => saveFailureShot(page, 'web-e2e-sidebar-scrollbar-stable-inset'))
     const viewport = page.locator('[data-sidebar-list-area]')
     const height = await viewport.evaluate(el => el.scrollHeight)
-    expect(await measureRowInset(page)).toEqual({ overflows: true, rowEdgeInset: 8, rowPaintInset: 11 })
+    expect(await measureRowInset(page)).toEqual({ overflows: true, rowEdgeInset: 16, rowPaintInset: 19 })
     const bucket = page.getByText('Ungrouped', { exact: true }).locator('..').locator('..')
     await bucket.click()
     try {
       await expect.poll(async () => viewport.evaluate(el => el.scrollHeight)).toBeLessThan(height)
       await expect.poll(async () => (await measureRowInset(page)).overflows).toBe(false)
-      expect(await measureRowInset(page)).toEqual({ overflows: false, rowEdgeInset: 8, rowPaintInset: 11 })
-      // A section that fits leaves the sidebar viewport nothing to scroll, so the navigation stays.
+      expect(await measureRowInset(page)).toEqual({ overflows: false, rowEdgeInset: 16, rowPaintInset: 19 })
+      // The pinned navigation never scrolls, in either state.
       expect((await nestedScrollGeometry(page)).viewportRange).toBe(0)
     } finally {
       await expandSeededSessions(page)
@@ -433,46 +441,34 @@ describe('web e2e: sidebar session list scrollbar (reserved gutter / themed thum
     expect(tripwire.pageErrors).toEqual([])
   }, 60_000)
 
-  it('hands one downward wheel event from the navigation to the session list and back', async () => {
+  it('scrolls the list natively while the navigation stays pinned', async () => {
     onTestFailed(() => saveFailureShot(page, 'web-e2e-sidebar-nested-scroll'))
     const size = page.viewportSize()!
     try {
       await page.setViewportSize({ width: size.width, height: 500 })
       await resetNestedScroll(page)
       const before = await nestedScrollGeometry(page)
-      expect(before.viewportRange).toBeGreaterThan(0)
+      expect(before.viewportRange).toBe(0)
       expect(before.listRange).toBeGreaterThan(60)
-      expect(before.headerTop).toBeGreaterThan(before.viewportTop)
+      expect(before.navBottom).toBeGreaterThan(before.viewportTop)
       await pointInto(page, '[data-sidebar-list-area] [role="treeitem"]')
-      await page.mouse.wheel(0, before.viewportRange + 60)
-      await expect.poll(async () => (await nestedScrollGeometry(page)).listScroll).toBe(60)
+      await page.mouse.wheel(0, 120)
+      await expect.poll(async () => (await nestedScrollGeometry(page)).listScroll).toBe(120)
       const after = await nestedScrollGeometry(page)
-      expect(after.viewportScroll).toBe(before.viewportRange)
-      expect(after.headerTop).toBe(after.viewportTop)
-      expect(after.navBottom).toBeLessThanOrEqual(after.viewportTop)
+      expect(after.viewportScroll).toBe(0)
+      expect(after.headerTop).toBe(before.headerTop)
+      expect(after.navBottom).toBe(before.navBottom)
       expect(after.buttonTop).toBe(before.buttonTop)
       expect(after.footerTop).toBe(before.footerTop)
-      await page.mouse.wheel(0, -110)
-      await expect.poll(async () => (await nestedScrollGeometry(page)).viewportScroll).toBe(before.viewportRange - 50)
-      expect((await nestedScrollGeometry(page)).listScroll).toBe(0)
-    } finally {
-      await page.setViewportSize(size)
-      await resetNestedScroll(page)
-    }
-    expect(tripwire.pageErrors).toEqual([])
-  }, 60_000)
-
-  it('continues a wheel event that starts over the navigation into the session list', async () => {
-    onTestFailed(() => saveFailureShot(page, 'web-e2e-sidebar-nested-scroll-navigation'))
-    const size = page.viewportSize()!
-    try {
-      await page.setViewportSize({ width: size.width, height: 500 })
-      await resetNestedScroll(page)
-      const before = await nestedScrollGeometry(page)
+      await page.mouse.wheel(0, -120)
+      await expect.poll(async () => (await nestedScrollGeometry(page)).listScroll).toBe(0)
+      // Wheel over the pinned navigation moves nothing: the viewport clips.
       await pointInto(page, '[data-sidebar-scrollport] [class*="panelList"]')
-      await page.mouse.wheel(0, before.viewportRange + 30)
-      await expect.poll(async () => (await nestedScrollGeometry(page)).listScroll).toBe(30)
-      expect((await nestedScrollGeometry(page)).viewportScroll).toBe(before.viewportRange)
+      await page.mouse.wheel(0, 120)
+      await page.waitForTimeout(300)
+      const idle = await nestedScrollGeometry(page)
+      expect(idle.listScroll).toBe(0)
+      expect(idle.viewportScroll).toBe(0)
     } finally {
       await page.setViewportSize(size)
       await resetNestedScroll(page)
@@ -480,7 +476,58 @@ describe('web e2e: sidebar session list scrollbar (reserved gutter / themed thum
     expect(tripwire.pageErrors).toEqual([])
   }, 60_000)
 
-  it('keeps the toolbar at the top through empty search results', async () => {
+  it('drags the scrollbar thumb to scroll the session list and back', async () => {
+    onTestFailed(() => saveFailureShot(page, 'web-e2e-sidebar-scrollbar-drag'))
+    await resetNestedScroll(page)
+    const drag = await thumbDrag(page)
+    expect(drag.range).toBeGreaterThan(60)
+    const distance = Math.min(150, drag.travel)
+    await page.mouse.move(drag.x, drag.y)
+    await page.mouse.down()
+    await page.mouse.move(drag.x, drag.y + distance, { steps: 8 })
+    await page.mouse.up()
+    const scrolled = (await nestedScrollGeometry(page)).listScroll
+    // The thumb maps track travel onto the scroll range proportionally.
+    const expected = distance * (drag.range / drag.travel)
+    expect(scrolled).toBeGreaterThan(expected / 2)
+    expect(scrolled).toBeLessThanOrEqual(expected + 2)
+    expect((await nestedScrollGeometry(page)).viewportScroll).toBe(0)
+    const back = await thumbDrag(page)
+    await page.mouse.move(back.x, back.y)
+    await page.mouse.down()
+    await page.mouse.move(back.x, back.y - distance, { steps: 8 })
+    await page.mouse.up()
+    await expect.poll(async () => (await nestedScrollGeometry(page)).listScroll).toBeLessThan(3)
+    expect(tripwire.pageErrors).toEqual([])
+  }, 60_000)
+
+  it('steps and holds the rail arrows like Windows scroll buttons', async () => {
+    onTestFailed(() => saveFailureShot(page, 'web-e2e-sidebar-rail-arrows'))
+    await resetNestedScroll(page)
+    const up = page.getByRole('button', { name: 'Scroll up', exact: true })
+    const down = page.getByRole('button', { name: 'Scroll down', exact: true })
+    expect(await up.isDisabled()).toBe(true)
+    expect(await down.isDisabled()).toBe(false)
+    // One click steps three 34px rows.
+    await down.click()
+    await expect.poll(async () => (await nestedScrollGeometry(page)).listScroll).toBe(102)
+    // Holding steps once, waits, then repeats until release.
+    const box = (await down.boundingBox())!
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2)
+    await page.mouse.down()
+    await page.waitForTimeout(900)
+    await page.mouse.up()
+    const held = (await nestedScrollGeometry(page)).listScroll
+    expect(held).toBeGreaterThan(102 + 34 * 4)
+    expect((await nestedScrollGeometry(page)).viewportScroll).toBe(0)
+    await up.click()
+    await expect.poll(async () => (await nestedScrollGeometry(page)).listScroll).toBe(held - 102)
+    await resetNestedScroll(page)
+    await expect.poll(async () => up.isDisabled()).toBe(true)
+    expect(tripwire.pageErrors).toEqual([])
+  }, 60_000)
+
+  it('keeps the toolbar pinned through empty search results', async () => {
     onTestFailed(() => saveFailureShot(page, 'web-e2e-sidebar-nested-scroll-search'))
     const header = page.locator('[data-sidebar-workspace-header]')
     const input = header.locator('input')
@@ -488,13 +535,7 @@ describe('web e2e: sidebar session list scrollbar (reserved gutter / themed thum
     try {
       await page.setViewportSize({ width: size.width, height: 500 })
       await resetNestedScroll(page)
-      const range = (await nestedScrollGeometry(page)).viewportRange
-      await pointInto(page, '[data-sidebar-list-area] [role="treeitem"]')
-      await page.mouse.wheel(0, range)
-      await expect.poll(async () => {
-        const geometry = await nestedScrollGeometry(page)
-        return geometry.headerTop === geometry.viewportTop
-      }).toBe(true)
+      const before = await nestedScrollGeometry(page)
       const searchButton = await page.getByRole('button', { name: 'Search sessions', exact: true }).boundingBox()
       if (searchButton === null) throw new Error('Search sessions has no layout box')
       await page.mouse.click(searchButton.x + searchButton.width / 2, searchButton.y + searchButton.height / 2)
@@ -502,8 +543,8 @@ describe('web e2e: sidebar session list scrollbar (reserved gutter / themed thum
       await input.fill('no-sidebar-scroll-matches-9f4c')
       await page.locator('[class*="searchTree"]').locator('..').locator('[class*="empty"]').waitFor()
       const filtered = await nestedScrollGeometry(page)
-      expect(filtered.viewportScroll).toBe(range)
-      expect(filtered.headerTop).toBe(filtered.viewportTop)
+      expect(filtered.viewportScroll).toBe(0)
+      expect(filtered.headerTop).toBe(before.headerTop)
       expect((await header.boundingBox())?.height).toBe(36)
     } finally {
       if (await input.isVisible()) { await input.fill(''); await input.press('Escape') }
@@ -524,12 +565,12 @@ describe('web e2e: sidebar session list scrollbar (reserved gutter / themed thum
     // the hover token included.
     expect(light.standardWidth).toBe('auto')
     expect(light.standardColor).toBe('auto')
-    // The pseudo-element path is the one in force: the sheet's own 5px sizing
-    // and transparent track reached a container it never names.
-    expect(light.width).toBe('5px')
+    // The pseudo-element path is the one in force: the shell's 14px drag rail
+    // and transparent track reached a container the sheet never names.
+    expect(light.width).toBe('14px')
     expect(light.track).toBe('rgba(0, 0, 0, 0)')
     // The resting and the hover rule each read the rebindable indirection, and
-    // the two resolve to DIFFERENT colours on this list: the l1 pair arrived
+    // the two resolve to DIFFERENT colours on this list: the l2 pair arrived
     // here intact rather than collapsing to one value or falling back.
     expect(light.hoverRules).toEqual(['var(--dsh-scrollbar-thumb-hover)'])
     expect(light.token).toMatch(/^rgba?\(/)
@@ -552,8 +593,12 @@ describe('web e2e: sidebar session list scrollbar (reserved gutter / themed thum
   it('matches the committed scrollbar geometry golden in both palettes', async () => {
     onTestFailed(() => saveFailureShot(page, 'web-e2e-sidebar-scrollbar-golden'))
     const light = await measurePalette(page)
+    expect(light.awayThumb).not.toBe(NO_THUMB)
+    expect(light.awayThumb).toBe(light.metrics.token)
     await page.evaluate(() => { document.body.setAttribute('data-ds-dark-theme', '') })
     const dark = await measurePalette(page)
+    expect(dark.awayThumb).not.toBe(NO_THUMB)
+    expect(dark.awayThumb).toBe(dark.metrics.token)
     await page.evaluate(() => { document.body.removeAttribute('data-ds-dark-theme') })
     await compareOrRefreshGolden(GEOMETRY_EXPECTED, renderGeometry(light, dark), MODE)
     expect(tripwire.pageErrors).toEqual([])

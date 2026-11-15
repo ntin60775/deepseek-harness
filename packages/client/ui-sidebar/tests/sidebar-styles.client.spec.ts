@@ -43,7 +43,7 @@ describe('SidebarRoot.module.css', () => {
     expect(declarations('.collapsed .panelRow')?.get('padding')).toBe('0')
   })
 
-  it('owns a shared scrollport whose gaps scroll away', () => {
+  it('pins the navigation and gives the workspace section the remaining height', () => {
     const root = declarations('.root')
     const scrollport = declarations('.scrollArea')
     expect(root?.get('--dsh-sidebar-inline-padding')).toBe('8px')
@@ -52,13 +52,11 @@ describe('SidebarRoot.module.css', () => {
     expect(root?.get('--dsh-sidebar-paint-inset')).toBe('3px')
     expect(root?.get('padding')).toBe('6px var(--dsh-sidebar-inline-padding)')
     expect(declarations('.scrollRegion')?.get('min-height')).toBe('0')
-    expect(declarations('.root:not(.collapsed) .scrollRegion')?.get('container-type')).toBe('size')
     expect(declarations('.scrollRegion')?.get('container-type')).toBeUndefined()
     expect(scrollport?.get('display')).toBe('grid')
-    expect(scrollport?.get('overflow-y')).toBe('auto')
-    expect(scrollport?.get('overflow-x')).toBe('hidden')
+    expect(scrollport?.get('overflow')).toBe('hidden')
     expect(scrollport?.get('grid-template-columns')).toBe('4px minmax(0, 1fr) calc(var(--dsh-sidebar-inline-padding) - 2px)')
-    expect(scrollport?.get('grid-template-rows')).toBe('8px max-content 2px max-content')
+    expect(scrollport?.get('grid-template-rows')).toBe('8px max-content 2px minmax(0, 1fr)')
     expect(declarations('.scrollRegion')?.get('margin-top')).toBe('4px')
     expect(declarations('.collapsed .scrollRegion')?.get('margin-top')).toBe('0')
     expect(scrollport?.get('margin-left')).toBe('-4px')
@@ -78,11 +76,22 @@ describe('SidebarRoot.module.css', () => {
     expect(declarations('.collapsed .scrollArea')?.get('margin')).toBe('0')
   })
 
-  it('hides the expanded viewport scrollbar and publishes its scroll state to the section', () => {
-    const expanded = declarations('.root:not(.collapsed) .scrollArea')
-    expect(expanded?.get('container-type')).toBe('scroll-state')
-    expect(expanded?.get('scrollbar-width')).toBe('none')
-    expect(declarations('.root:not(.collapsed) .scrollArea::-webkit-scrollbar')?.get('display')).toBe('none')
+  it('keeps the session list scrollbar drawn with a wide drag rail', () => {
+    const root = declarations('.root')
+    expect(root?.get('--dsh-scrollbar-thumb')).toBe('var(--dsw-alias-scrollbar-bg-l2)')
+    expect(root?.get('--dsh-scrollbar-thumb-hover')).toBe('var(--dsw-alias-scrollbar-hover-l2)')
+    expect(root?.get('--dsh-scrollbar-width')).toBe('14px')
+    expect(root?.get('--dsh-scrollbar-thumb-border')).toBe('3px')
+    expect(root?.get('--dsh-scrollbar-track-margin')).toBe('18px')
+    expect(declarations('.regionArea')?.get('border-top')).toBe('1px solid var(--dsw-alias-border-l3)')
+    expect(declarations('.footArea')?.get('border-top')).toBe('1px solid var(--dsw-alias-border-l3)')
+    expect(declarations('.collapsed .regionArea')?.get('border-top')).toBe('0')
+    expect(declarations('.collapsed .footArea')?.get('border-top')).toBe('0')
+    expect(declarations('.root.quietBars')).toBeUndefined()
+    expect(declarations('.root:not(.collapsed) .scrollArea')).toBeUndefined()
+    expect(declarations('.scrollFade')?.get('inset-inline')).toBe(
+      '0 max(0px, calc(var(--dsh-scrollbar-width) + 2px - var(--dsh-sidebar-inline-padding)))',
+    )
   })
 
   it('keeps the reviewed expanded spacing separate from rail and caption controls', () => {

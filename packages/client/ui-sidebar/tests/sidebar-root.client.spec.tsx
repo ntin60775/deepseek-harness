@@ -9,7 +9,7 @@ import { allowAllAccess, makeTranslate } from '@deepseek-ai/dsh-client-test-runt
 import type { ReactNode } from 'react'
 import { useState } from 'react'
 import type {
-  SidebarFooterActionOwnerProps, SidebarPanelMetadata, SidebarRootComponentProps, SidebarSectionHookContext, SidebarSectionOwnerProps,
+  SidebarFooterActionOwnerProps, SidebarPanelMetadata, SidebarRootComponentProps, SidebarSectionOwnerProps,
   SidebarSettingsOwnerProps,
 } from '../src/client/contract/slots.ts'
 import { HeaderLeadingControls, type HeaderLeadingControlsProps } from '../src/client/HeaderLeadingControls.tsx'
@@ -62,7 +62,6 @@ function mountShell({ collapsed = false, width = 300, drawer = false, shortcuts 
   const toggleSidebar = vi.fn()
   const trackEntryClick = vi.fn<SidebarRootComponentProps['trackEntryClick']>()
   let regionOwner: SidebarSectionOwnerProps | undefined
-  let regionContext: SidebarSectionHookContext | undefined
   let settingsOwner: SidebarSettingsOwnerProps | undefined
   let footerActionOwner: SidebarFooterActionOwnerProps | undefined
   const brandMark = <span data-testid="custom-brand-mark">M</span>
@@ -83,7 +82,6 @@ function mountShell({ collapsed = false, width = 300, drawer = false, shortcuts 
       renderSlot={((
         key: string,
         owner: SidebarFooterActionOwnerProps | SidebarSectionOwnerProps | SidebarSettingsOwnerProps,
-        opts?: { hookContext?: SidebarSectionHookContext },
       ) => {
         if (key === 'sidebar.brand.mark') return brandMark
         if (key === 'sidebar.brand.name') return brandName
@@ -98,7 +96,6 @@ function mountShell({ collapsed = false, width = 300, drawer = false, shortcuts 
           return <div data-testid="footer-action-seat" data-wide={owner.wide} />
         }
         regionOwner = owner as SidebarSectionOwnerProps
-        regionContext = opts?.hookContext
         return <div data-testid="region" data-wide={owner.wide}>{content}</div>
       }) as SidebarRootComponentProps['renderSlot']}
     />
@@ -111,10 +108,6 @@ function mountShell({ collapsed = false, width = 300, drawer = false, shortcuts 
     regionOwner: () => {
       if (regionOwner === undefined) throw new Error('region owner not rendered')
       return regionOwner
-    },
-    regionContext: () => {
-      if (regionContext === undefined) throw new Error('region hookContext not rendered')
-      return regionContext
     },
     settingsOwner: () => {
       if (settingsOwner === undefined) throw new Error('settings owner not rendered')
@@ -144,19 +137,12 @@ describe('SidebarRoot shell', () => {
     expect(viewport.contains(screen.getByTestId('footer-action-seat'))).toBe(false)
   })
 
-  it('hands the section a stable scroller hook bound to this sidebar viewport', () => {
-    const shell = mountShell()
-    const scroller = shell.regionContext().useSectionScroller()
-    shell.rerender({ width: 320 })
-    expect(shell.regionContext().useSectionScroller()).toBe(scroller)
+  it('leaves wheel scrolling to the section list instead of splitting gestures', () => {
+    mountShell()
     const viewport = document.querySelector<HTMLDivElement>('[data-sidebar-scrollport]')!
-    const unbound = new WheelEvent('wheel', { deltaY: 40, cancelable: true })
-    viewport.dispatchEvent(unbound)
-    expect(unbound.defaultPrevented).toBe(false)
-    scroller.bindScrollerRef(document.createElement('div'))
-    const bound = new WheelEvent('wheel', { deltaY: 40, cancelable: true })
-    viewport.dispatchEvent(bound)
-    expect(bound.defaultPrevented).toBe(true)
+    const wheel = new WheelEvent('wheel', { deltaY: 40, cancelable: true })
+    viewport.dispatchEvent(wheel)
+    expect(wheel.defaultPrevented).toBe(false)
   })
 
   it('advertises the effective new-session binding', () => {

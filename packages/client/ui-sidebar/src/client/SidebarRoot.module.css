@@ -19,10 +19,16 @@
   background: var(--dsw-specific-sidebar-fill);
   color: var(--dsw-alias-label-primary);
   font-size: 14px;
-  /* The sidebar is elevated above the conversation surface, so a revealed
-     scrollbar uses the l2 pair. .quietBars hides it without changing layout. */
+  /* The sidebar is elevated above the conversation surface, so its session
+     list scrollbar uses the l2 pair. The bar stays drawn whenever the list
+     overflows: a 14px rail with a 3px transparent border keeps an 8px visible
+     thumb inside a comfortable mouse-drag target. The track insets 18px at
+     each end so the thumb stays between the rail-end arrow buttons. */
   --dsh-scrollbar-thumb: var(--dsw-alias-scrollbar-bg-l2);
   --dsh-scrollbar-thumb-hover: var(--dsw-alias-scrollbar-hover-l2);
+  --dsh-scrollbar-width: 14px;
+  --dsh-scrollbar-thumb-border: 3px;
+  --dsh-scrollbar-track-margin: 18px;
 }
 
 :global([data-animating]:not([data-dragging])) .root {
@@ -121,19 +127,6 @@
 
 :global([data-windows-titlebar]) .collapsed .toggle .panelIcon {
   display: inline;
-}
-
-/* Scrollbars in the column are a pointer affordance: the shell adds this
-   class whenever the pointer is not inside (SidebarRoot.tsx owns the linger),
-   and rebinding ui-theme's indirection pair to `transparent` takes the thumb
-   out of every scroll region nested under it — the workspace browser's
-   session list. `transparent` rather than `display: none` on the bar:
-   the reservation (`scrollbar-gutter: stable` on the list) stays in force, so
-   revealing the thumb never reflows a row. Rebinding contract and the two
-   rendering paths it reaches: ui-theme's README. */
-.root.quietBars {
-  --dsh-scrollbar-thumb: transparent;
-  --dsh-scrollbar-thumb-hover: transparent;
 }
 
 /* Collapse phase 1: the whole frozen-width content fades out in place over
@@ -539,38 +532,20 @@
   flex-direction: column;
 }
 
-/* The workspace section is `100cqh` of this bounded region, one viewport tall without a resize observer. */
-.root:not(.collapsed) .scrollRegion {
-  container-type: size;
-}
-
-/* Both gaps scroll away; ordinary rows do not force overflow when they fit. The
-   trailing column keeps content 8px from the sidebar edge; this viewport draws no
-   scrollbar of its own. */
+/* The navigation stays pinned; the workspace section fills the remaining
+   height and its list is the column's only vertical scroller, drawing the
+   only scrollbar. The trailing column keeps content 8px from the sidebar
+   edge; horizontal overflow is clipped so toolbar offsets draw no bar. */
 .scrollArea {
   flex: 1;
   min-height: 0;
   display: grid;
   grid-template-columns: 4px minmax(0, 1fr) calc(var(--dsh-sidebar-inline-padding) - 2px);
-  grid-template-rows: 8px max-content 2px max-content;
+  grid-template-rows: 8px max-content 2px minmax(0, 1fr);
   align-content: start;
   margin-left: -4px;
   margin-right: calc(2px - var(--dsh-sidebar-inline-padding));
-  overflow-x: hidden;
-  overflow-y: auto;
-}
-
-/* Expanded, this viewport only scrolls the navigation away; the section below
-   scrolls its own rows and draws the only visible scrollbar. Descendants query
-   the scroll state to take scrolling once this viewport ends. */
-.root:not(.collapsed) .scrollArea {
-  container-type: scroll-state;
-  scrollbar-width: none;
-}
-
-/* Safari versions without `scrollbar-width` still use the WebKit scrollbar. */
-.root:not(.collapsed) .scrollArea::-webkit-scrollbar {
-  display: none;
+  overflow: hidden;
 }
 
 .scrollArea::before,
@@ -583,9 +558,11 @@
 .scrollArea::before { grid-row: 1; }
 .scrollArea::after { grid-row: 3; }
 
+/* The fade hints at clipped rows but stops where the list's scrollbar rail
+   begins (2px from the column edge), so the bar stays fully drawn. */
 .scrollFade {
   position: absolute;
-  inset-inline: 0;
+  inset-inline: 0 max(0px, calc(var(--dsh-scrollbar-width) + 2px - var(--dsh-sidebar-inline-padding)));
   bottom: 0;
   height: 24px;
   background: linear-gradient(to bottom, transparent, var(--dsw-specific-sidebar-fill));
@@ -762,7 +739,9 @@
   color: var(--dsw-alias-label-primary);
 }
 
-/* The workspace seat stays mounted while its wide and rail bodies change. */
+/* The workspace seat stays mounted while its wide and rail bodies change.
+   The hairline above it separates the pinned navigation zone from the
+   scrolling session zone; the foot carries the matching line below. */
 .regionArea {
   grid-column: 2;
   grid-row: 4;
@@ -770,18 +749,24 @@
   min-width: 0;
   display: flex;
   flex-direction: column;
+  border-top: 1px solid var(--dsw-alias-border-l3);
+  padding-top: 4px;
 }
 
 .collapsed .regionArea {
   flex: 1;
+  border-top: 0;
+  padding-top: 0;
 }
 
 /* Footer seats: additive actions stack above Settings. Each occupant owns its
-   button geometry and hover chrome. */
+   button geometry and hover chrome. The hairline closes the session zone. */
 .footArea {
   flex: none;
   display: flex;
   flex-direction: column;
+  border-top: 1px solid var(--dsw-alias-border-l3);
+  padding-top: 6px;
 }
 
 .settingsArea,
@@ -797,6 +782,8 @@
 
 .collapsed .footArea {
   align-items: center;
+  border-top: 0;
+  padding-top: 0;
 }
 
 .collapsed .settingsArea,

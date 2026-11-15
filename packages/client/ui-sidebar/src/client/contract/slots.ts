@@ -7,9 +7,8 @@
  * `sidebar.settings` registrant's (ui-settings), followed by optional footer
  * actions in `sidebar.footer.action`.
  */
-import type { RefCallback } from 'react'
 import type {
-  InjectFace, PropsLocale, PropsRenderFactories, PropsRenderSlots, PropsRuntime, SlotHookFactory,
+  InjectFace, PropsLocale, PropsRenderFactories, PropsRenderSlots, PropsRuntime,
 } from '@deepseek-ai/dsh-client-ui-slots'
 import type { ObservableSnapshot } from '@deepseek-ai/dsh-client-store'
 import type { WorkspaceId } from '@deepseek-ai/dsh-api-workspace-controller/client'
@@ -51,16 +50,14 @@ declare module '@deepseek-ai/dsh-client-ui-slots' {
      * The workspace/session browsing region: section header, search, the
      * grouped/flat session list, and every workspace dialog. Declared by this
      * package's 'sidebar' entry (declaring is claiming); ui-workspace
-     * registers the browser. The section renders inside the sidebar viewport,
-     * which is a size container one viewport tall and a scroll-state container,
-     * and binds its own vertical scroller through `useSectionScroller`.
+     * registers the browser. The section fills the column height left by the
+     * pinned navigation and owns the column's only vertical scroller, whose
+     * scrollbar stays drawn whenever the list overflows.
      */
     'sidebar.workspaces': {
       kind: 'single'
       scope: 'root'
       owner: SidebarSectionOwnerProps
-      hookContext: SidebarSectionHookContext
-      inject: SidebarSectionInjected
     }
     /**
      * The settings seat at the sidebar foot. Declared by this package's
@@ -146,32 +143,6 @@ export interface SidebarSectionOwnerProps {
   wide: boolean
   /** Ensure the sidebar is visible; safe to call while already expanded. */
   expandSidebar: () => void
-}
-
-/** Sidebar viewport capability handed to the `sidebar.workspaces` occupant. */
-export interface SectionScroller {
-  /**
-   * Ref callback for the occupant's own vertical scroller. While bound, wheel scrolling over
-   * the sidebar viewport moves the navigation away first and then continues into this element;
-   * scrolling up returns this element to its top before the navigation reappears.
-   */
-  readonly bindScrollerRef: RefCallback<HTMLElement>
-}
-
-/**
- * Bind the occupant to the sidebar viewport it renders in.
- * @returns The same object on every call for one sidebar.
- */
-export type UseSectionScroller = () => SectionScroller
-
-/** Viewport capability supplied with each `sidebar.workspaces` render. */
-export interface SidebarSectionHookContext {
-  readonly useSectionScroller: UseSectionScroller
-}
-
-/** Slot-level Hook factory for the `sidebar.workspaces` occupant. */
-export interface SidebarSectionInjected {
-  hooks: { sectionScroller: SlotHookFactory<'sidebar.workspaces', UseSectionScroller> }
 }
 
 /**
