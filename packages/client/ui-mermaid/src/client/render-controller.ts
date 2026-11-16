@@ -60,8 +60,9 @@ export function createMermaidRenderController(options: MermaidRenderControllerOp
           try {
             entry ??= import('./mermaid-entry.ts')
             module = await entry
-          } catch {
+          } catch (error) {
             // A rejected import stays unretried here; the next attempt re-imports.
+            console.debug('[ui-mermaid] diagram chunk import failed', error)
             entry = undefined
             resolve({ kind: 'failed' })
             return
@@ -72,7 +73,10 @@ export function createMermaidRenderController(options: MermaidRenderControllerOp
             options.publishVariables(variables)
             const svg = await module.renderMermaid(id, code, variables)
             resolve(stale() ? { kind: 'stale' } : { kind: 'rendered', svg })
-          } catch {
+          } catch (error) {
+            // mermaid's parse message or sanitize's no-visible-text refusal;
+            // the card reports the locale-owned notice, the reason stays here.
+            console.debug('[ui-mermaid] diagram render failed', error)
             resolve(stale() ? { kind: 'stale' } : { kind: 'failed' })
           }
         })

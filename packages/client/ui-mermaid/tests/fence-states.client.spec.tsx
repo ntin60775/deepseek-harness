@@ -102,6 +102,7 @@ describe('mermaid fence body states', () => {
     const { props, attempts } = fenceFixture()
     const { unmount } = render(<MermaidFenceLayer {...props}>{inner}</MermaidFenceLayer>)
     unmount()
+    expect(attempts[0]!.cancelled).toBe(true)
     attempts[0]!.settle({ kind: 'failed' })
     await Promise.resolve()
     expect(screen.queryByText(t('error.notice'))).toBeNull()

@@ -65,6 +65,13 @@ describe('mermaid SVG sanitize on recorded vectors', () => {
     expect(() => sanitizeMermaidSvg(vector('empty-text').svg)).toThrow('no visible text')
   })
 
+  it('does not count accTitle or metadata prose as visible text', () => {
+    const svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10" aria-labelledby="t1">'
+      + '<title id="t1">Acc title</title><desc>Description</desc><metadata>meta</metadata>'
+      + '<foreignObject width="10" height="10"><div xmlns="http://www.w3.org/1999/xhtml">label</div></foreignObject></svg>'
+    expect(() => sanitizeMermaidSvg(svg)).toThrow('no visible text')
+  })
+
   it('keeps the default profile: role survives, and use is always cut', () => {
     const role = vector('flowchart-html-label')
     const clean = sanitizeMermaidSvg(role.svg)
@@ -75,11 +82,29 @@ describe('mermaid SVG sanitize on recorded vectors', () => {
     expect(cut).toContain('Label')
   })
 
-  it('strips javascript hrefs and event handlers from click vectors', () => {
+  it('keeps the click-vector pipeline output inert', () => {
+    // mermaid securityLevel strict neutralizes these payloads upstream; the
+    // recorded output carries a bare anchor, and sanitize must keep it inert.
     for (const name of ['click-href-javascript', 'click-call']) {
       const clean = sanitizeMermaidSvg(vector(name).svg)
       expect(clean).not.toMatch(/javascript:/u)
       expect(clean).not.toMatch(/on(?:click|error|load)\s*=/iu)
     }
+  })
+
+  it('cuts javascript hrefs, event handlers, and use from raw SVG', () => {
+    const raw = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 40" aria-label="Diagram name" role="graphics-document">'
+      + '<a href="javascript:alert(1)"><text>Link</text></a>'
+      + '<text onclick="alert(1)">Handler</text>'
+      + '<use href="#icon"/>'
+      + '<text>Visible</text></svg>'
+    const clean = sanitizeMermaidSvg(raw)
+    expect(clean).not.toMatch(/javascript:/u)
+    expect(clean).not.toMatch(/on(?:click|error|load)\s*=/iu)
+    expect(clean).not.toMatch(/<use\b/iu)
+    expect(clean).toContain('Visible')
+    const root = new DOMParser().parseFromString(clean, 'image/svg+xml').documentElement
+    expect(root.getAttribute('aria-label')).toBe('Diagram name')
+    expect(root.getAttribute('role')).toBe('graphics-document')
   })
 })

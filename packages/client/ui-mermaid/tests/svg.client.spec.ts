@@ -30,10 +30,10 @@ describe('lightbox data URL', () => {
     expect(decoded).toContain('Лог')
     expect(decoded).toContain('сессии')
     const root = new DOMParser().parseFromString(decoded, 'image/svg+xml').documentElement
-    const box = root.getAttribute('viewBox')!.split(/[\s,]+/u).map(Number)
-    expect(root.getAttribute('width')).toBe(String(box[2]))
-    expect(root.getAttribute('height')).toBe(String(box[3]))
-    expect(box[2]).toBeGreaterThan(600)
+    // Independent literals measured from the recorded fixture's viewBox.
+    expect(root.getAttribute('width')).toBe('1432.15625')
+    expect(root.getAttribute('height')).toBe('63')
+    expect(root.getAttribute('viewBox')).toBe('0 0 1432.15625 63')
   })
 
   it('round-trips a Cyrillic label through the base64 encoding', () => {
@@ -51,6 +51,7 @@ describe('lightbox data URL', () => {
       '<svg xmlns="http://www.w3.org/2000/svg"><text>No box</text></svg>',
       '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 nope 40"><text>Bad box</text></svg>',
       '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 0 40"><text>Zero box</text></svg>',
+      '<svg xmlns="http://www.w3.org/2000/svg"><symbol id="s" viewBox="0 0 10 10"/><text>Child box only</text></svg>',
     ]) {
       const url = svgToDataUrl(svg)
       const decoded = new TextDecoder().decode(Uint8Array.from(atob(url.slice('data:image/svg+xml;base64,'.length)), char => char.charCodeAt(0)))

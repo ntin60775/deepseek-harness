@@ -1,12 +1,13 @@
 /** Presentation projection and lightbox serialization of a sanitized diagram SVG. */
 
-/** Parse the `viewBox` attribute into its four numbers; a missing or malformed box yields undefined. */
-function viewBoxSize(svg: string): { width: number; height: number } | undefined {
-  const box = /viewBox\s*=\s*["']\s*([\d.eE+-]+)[\s,]+([\d.eE+-]+)[\s,]+([\d.eE+-]+)[\s,]+([\d.eE+-]+)\s*["']/u.exec(svg)
-  if (box === null) return undefined
-  const width = Number(box[3])
-  const height = Number(box[4])
-  return Number.isFinite(width) && Number.isFinite(height) && width > 0 && height > 0 ? { width, height } : undefined
+/** Parse the root svg's `viewBox` attribute; a missing or malformed box yields undefined. */
+function viewBoxSize(root: Element): { width: number; height: number } | undefined {
+  const value = root.getAttribute('viewBox')
+  if (value === null) return undefined
+  const parts = value.trim().split(/[\s,]+/u).map(Number)
+  if (parts.length !== 4 || parts.some(part => !Number.isFinite(part))) return undefined
+  const [, , width, height] = parts as [number, number, number, number]
+  return width > 0 && height > 0 ? { width, height } : undefined
 }
 
 /**
@@ -34,7 +35,7 @@ export function prepareDiagramSvg(svg: string): string {
 export function svgToDataUrl(svg: string): string {
   const document = new DOMParser().parseFromString(svg, 'image/svg+xml')
   const root = document.documentElement
-  const size = viewBoxSize(svg)
+  const size = viewBoxSize(root)
   if (size !== undefined) {
     root.setAttribute('width', String(size.width))
     root.setAttribute('height', String(size.height))
