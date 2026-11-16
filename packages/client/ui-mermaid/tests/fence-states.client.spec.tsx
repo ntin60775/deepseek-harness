@@ -94,8 +94,12 @@ describe('mermaid fence body states', () => {
     channel.change({ revision: 2 } as ThemeSnapshot)
     await vi.waitFor(() => { expect(attempts).toHaveLength(2) })
     expect(attempts[0]!.cancelled).toBe(true)
+    // The redraw happens inside the mounted layer: the body returns to the
+    // code block while the new attempt runs, then swaps back to the card.
+    expect(screen.getByTestId('inner-code')).toBeTruthy()
     attempts[1]!.settle({ kind: 'rendered', svg: diagramSvg })
     await vi.waitFor(() => { expect(screen.getByRole('img')).toBeTruthy() })
+    expect(screen.queryByTestId('inner-code')).toBeNull()
   })
 
   it('drops a result that arrives after unmount', async () => {

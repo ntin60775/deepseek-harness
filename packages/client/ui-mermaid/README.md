@@ -7,7 +7,7 @@ kind: "package-reference"
 
 ## Summary
 
-A ` ```mermaid ` fence in the chat transcript renders as an SVG diagram card instead of a code block. One card type serves every size and theme: the diagram is the default body, the source is one toggle away, and a lightbox shows the whole diagram fitted to the viewport. The package ships disabled; a deployment opts in by overriding the `ui-mermaid` row in its profile patch.
+A ` ```mermaid ` fence in the chat transcript renders as an SVG diagram card instead of a code block. One card type serves every size and theme: the diagram is the default body, the source is one toggle away, and a lightbox shows the whole diagram fitted to the viewport. Wide diagrams keep their natural size with horizontal scroll inside the card. The package ships disabled; a deployment opts in by overriding the `ui-mermaid` row in its profile patch.
 
 ## Table of Contents
 
@@ -34,6 +34,21 @@ A parse failure, a rejected chunk import, or a render without visible text degra
 
 Every SVG passes DOMPurify (default profile plus `FORBID_TAGS: ['foreignObject']`) before presentation, with `htmlLabels: false` globally. The card wrapper owns the accessible name (`role="img"` with a localized label); the inner svg is `aria-hidden`.
 
+### Fit rule and configuration
+
+`fit = min(1, measureWidth / W)` with `W×H` read from the rendered svg's `viewBox.baseVal`. Below `minFitScale` the diagram keeps its natural `W×H` and the card body scrolls horizontally; at or above it the diagram fits the column (`width="100%"` plus mermaid's `max-width`). Equality resolves to the fitted mode. Height is never constrained.
+
+```yaml
+- id: ui-mermaid
+  disabled: false
+  config:
+    minFitScale: 0.85
+```
+
+`minFitScale` accepts `(0, 1]`, defaults to `0.85` (11/13 ≈ 0.846 rounded up), and fails loud at load outside the range. The diagram base font is fixed at 13px in every theme; the floor keeps scaled text at or above 11px.
+
+Measurement rule: CSS never compares a diagram's viewBox width with the column through a threshold — the comparison is the pure fit function, CSS only expresses the resolved mode. The measured value is pixel-based: `clientWidth` of the card's inner non-scrolling measure container, independent of the active mode (the scrollbar lives inside the diagram wrapper). The owner is the card node: `data-fit-mode` (`fit` | `natural`) is published on the card by an apply-owned ref-callback face. A ResizeObserver without debounce applies the threshold in its callback; a mode switch rewrites the cached svg's root attributes and never re-renders mermaid.
+
 <a id="model-experience"></a>
 ## Model Experience
 
@@ -50,7 +65,6 @@ None; diagram rendering happens entirely in the browser and writes nothing to th
 - Embedded SVG icons (`<use>`) are unsupported: DOMPurify always cuts `use`, so a diagram with icons renders without them; a render left with no visible text degrades to the source with a notice.
 - Other diagram languages (graphviz, plantuml, d2), export, editing, and rendering outside the chat transcript (session titles, tool cards, `.md` previews) are out of scope.
 - The viewer is viewport-fit with the lightbox caps; there is no interactive zoom and no absolute 1:1 mode.
-- Every diagram renders fitted to the column; a natural-width horizontal-scroll mode for wide diagrams is absent.
 
 <a id="dev-note"></a>
 ### Dev Note

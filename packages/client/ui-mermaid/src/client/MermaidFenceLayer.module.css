@@ -73,6 +73,19 @@
   height: auto;
 }
 
+/* Natural branch: the cached svg keeps its explicit W×H and scrolls inside
+   the card; flex-start keeps the scroll origin at the left edge. The measured
+   container above never scrolls, so its clientWidth is mode-independent. */
+.card[data-fit-mode='natural'] .diagram {
+  overflow-x: auto;
+  justify-content: flex-start;
+}
+
+.card[data-fit-mode='natural'] .diagram svg {
+  max-width: none;
+  flex-shrink: 0;
+}
+
 .degraded {
   position: relative;
 }

@@ -1,0 +1,174 @@
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+
+ RUN  v4.1.11 /tmp/mermaid02-base
+
+ ❯ |thread-safe| packages/client/ui-mermaid/tests/fit.client.spec.ts (0 test)
+ ❯ |thread-safe| packages/client/ui-mermaid/tests/measure.client.spec.tsx (0 test)
+ ❯ |thread-safe| packages/client/ui-mermaid/tests/config.client.spec.ts (5 tests | 5 failed) 10ms
+     × defaults minFitScale to 0.85 4ms
+     × accepts values inside (0, 1] including both boundaries of the ceiling 1ms
+     × rejects zero at load with a validation error 3ms
+     × rejects values above one at load 1ms
+     × rejects negative values and non-numbers at load 1ms
+ ❯ |thread-safe| packages/client/ui-mermaid/tests/apply.client.spec.tsx (0 test)
+
+⎯⎯⎯⎯⎯⎯ Failed Suites 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |thread-safe| packages/client/ui-mermaid/tests/apply.client.spec.tsx [ packages/client/ui-mermaid/tests/apply.client.spec.tsx ]
+Error: Failed to resolve import "../src/client/measure.ts" from "packages/client/ui-mermaid/tests/harness.client.ts". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /tmp/mermaid02-base/packages/client/ui-mermaid/tests/harness.client.ts:9:41
+  6  |  import { vi } from "vitest";
+  7  |  import { en } from "../src/client/locales.ts";
+  8  |  import { createMermaidMeasureFace } from "../src/client/measure.ts";
+     |                                            ^
+  9  |  import { createMermaidThemeChannel } from "../src/client/theme-state.ts";
+  10 |  /** Controllable ResizeObserver stand-in: jsdom has no layout and no ResizeObserver. */
+ ❯ TransformPluginContext._formatLog node_modules/.pnpm/vite@8.2.2_@types+node@22.20.1_esbuild@0.28.2_jiti@2.7.0_tsx@4.23.13_yaml@2.9.0/node_modules/vite/dist/node/chunks/node.js:31147:39
+ ❯ TransformPluginContext.error node_modules/.pnpm/vite@8.2.2_@types+node@22.20.1_esbuild@0.28.2_jiti@2.7.0_tsx@4.23.13_yaml@2.9.0/node_modules/vite/dist/node/chunks/node.js:31144:14
+ ❯ normalizeUrl node_modules/.pnpm/vite@8.2.2_@types+node@22.20.1_esbuild@0.28.2_jiti@2.7.0_tsx@4.23.13_yaml@2.9.0/node_modules/vite/dist/node/chunks/node.js:28083:18
+ ❯ node_modules/.pnpm/vite@8.2.2_@types+node@22.20.1_esbuild@0.28.2_jiti@2.7.0_tsx@4.23.13_yaml@2.9.0/node_modules/vite/dist/node/chunks/node.js:28153:30
+ ❯ TransformPluginContext.transform node_modules/.pnpm/vite@8.2.2_@types+node@22.20.1_esbuild@0.28.2_jiti@2.7.0_tsx@4.23.13_yaml@2.9.0/node_modules/vite/dist/node/chunks/node.js:28119:4
+ ❯ EnvironmentPluginContainer.transform node_modules/.pnpm/vite@8.2.2_@types+node@22.20.1_esbuild@0.28.2_jiti@2.7.0_tsx@4.23.13_yaml@2.9.0/node_modules/vite/dist/node/chunks/node.js:30932:14
+ ❯ loadAndTransform node_modules/.pnpm/vite@8.2.2_@types+node@22.20.1_esbuild@0.28.2_jiti@2.7.0_tsx@4.23.13_yaml@2.9.0/node_modules/vite/dist/node/chunks/node.js:20671:26
+ ❯ fetchModule node_modules/.pnpm/vite@8.2.2_@types+node@22.20.1_esbuild@0.28.2_jiti@2.7.0_tsx@4.23.13_yaml@2.9.0/node_modules/vite/dist/node/chunks/node.js:34343:15
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/8]⎯
+
+ FAIL  |thread-safe| packages/client/ui-mermaid/tests/fit.client.spec.ts [ packages/client/ui-mermaid/tests/fit.client.spec.ts ]
+Error: Failed to resolve import "../src/client/fit.ts" from "packages/client/ui-mermaid/tests/fit.client.spec.ts". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /tmp/mermaid02-base/packages/client/ui-mermaid/tests/fit.client.spec.ts:4:34
+  2  |  /** Boundary specs of the pure fit rule: 0.84 / 0.85 / 0.86 and the equality case. */
+  3  |  import { describe, expect, it } from "vitest";
+  4  |  import { resolveDiagramFit } from "../src/client/fit.ts";
+     |                                     ^
+  5  |  /** Independent literal box: W=1000 makes the scale fractions exact decimals. */
+  6  |  const box = {
+ ❯ TransformPluginContext._formatLog node_modules/.pnpm/vite@8.2.2_@types+node@22.20.1_esbuild@0.28.2_jiti@2.7.0_tsx@4.23.13_yaml@2.9.0/node_modules/vite/dist/node/chunks/node.js:31147:39
+ ❯ TransformPluginContext.error node_modules/.pnpm/vite@8.2.2_@types+node@22.20.1_esbuild@0.28.2_jiti@2.7.0_tsx@4.23.13_yaml@2.9.0/node_modules/vite/dist/node/chunks/node.js:31144:14
+ ❯ normalizeUrl node_modules/.pnpm/vite@8.2.2_@types+node@22.20.1_esbuild@0.28.2_jiti@2.7.0_tsx@4.23.13_yaml@2.9.0/node_modules/vite/dist/node/chunks/node.js:28083:18
+ ❯ node_modules/.pnpm/vite@8.2.2_@types+node@22.20.1_esbuild@0.28.2_jiti@2.7.0_tsx@4.23.13_yaml@2.9.0/node_modules/vite/dist/node/chunks/node.js:28153:30
+ ❯ TransformPluginContext.transform node_modules/.pnpm/vite@8.2.2_@types+node@22.20.1_esbuild@0.28.2_jiti@2.7.0_tsx@4.23.13_yaml@2.9.0/node_modules/vite/dist/node/chunks/node.js:28119:4
+ ❯ EnvironmentPluginContainer.transform node_modules/.pnpm/vite@8.2.2_@types+node@22.20.1_esbuild@0.28.2_jiti@2.7.0_tsx@4.23.13_yaml@2.9.0/node_modules/vite/dist/node/chunks/node.js:30932:14
+ ❯ loadAndTransform node_modules/.pnpm/vite@8.2.2_@types+node@22.20.1_esbuild@0.28.2_jiti@2.7.0_tsx@4.23.13_yaml@2.9.0/node_modules/vite/dist/node/chunks/node.js:20671:26
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/8]⎯
+
+ FAIL  |thread-safe| packages/client/ui-mermaid/tests/measure.client.spec.tsx [ packages/client/ui-mermaid/tests/measure.client.spec.tsx ]
+Error: Failed to resolve import "../src/client/measure.ts" from "packages/client/ui-mermaid/tests/harness.client.ts". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /tmp/mermaid02-base/packages/client/ui-mermaid/tests/harness.client.ts:9:41
+  6  |  import { vi } from "vitest";
+  7  |  import { en } from "../src/client/locales.ts";
+  8  |  import { createMermaidMeasureFace } from "../src/client/measure.ts";
+     |                                            ^
+  9  |  import { createMermaidThemeChannel } from "../src/client/theme-state.ts";
+  10 |  /** Controllable ResizeObserver stand-in: jsdom has no layout and no ResizeObserver. */
+ ❯ TransformPluginContext._formatLog node_modules/.pnpm/vite@8.2.2_@types+node@22.20.1_esbuild@0.28.2_jiti@2.7.0_tsx@4.23.13_yaml@2.9.0/node_modules/vite/dist/node/chunks/node.js:31147:39
+ ❯ TransformPluginContext.error node_modules/.pnpm/vite@8.2.2_@types+node@22.20.1_esbuild@0.28.2_jiti@2.7.0_tsx@4.23.13_yaml@2.9.0/node_modules/vite/dist/node/chunks/node.js:31144:14
+ ❯ normalizeUrl node_modules/.pnpm/vite@8.2.2_@types+node@22.20.1_esbuild@0.28.2_jiti@2.7.0_tsx@4.23.13_yaml@2.9.0/node_modules/vite/dist/node/chunks/node.js:28083:18
+ ❯ node_modules/.pnpm/vite@8.2.2_@types+node@22.20.1_esbuild@0.28.2_jiti@2.7.0_tsx@4.23.13_yaml@2.9.0/node_modules/vite/dist/node/chunks/node.js:28153:30
+ ❯ TransformPluginContext.transform node_modules/.pnpm/vite@8.2.2_@types+node@22.20.1_esbuild@0.28.2_jiti@2.7.0_tsx@4.23.13_yaml@2.9.0/node_modules/vite/dist/node/chunks/node.js:28119:4
+ ❯ EnvironmentPluginContainer.transform node_modules/.pnpm/vite@8.2.2_@types+node@22.20.1_esbuild@0.28.2_jiti@2.7.0_tsx@4.23.13_yaml@2.9.0/node_modules/vite/dist/node/chunks/node.js:30932:14
+ ❯ loadAndTransform node_modules/.pnpm/vite@8.2.2_@types+node@22.20.1_esbuild@0.28.2_jiti@2.7.0_tsx@4.23.13_yaml@2.9.0/node_modules/vite/dist/node/chunks/node.js:20671:26
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/8]⎯
+
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |thread-safe| packages/client/ui-mermaid/tests/config.client.spec.ts > ui-mermaid Config > defaults minFitScale to 0.85
+TypeError: Config is not a function
+ ❯ packages/client/ui-mermaid/tests/config.client.spec.ts:9:12
+      7| describe('ui-mermaid Config', () => {
+      8|   it('defaults minFitScale to 0.85', () => {
+      9|     expect(Config({})).toEqual({ minFitScale: 0.85 })
+       |            ^
+     10|     expect(Config()).toEqual({ minFitScale: 0.85 })
+     11|   })
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/8]⎯
+
+ FAIL  |thread-safe| packages/client/ui-mermaid/tests/config.client.spec.ts > ui-mermaid Config > accepts values inside (0, 1] including both boundaries of the ceiling
+TypeError: Config is not a function
+ ❯ packages/client/ui-mermaid/tests/config.client.spec.ts:14:12
+     12|
+     13|   it('accepts values inside (0, 1] including both boundaries of the ce…
+     14|     expect(Config({ minFitScale: 0.5 })).toEqual({ minFitScale: 0.5 })
+       |            ^
+     15|     expect(Config({ minFitScale: 0.01 })).toEqual({ minFitScale: 0.01 …
+     16|     expect(Config({ minFitScale: 1 })).toEqual({ minFitScale: 1 })
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/8]⎯
+
+ FAIL  |thread-safe| packages/client/ui-mermaid/tests/config.client.spec.ts > ui-mermaid Config > rejects zero at load with a validation error
+AssertionError: expected error to be instance of ValidationError
+
+- Expected:
+[Function ValidationError]
+
++ Received:
+TypeError {
+  "message": "(0 , __vite_ssr_import_2__.Config) is not a function",
+}
+
+ ❯ packages/client/ui-mermaid/tests/config.client.spec.ts:20:46
+     18|
+     19|   it('rejects zero at load with a validation error', () => {
+     20|     expect(() => Config({ minFitScale: 0 })).toThrow(z.ValidationError)
+       |                                              ^
+     21|     expect(() => Config({ minFitScale: 0 })).toThrow(/minFitScale > 0/…
+     22|   })
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/8]⎯
+
+ FAIL  |thread-safe| packages/client/ui-mermaid/tests/config.client.spec.ts > ui-mermaid Config > rejects values above one at load
+AssertionError: expected error to be instance of ValidationError
+
+- Expected:
+[Function ValidationError]
+
++ Received:
+TypeError {
+  "message": "(0 , __vite_ssr_import_2__.Config) is not a function",
+}
+
+ ❯ packages/client/ui-mermaid/tests/config.client.spec.ts:25:49
+     23|
+     24|   it('rejects values above one at load', () => {
+     25|     expect(() => Config({ minFitScale: 1.01 })).toThrow(z.ValidationEr…
+       |                                                 ^
+     26|     expect(() => Config({ minFitScale: 2 })).toThrow(z.ValidationError)
+     27|   })
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/8]⎯
+
+ FAIL  |thread-safe| packages/client/ui-mermaid/tests/config.client.spec.ts > ui-mermaid Config > rejects negative values and non-numbers at load
+AssertionError: expected error to be instance of ValidationError
+
+- Expected:
+[Function ValidationError]
+
++ Received:
+TypeError {
+  "message": "(0 , __vite_ssr_import_2__.Config) is not a function",
+}
+
+ ❯ packages/client/ui-mermaid/tests/config.client.spec.ts:30:49
+     28|
+     29|   it('rejects negative values and non-numbers at load', () => {
+     30|     expect(() => Config({ minFitScale: -0.1 })).toThrow(z.ValidationEr…
+       |                                                 ^
+     31|     expect(() => Config(JSON.parse('{"minFitScale":"0.8"}'))).toThrow(…
+     32|   })
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/8]⎯
+
+
+ Test Files  4 failed (4)
+      Tests  5 failed (5)
+   Start at  23:31:54
+   Duration  3.30s (transform 3.05s, setup 253ms, import 1.58s, tests 10ms, environment 2.33s)

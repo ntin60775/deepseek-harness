@@ -1,0 +1,20 @@
+Mutation probes on commit ef71e74fe8 tree (vitest run, ui-mermaid focused).
+
+M1 fit.ts: `fit < config.minFitScale` -> `fit <= config.minFitScale`
+   Command: pnpm exec vitest run packages/client/ui-mermaid/tests/fit.client.spec.ts packages/client/ui-mermaid/tests/measure.client.spec.tsx
+   Red (4): fit boundary "fits the column at equality with the floor (fit 0.85)";
+   fit boundary "applies a configured floor instead of the default";
+   measure "resolves equality with the floor to the fitted mode";
+   measure "reads the same mode-independent clientWidth source on both sides of the threshold".
+   Reverted.
+
+M2 index.ts Config: `.default(0.85)` -> `.default(0.8)`
+   Command: pnpm exec vitest run packages/client/ui-mermaid/tests/config.client.spec.ts packages/client/ui-mermaid/tests/apply.client.spec.tsx
+   Red (1): config "defaults minFitScale to 0.85".
+   Reverted.
+
+M3 measure.ts: natural branch removed (always width=100%, height removed)
+   Command: pnpm exec vitest run packages/client/ui-mermaid/tests/measure.client.spec.tsx
+   Red (2): measure "injects the measure container clientWidth and publishes natural size from viewBox.baseVal";
+   measure "switches mode in the RO callback by attributes only, without a mermaid re-render".
+   Reverted; focused suite green again (78/78).
