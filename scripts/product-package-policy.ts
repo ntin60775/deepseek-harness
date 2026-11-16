@@ -20,6 +20,7 @@ export const PRODUCT_PACKAGE_POLICY: Readonly<Record<string, ProductPackagePolic
   'packages/core/agent-tool-presentation': { category: 'optional', reason: 'Deprecated selector retained for existing executor configurations.' },
   'packages/client/script-realm': { category: 'optional', reason: 'Script environment provider registry for explicitly selected Client integrations.' },
   'packages/client/script-realm-iframe': { category: 'optional', reason: 'Iframe execution provider registered only by an explicitly selected Client plugin.' },
+  'packages/client/ui-mermaid': { category: 'optional', reason: 'Mermaid fence cards ship disabled; a deployment opts in through its profile patch.' },
   'packages/browser-use/browser-use': { category: 'optional', reason: 'Service definition used by explicitly selected browser providers.' },
   'packages/computer-use/computer-use': { category: 'optional', reason: 'Service definition used by explicitly selected computer providers.' },
   'packages/lsp/lsp': { category: 'optional', reason: 'Service definition for deployment-configured language servers.' },

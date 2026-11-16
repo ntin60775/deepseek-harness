@@ -39,6 +39,7 @@
     "docs/user/develop/framework/README.md",
     "docs/user/develop/practice/README.md",
     "docs/user/guide/README.md",
+    "packages/client/ui-mermaid/README.md",
     "packages/fork/README.md",
     "packages/fork/web-search-zai/README.md",
     "scripts/web-launcher/README.md"

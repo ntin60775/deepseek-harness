@@ -1,0 +1,5 @@
+- text: mermaid
+- button "Source"
+- button "Copy"
+- button "Open diagram in viewer"
+- img "Mermaid diagram"

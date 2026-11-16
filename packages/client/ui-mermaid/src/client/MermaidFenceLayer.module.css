@@ -1,0 +1,87 @@
+/* Card chrome parity with the markdown code block (CodeBlock.module.css). */
+
+.card {
+  position: relative;
+  margin: 16px 0 11px;
+  background: var(--dsw-alias-markdown-code-block);
+  border-radius: var(--dsw-radius-lg);
+  color: var(--dsw-alias-label-primary);
+}
+
+.banner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 9px 14px;
+  background: var(--dsw-alias-markdown-code-block-banner);
+  border-radius: var(--dsw-radius-lg) var(--dsw-radius-lg) 0 0;
+  font: 400 11px/18px var(--dsw-font-family);
+}
+
+.infostring {
+  font-family: var(--ds-font-family-code);
+  font-size: 11px;
+  line-height: 18px;
+  color: var(--dsw-alias-label-primary);
+}
+
+.spacer {
+  flex: 1;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.textButton {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font: inherit;
+  color: var(--dsw-alias-label-secondary);
+}
+
+.textButton[aria-pressed='true'] {
+  color: var(--dsw-alias-label-primary);
+}
+
+.iconButton {
+  width: 24px;
+  height: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  border-radius: var(--dsw-radius-md);
+  cursor: pointer;
+  color: var(--dsw-alias-label-secondary);
+}
+
+.diagram {
+  padding: 20px 16px;
+  display: flex;
+  justify-content: center;
+}
+
+.diagram svg {
+  max-width: 100%;
+  height: auto;
+}
+
+.degraded {
+  position: relative;
+}
+
+.notice {
+  margin: 0;
+  padding: 7px 14px;
+  font-size: 11px;
+  line-height: 18px;
+  color: var(--dsw-alias-label-secondary);
+  border-top: 0.5px solid var(--dsw-alias-border-l2);
+}

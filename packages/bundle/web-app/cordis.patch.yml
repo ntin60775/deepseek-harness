@@ -365,6 +365,11 @@
     - id: ui-chat
       name: '@deepseek-ai/dsh-client-ui-chat'
 
+    # Mermaid diagram cards for settled chat fences; opt-in per deployment.
+    - id: ui-mermaid
+      name: '@deepseek-ai/dsh-client-ui-mermaid'
+      disabled: true
+
     # Official occupants for the sidebar brand slots and the home whale frame layer.
     - id: ui-brand-official
       name: '@deepseek-ai/dsh-client-ui-brand-official'

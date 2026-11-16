@@ -1,0 +1,3 @@
+# Opt in to the mermaid fence layer for its diagram scenario.
+- id: ui-mermaid
+  disabled: false
