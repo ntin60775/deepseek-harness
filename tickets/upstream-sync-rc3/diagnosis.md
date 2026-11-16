@@ -76,3 +76,16 @@
 - `verify-doc-budgets`: корневой `AGENTS.md` держит 2080/2080; апстрим добавил ссылку `([checker](scripts/verify-empty-catch.ts))` в правило про пустой `catch`. Нужен condense или relocate до/после мержа.
 - `gen-doc-graphs`, `gen-config-catalog`, `gen-tsconfig-paths`: генерённые артефакты, политика ритуала — сторона апстрима плюс перегенерация.
 - `verify-translation-pairing`: пары каталожных доков перезаписываются ритуалом; `docs/plans/` и форк-оверлей из пейринга исключены.
+## 8. Итоги прогона после мержа (2026-11-16)
+
+Мерж апстрима (2026-11-16): 23 конфликта, 3263 изменённых файла. Агрегатные чек-тайпы упали на трёх тестах, где смешались стили обеих сторон (`ToolCallId`/`SessionId` как значения при type-импорте, `@deepseek-ai/dsh-llm/brand`): переведено на `brandString` и корневой экспорт. `constraints` падал на остатках `packages/experimental/ptc-runtime-python` — снято `pnpm run clean` (402 пути).
+
+`test:docs` 21/21 после перезаписи шести README-пар и выравнивания эталонной пары `session-persistence-jsonl` (184/184): в zh добавлен абзац про `delete(id)`, в en список меню совмещён (pin/rename/read-unread/fork/copy/archive/delete).
+
+`test:snapshot` под Node 24 — 268 passed, 2 skipped, 0 failed. Под Node 22 краснели `esm_denied`, `esm_static`, `esm_dynamic` с «PTC importHandler supports evaluation-phase imports only»: у `vm.Module` в Node 22 нет аргумента `phase`. Ритуал теперь сам добавляет Node 24 в PATH (`NODE_BIN_DIR`).
+
+Живая проба на изолированном Host `:3081` (`DSH_HOME=/tmp/dsh-verify-3081`): computed-токены 654/654 совпали, контраст 92/92 PASS, скриншоты обеих схем сняты и прочитаны, консоль без новых ошибок. Свежий home показывает онбординг «Get started» блокирующей модалкой — проба требует перенесённых кредов и `state/`.
+
+Классификатор темы: `verify/surfaces.json` — 137 элементов (17 видов узла чата, 40 с лишним хуков, 12 слотов), `verify/classify.mjs` даёт `classify: OK`; негативный тест подтверждён (снятый вид → `NEW`, выдуманный хук → `MISSING`, exit 1). В CSS добавлены правила для `inherited-history` и терминальных `banner`/`prompt`/`output`/`state-label`, снят мёртвый `_version`; `client.js` пересобран (172 589 байт, smoke 64/64). Проверка живой страницы: подпись разделителя и терминальные подписи — 12px/11px tertiary, prompt — акцент, output — #928374.
+
+Пробелы прогона: `omp-demo-panel` живьём не проверен (эффект требует активной сессии, в изолированном home её нет; API `sidebarRight.openResource` и `data-content-phase` на месте); транскриптные поверхности проверены статически и на синтетических узлах, не на записанной сессии.

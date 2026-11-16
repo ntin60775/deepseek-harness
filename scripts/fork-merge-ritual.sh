@@ -24,6 +24,12 @@ cd "$(dirname "$0")/.."
 # once the merged upstream doc corpus is indexed.
 export NODE_OPTIONS="${NODE_OPTIONS:+$NODE_OPTIONS }--max-old-space-size=8192"
 
+# The host PATH carries Node 22, whose vm.Module has no import `phase`: the PTC
+# snapshot scenarios then fail with "supports evaluation-phase imports only".
+# The harness needs Node 24, so the ritual prepends the workstation's Node 24 bin.
+NODE_BIN_DIR="${NODE_BIN_DIR:-/home/prog7/.local/share/node-lts/bin}"
+[ -x "$NODE_BIN_DIR/node" ] && export PATH="$NODE_BIN_DIR:$PATH"
+
 UPSTREAM_REMOTE="${UPSTREAM_REMOTE:-upstream}"
 UPSTREAM_URL="${UPSTREAM_URL:-git@github.com:deepseek-ai/deepseek-harness.git}"
 UPSTREAM_BRANCH="${UPSTREAM_BRANCH:-master}"
