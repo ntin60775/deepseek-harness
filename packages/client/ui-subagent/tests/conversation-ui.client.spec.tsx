@@ -9,8 +9,8 @@ import type {
 import type { SubagentAddress, SubagentCatalogEntry } from '@deepseek-ai/dsh-subagent/client'
 import type { TeamProjection, TeamTaskId, TeamTaskView } from '@deepseek-ai/dsh-agent-team/client'
 import type { SessionId } from '@deepseek-ai/dsh-session/types'
-import { ReasoningEffortId } from '@deepseek-ai/dsh-llm/brand'
-import type { SessionStatusSnapshot } from '@deepseek-ai/dsh-client-ui-session/client'
+import { ReasoningEffortId } from '@deepseek-ai/dsh-llm'
+import type { SessionStatusSnapshot } from '@deepseek-ai/dsh-client-ui-session-status/client'
 import {
   SubagentCatalogAction, SubagentHeaderLineage,
   type SubagentCatalogActionProps, type SubagentHeaderLineageProps,
@@ -450,7 +450,7 @@ describe('SubagentHeaderLineage', () => {
     const input = props(catalog({ entries: [{ id: CHILD, mode: 'continuable', label: 'worker', activity: 'inactive' }] }))
     const initial = input.useSessions(state => state)
     const statuses: SessionStatusSnapshot = new Map([[CHILD, {
-      running: true, completionUnread: false, pendingInteraction: undefined,
+      running: true, completionUnread: false, completionFailed: false, pendingInteraction: undefined,
     }]])
     render(<HeaderCatalog {...input}
       useSessions={select => select({ ...initial, ids: [] })}

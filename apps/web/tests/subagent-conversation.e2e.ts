@@ -9,7 +9,7 @@ import { afterAll, beforeAll, describe, expect, it, onTestFailed, onTestFinished
 import { prepareSessionSnapshotFixtureForComparison } from '@deepseek-ai/dsh-llm-replay'
 import { createToolResultMessage, ToolCallId } from '@deepseek-ai/dsh-llm'
 import {
-  SESSION_FORMAT_VERSION, SessionId as sessionId, SessionLogOffset, SessionSeq,
+  SESSION_FORMAT_VERSION, type SessionId as sessionId, SessionLogOffset, SessionSeq,
   type SessionEvent, type SessionHeader, type SessionId,
 } from '@deepseek-ai/dsh-session'
 import type {} from '@deepseek-ai/dsh-agent'
@@ -21,6 +21,7 @@ import {
   launchWebScaffold, readPersistedEvents, realizeSeedFixture, seedSession, selectedSessionFixture, watchConsole,
   webSnapshotMode, type WebScaffold,
 } from './scaffold.ts'
+import { brandString } from '@deepseek-ai/dsh-brand'
 import { assertSubagentMenuWidth, connectFreshWorkspace, expandOwningTurnProcess, newEnglishPage, pinBrowserClock, pinHostClock, saveFailureShot, writeComposerDraft } from './support.ts'
 
 const BASE_FIXTURE = fileURLToPath(new URL('../../../snapshots/web/live-interactions/session.v3.jsonl', import.meta.url))
@@ -186,7 +187,7 @@ describe('web e2e: persisted subagent conversation and human continuation', () =
     liveReferenceOptions = await liveMenu.getByRole('option').allTextContents()
     await page.keyboard.press('Escape')
     await writeComposerDraft(page, liveInput, '')
-    oneShotId = sessionId('recorded-one-shot')
+    oneShotId = brandString<sessionId>('recorded-one-shot')
     const oneShotDurationMs = 192 * 24 * 60 * 60 * 1_000
     const oneShotAt = Date.now() - oneShotDurationMs
     const oneShotHeader: SessionHeader = {
@@ -252,7 +253,7 @@ describe('web e2e: persisted subagent conversation and human continuation', () =
     await pushedCount.waitFor({ timeout: 15_000 })
     expect(apiCalls.filter(path => path === '/api/session/projections')).toHaveLength(catalogReads)
     await compareOrRefreshGolden(CATALOG_PUSH_EXPECTED, await pushedCount.ariaSnapshot(), MODE)
-    grandchildId = sessionId('recorded-grandchild')
+    grandchildId = brandString<sessionId>('recorded-grandchild')
     const authoredAt = Date.now()
     const grandchildHeader: SessionHeader = {
       version: SESSION_FORMAT_VERSION,
@@ -942,7 +943,7 @@ describe('web e2e: persisted subagent conversation and human continuation', () =
     }
     expect(forkReceipt.result).toMatchObject({ ok: true })
     if (!forkReceipt.result.ok) return
-    const forkId = sessionId(forkReceipt.result.value.sessionId)
+    const forkId = brandString<sessionId>(forkReceipt.result.value.sessionId)
     await expect.poll(() => scaffold.ctx.agents.get(forkId)).not.toBeUndefined()
 
     await sessions.getByRole('treeitem', { name: /Ask a research subagent to/ }).click()
@@ -1024,9 +1025,9 @@ describe('web e2e: persisted subagent conversation and human continuation', () =
 })
 
 describe('web e2e: migration-required subagent catalog', () => {
-  const parentId = sessionId('migration-catalog-parent')
-  const childId = sessionId('migration-catalog-child')
-  const grandchildId = sessionId('migration-catalog-grandchild')
+  const parentId = brandString<sessionId>('migration-catalog-parent')
+  const childId = brandString<sessionId>('migration-catalog-child')
+  const grandchildId = brandString<sessionId>('migration-catalog-grandchild')
   const childLabel = 'historical researcher'
   const grandchildLabel = 'historical editor'
   const predecessors: { id: SessionId; directory: string; path: string; source: Buffer }[] = []

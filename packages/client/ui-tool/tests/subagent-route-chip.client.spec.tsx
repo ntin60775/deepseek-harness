@@ -11,7 +11,7 @@ import { useDisclosure } from '@deepseek-ai/dsh-client-ui-chat/src/client/chat/u
 import { PartialArguments } from '@deepseek-ai/dsh-util-values'
 import { en } from '@deepseek-ai/dsh-client-ui-conversation/src/client/locales.ts'
 import { en as commonEn } from '@deepseek-ai/dsh-client-locale/src/locales/en.ts'
-import { ReasoningEffortId } from '@deepseek-ai/dsh-llm/brand'
+import { ReasoningEffortId } from '@deepseek-ai/dsh-llm'
 import { DetailsRow } from '../src/client/tool/toolviews/details-row.tsx'
 import { ToolRow } from '../src/client/tool/components/ToolRow.tsx'
 import { catalogChildId, explicitRoute, matchCatalogEntry, spawnCardRoute } from '../src/client/tool/models/subagent-route.ts'
