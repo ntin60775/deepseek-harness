@@ -47,7 +47,7 @@
 
 Охранники: verify-client-packages ✓, verify-cordis-config (моя часть) ✓, build:artifacts 8/8 + build:check 2/2 ✓, test:docs 21/21 ✓, oxlint по тронутому 0 ✓, coverage per-file 100% ui-mermaid/src ✓ (55 тестов включая composition-спеку), gen-third-party-notices перегенерирован (mermaid → runtime-секция).
 
-Живая проба (keyless scaffold + overlay): скриншоты light/dark карточки, dark source, dark/light viewer — `proofs/01-*.png`, прочитаны исполнителем; live-перерисовка на theme/change доказана сменой computed fill ноды и возвратом на Light.
+Живая проба (keyless scaffold + overlay): скриншоты light/dark карточки, dark source, dark/light viewer — `proofs/01-*.png`, прочитаны исполнителем; live-перерисовка на theme/change доказана сменой computed fill ноды и возвратом на Light. OMP TUI: локальный плагин `/home/prog7/home/dev/dsh-plugins/theme-omp` смонтирован в keyless scaffold через extraInstallAnchors (резолвинг) плюс insert-строка в probe-overlay; пробы light и dark gruvbox — `proofs/01-omp-*.png`, прочитаны исполнителем (карточка, чат, viewer). Первый пробный прогон без insert-строки показал дефолтную палитру — anchor даёт только резолвинг имени, строку ростера вставляет overlay; зафиксировано как методика, не дефект пакета.
 
 Размеры артефактов (разовый замер): entry client.js 12 453 B (gzip 4 375 B); lazy client.mermaid-entry.js 3 412 709 B (gzip 913 427 B); одна копия dompurify внутри чанка (728 sources в карте, 66 mermaid).
 
@@ -61,7 +61,7 @@
 
 ### Базовые красные (подтверждены прогоном на базовом коммите, к тикету отношения не имеют)
 
-ui-settings-account (account + formatBalance, account ретраится), ui-deliverables review-tab (flake, в изоляции зелёный), ui-theme elevation-styles (SidebarRoot.module.css 1px), verify-no-unknown-casts (ui-conversation todo-panel:138), verify-locale-metadata + verify-cordis-config (packages/fork/web-search-zai), verify-optional-dependency-imports (api/session-controller commands.ts:24). Очередь — следующий sweep окна PR.
+ui-settings-account (account + formatBalance, account ретраится), ui-deliverables review-tab (flake, в изоляции зелёный), ui-theme elevation-styles (SidebarRoot.module.css 1px), verify-no-unknown-casts (ui-conversation todo-panel:138), verify-locale-metadata + verify-cordis-config (packages/fork/web-search-zai), verify-optional-dependency-imports (api/session-controller commands.ts:24), hmr-live.e2e.ts (таймаут ожидания fixture-текста; воспроизведён на базовом коммите). Очередь — следующий sweep окна PR. Из-за базового hmr-live CI-лейн test:web:ci встаёт на serial-стадии; полный контур снят воспроизведением CI-порядка: serial-владельцы client-plugin-live и present-svg отдельно (зелёные), затем параллельный пул остальных 244 файлов (maxWorkers=6 и 3, идентичный результат): 214 passed, 30 файлов / 52 теста красны — все 30 воспроизведены на базовом коммите тем же прогоном (список в «Что осталось» continue.md). Новых красных от изменения нет; mermaid-fence сценарий в пуле зелёный.
 
 ## Ревью-панель (один прогон, 2026-11-16; qwen-token-plan/qwen3.8-flash xhigh, 4 роли)
 
