@@ -42,7 +42,7 @@ describe('web e2e: mermaid fence diagram card', () => {
     await scaffold?.close()
   })
 
-  it('renders exactly one named diagram card with source swap and a viewport-fit viewer', async () => {
+  it('renders two named diagram cards with source swap and a viewport-fit viewer', async () => {
     onTestFailed(() => saveFailureShot(page, 'web-e2e-mermaid-fence'))
     const card = page.locator('[data-mermaid-card]').first()
     expect(await page.locator('[data-mermaid-card]').count()).toBe(2)
@@ -80,6 +80,14 @@ describe('web e2e: mermaid fence diagram card', () => {
     // The default column fits the 351px loop diagram and is far below the
     // wide pipeline's natural width: fitted vs natural branch side by side.
     await expect.poll(() => small.getAttribute('data-fit-mode')).toBe('fit')
+    // The fitted svg's real scale equals the computed fit: its width is
+    // min(measureWidth, W), with body padding outside the measure container.
+    const fitted = await small.evaluate((card) => {
+      const measure = card.querySelector('[role="img"]')!.parentElement as HTMLElement
+      const svg = card.querySelector('[role="img"] svg') as SVGSVGElement
+      return { measure: measure.clientWidth, width: svg.viewBox.baseVal.width, svg: svg.getBoundingClientRect().width }
+    })
+    expect(fitted.svg).toBeCloseTo(Math.min(fitted.measure, fitted.width), 0)
     expect(await wide.getAttribute('data-fit-mode')).toBe('natural')
     const wideOverflow = await wide.locator('[role="img"]').evaluate(el => ({ scroll: el.scrollWidth, client: el.clientWidth }))
     expect(wideOverflow.scroll).toBeGreaterThan(wideOverflow.client)

@@ -28,6 +28,6 @@ describe('ui-mermaid Config', () => {
 
   it('rejects negative values and non-numbers at load', () => {
     expect(() => Config({ minFitScale: -0.1 })).toThrow(z.ValidationError)
-    expect(() => Config(JSON.parse('{"minFitScale":"0.8"}'))).toThrow(z.ValidationError)
+    expect(() => Config(JSON.parse('{"minFitScale":"0.8"}') as { minFitScale?: number })).toThrow(z.ValidationError)
   })
 })

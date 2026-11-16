@@ -1,4 +1,4 @@
-Mutation probes on commit ef71e74fe8 tree (vitest run, ui-mermaid focused).
+Mutation probes on the ticket-02 implementation tree before the proofs commit (vitest run, ui-mermaid focused).
 
 M1 fit.ts: `fit < config.minFitScale` -> `fit <= config.minFitScale`
    Command: pnpm exec vitest run packages/client/ui-mermaid/tests/fit.client.spec.ts packages/client/ui-mermaid/tests/measure.client.spec.tsx

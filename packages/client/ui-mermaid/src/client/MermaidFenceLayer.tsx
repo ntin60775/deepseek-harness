@@ -5,17 +5,16 @@ import type {} from '@deepseek-ai/dsh-client-ui-chat/client'
 import { CodeBlock, IconFullscreenOutlineRegular, ImageLightbox, writeClipboard } from '@deepseek-ai/dsh-client-ui-primitives'
 import type { HocShare, HostObservable, InjectFace, PropsLocale, PropsRuntime, SlotMap } from '@deepseek-ai/dsh-client-ui-slots'
 import type { MermaidAttempt } from './render-controller.ts'
+import type { MermaidMeasureFace } from './measure.ts'
 import { prepareDiagramSvg, svgToDataUrl } from './svg.ts'
 import type { MermaidThemeState } from './theme-state.ts'
 import css from './MermaidFenceLayer.module.css'
 
 /** Inject face supplied by the plugin apply: theme channel, render attempts, and the measurement face. */
-export interface MermaidFenceInjected {
+export interface MermaidFenceInjected extends MermaidMeasureFace {
   hooks: { mermaidTheme: HostObservable<MermaidThemeState> }
   /** Start one serialized render attempt for a settled fence source. */
   renderDiagram: (code: string) => MermaidAttempt
-  /** Create one apply-owned measure-ref lifecycle for this card's diagram body. */
-  createDiagramRef: () => (element: HTMLDivElement | null) => void
 }
 
 /** Props of the mermaid fence layer: the fence, the inner content, and the inject face. */
@@ -114,15 +113,17 @@ export function MermaidFenceLayer(
       {showSource
         ? <CodeBlock code={code} lang="mermaid" showHeader={false} copyLabel={t('copy')} copiedLabel={t('copied')} />
         : (
-          <div ref={diagramRef}>
-            <div
-              className={css.diagram}
-              role="img"
-              aria-label={t('diagram.label')}
-              tabIndex={0}
-              onKeyDown={onDiagramKeyDown}
-              dangerouslySetInnerHTML={{ __html: prepareDiagramSvg(body.svg) }}
-            />
+          <div className={css.body}>
+            <div ref={diagramRef}>
+              <div
+                className={css.diagram}
+                role="img"
+                aria-label={t('diagram.label')}
+                tabIndex={0}
+                onKeyDown={onDiagramKeyDown}
+                dangerouslySetInnerHTML={{ __html: prepareDiagramSvg(body.svg) }}
+              />
+            </div>
           </div>
         )}
       {viewerSrc !== undefined && (

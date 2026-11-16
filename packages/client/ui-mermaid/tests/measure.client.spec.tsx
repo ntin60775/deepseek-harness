@@ -42,11 +42,23 @@ describe('mermaid measurement face', () => {
     const svg = wrapper.querySelector('svg')!
     expect(svg.getAttribute('width')).toBe('1432.15625')
     expect(svg.getAttribute('height')).toBe('63')
-    // The owner is the card node; the measured node is its inner non-scrolling container.
-    expect(measure.parentElement).toBe(card)
+    // The owner is the card node; the measured node is its inner non-scrolling
+    // container, and the diagram wrapper scrolls inside it.
+    expect(measure.closest('[data-mermaid-card]')).toBe(card)
+    expect(wrapper.parentElement).toBe(measure)
     expect(measure).not.toBe(wrapper)
     expect(FakeResizeObserver.made.at(-1)!.observe).toHaveBeenCalledWith(measure)
     expect(fixture.attempts).toHaveLength(1)
+  })
+
+  it('holds natural size against mermaid-style inline max-width', async () => {
+    measureWidth(840)
+    const mermaidForm = '<svg xmlns="http://www.w3.org/2000/svg" width="100%" style="max-width: 1000px;" viewBox="0 0 1000 100"><text>node</text></svg>'
+    const { card, wrapper } = await renderedCard(fenceFixture(), mermaidForm)
+    expect(card.dataset.fitMode).toBe('natural')
+    const svg = wrapper.querySelector('svg')!
+    expect(svg.getAttribute('width')).toBe('1000')
+    expect(svg.getAttribute('height')).toBe('100')
   })
 
   it('switches mode in the RO callback by attributes only, without a mermaid re-render', async () => {

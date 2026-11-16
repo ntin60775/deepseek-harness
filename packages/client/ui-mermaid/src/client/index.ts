@@ -11,6 +11,7 @@ import type {} from '@deepseek-ai/dsh-client-ui-chat/client'
 import type {} from '@deepseek-ai/dsh-client-ui-renderer/client'
 import type {} from '@deepseek-ai/dsh-client-ui-theme/client'
 import z from '@deepseek-ai/schemastery'
+import type { FitConfig } from './fit.ts'
 import { MermaidFenceLayer, type MermaidFenceInjected } from './MermaidFenceLayer.tsx'
 import { createMermaidMeasureFace } from './measure.ts'
 import { createMermaidRenderController } from './render-controller.ts'
@@ -35,12 +36,9 @@ declare module '@deepseek-ai/dsh-client-ui-slots' {
 export const inject = ['slots', 'locale', 'theme']
 
 /** Fit-rule configuration of the diagram card. */
-export interface Config {
-  /** Column-fit scale floor in (0, 1]; diagrams scaled below it keep natural size with card-local horizontal scroll. */
-  minFitScale: number
-}
+export type Config = FitConfig
 
-/** Validated fit rule; misconfiguration fails loud at load. Default 0.85 (11/13 ≈ 0.846 rounded up). */
+/** Validated fit rule; misconfiguration fails loud at load. Default 0.85 (11px / 13px ≈ 0.846 rounded up). */
 export const Config: z<{ minFitScale?: number }, Config> = z.object({
   minFitScale: z.transform(z.number().max(1), (value) => {
     // The transform resolver invokes the callback without options; the empty

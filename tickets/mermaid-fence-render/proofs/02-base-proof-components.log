@@ -1,8 +1,6 @@
-The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
-The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
-The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
-
- RUN  v4.1.11 /tmp/mermaid02-base
+Base-proof (component specs): new ticket-02 specs copied onto the base tree (master at ticket 01 merge) and run there.
+Command: pnpm exec vitest run <four new spec files>
+RUN  v4.1.11 (base tree worktree)
 
  ❯ |thread-safe| packages/client/ui-mermaid/tests/fit.client.spec.ts (0 test)
  ❯ |thread-safe| packages/client/ui-mermaid/tests/measure.client.spec.tsx (0 test)
@@ -19,7 +17,7 @@ The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths r
  FAIL  |thread-safe| packages/client/ui-mermaid/tests/apply.client.spec.tsx [ packages/client/ui-mermaid/tests/apply.client.spec.tsx ]
 Error: Failed to resolve import "../src/client/measure.ts" from "packages/client/ui-mermaid/tests/harness.client.ts". Does the file exist?
   Plugin: vite:import-analysis
-  File: /tmp/mermaid02-base/packages/client/ui-mermaid/tests/harness.client.ts:9:41
+  File: packages/client/ui-mermaid/tests/harness.client.ts:9:41
   6  |  import { vi } from "vitest";
   7  |  import { en } from "../src/client/locales.ts";
   8  |  import { createMermaidMeasureFace } from "../src/client/measure.ts";
@@ -40,7 +38,7 @@ Error: Failed to resolve import "../src/client/measure.ts" from "packages/client
  FAIL  |thread-safe| packages/client/ui-mermaid/tests/fit.client.spec.ts [ packages/client/ui-mermaid/tests/fit.client.spec.ts ]
 Error: Failed to resolve import "../src/client/fit.ts" from "packages/client/ui-mermaid/tests/fit.client.spec.ts". Does the file exist?
   Plugin: vite:import-analysis
-  File: /tmp/mermaid02-base/packages/client/ui-mermaid/tests/fit.client.spec.ts:4:34
+  File: packages/client/ui-mermaid/tests/fit.client.spec.ts:4:34
   2  |  /** Boundary specs of the pure fit rule: 0.84 / 0.85 / 0.86 and the equality case. */
   3  |  import { describe, expect, it } from "vitest";
   4  |  import { resolveDiagramFit } from "../src/client/fit.ts";
@@ -60,7 +58,7 @@ Error: Failed to resolve import "../src/client/fit.ts" from "packages/client/ui-
  FAIL  |thread-safe| packages/client/ui-mermaid/tests/measure.client.spec.tsx [ packages/client/ui-mermaid/tests/measure.client.spec.tsx ]
 Error: Failed to resolve import "../src/client/measure.ts" from "packages/client/ui-mermaid/tests/harness.client.ts". Does the file exist?
   Plugin: vite:import-analysis
-  File: /tmp/mermaid02-base/packages/client/ui-mermaid/tests/harness.client.ts:9:41
+  File: packages/client/ui-mermaid/tests/harness.client.ts:9:41
   6  |  import { vi } from "vitest";
   7  |  import { en } from "../src/client/locales.ts";
   8  |  import { createMermaidMeasureFace } from "../src/client/measure.ts";

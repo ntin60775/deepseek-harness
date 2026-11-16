@@ -1,4 +1,4 @@
-/** Pure column-fit rule for a settled diagram: natural size below the scale floor, column fit at or above it. */
+/** Pure column-fit rule for the diagram card body. */
 
 /** Diagram intrinsic size in pixels, read from the root svg's `viewBox.baseVal`. */
 export interface DiagramViewBox {

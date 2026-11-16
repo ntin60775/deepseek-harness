@@ -1,12 +1,12 @@
 /**
  * Apply-owned measurement face for the diagram card body.
  *
- * Measurement rule (domain-expert sign-off recorded in ticket 02):
+ * Measurement rule:
  * 1. CSS never compares a diagram's viewBox width with the column through a
  *    threshold; the comparison is `resolveDiagramFit`, CSS only expresses the
  *    resolved mode.
  * 2. The measured value is pixel-based: `clientWidth` of the card's inner
- *    measure container.
+ *    measure container, which equals the diagram's available content width.
  * 3. The owner is the card node: the measure container lives inside the card,
  *    `data-fit-mode` is published on the card, and the ref lifecycle belongs
  *    to the plugin apply, not the component.
@@ -41,12 +41,13 @@ export function createMermaidMeasureFace(config: FitConfig): MermaidMeasureFace 
   }
 }
 
-/** Attach the fit observers to one mounted measure container; returns their disposal. */
+/** Attach the fit observer to one mounted measure container; returns its disposal. */
 function attach(measure: HTMLDivElement, config: FitConfig): () => void {
-  const card = measure.parentElement as HTMLElement
+  const card = measure.closest('[data-mermaid-card]') as HTMLElement
   const apply = (): void => {
-    const svg = measure.querySelector('svg')
-    if (svg === null) return
+    // The container only mounts in the rendered body state, whose sanitized
+    // svg is committed before this ref runs (header-scroll.ts precedent).
+    const svg = measure.querySelector('svg') as SVGSVGElement
     const box = svg.viewBox.baseVal
     const fit = resolveDiagramFit({ width: box.width, height: box.height }, measure.clientWidth, config)
     card.dataset.fitMode = fit.mode
@@ -60,9 +61,10 @@ function attach(measure: HTMLDivElement, config: FitConfig): () => void {
   }
   apply()
   // ResizeObserver coalesces per frame; the threshold applies in the callback
-  // without debounce. A new attempt (theme change, re-settle) returns the body
-  // to loading first, so the svg swap remounts this container and the ref
-  // re-applies the rule to the cached svg on attach.
+  // without debounce. A height-only delivery re-applies the same width and is
+  // idempotent. A new attempt (theme change, re-settle) returns the body to
+  // loading first, so the svg swap remounts this container and the ref
+  // re-applies the rule on attach.
   const resize = new ResizeObserver(apply)
   resize.observe(measure)
   return () => { resize.disconnect() }
