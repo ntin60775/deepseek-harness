@@ -1,5 +1,6 @@
 {
   "meta": {
-    "title": "ui-mermaid"
+    "title": "Mermaid 図",
+    "description": "確定した mermaid チャットフェンスをサニタイズ済み SVG 図カードとして描画し、ソース切替とライトボックス閲覧を提供します。"
   }
 }

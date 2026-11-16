@@ -3,7 +3,7 @@ node_type: index
 title: Draft specs and tickets
 service: _platform
 status: active
-updated: 2026-11-13
+updated: 2026-11-16
 tags: [kb, plans, tickets]
 links:
   part_of: [../README.md]

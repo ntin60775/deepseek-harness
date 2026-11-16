@@ -32,7 +32,7 @@ While a reply streams, the fence stays a code block. Once it settles, the card l
 
 A parse failure, a rejected chunk import, or a render without visible text degrades to the code block with a compact notice; the source stays intact. The import is not retried inside a mount; remounting starts a new attempt.
 
-Every SVG passes DOMPurify (default profile plus `FORBID: ['foreignObject']`) before presentation, with `htmlLabels: false` globally. The card wrapper owns the accessible name (`role="img"` with a localized label); the inner svg is `aria-hidden`.
+Every SVG passes DOMPurify (default profile plus `FORBID_TAGS: ['foreignObject']`) before presentation, with `htmlLabels: false` globally. The card wrapper owns the accessible name (`role="img"` with a localized label); the inner svg is `aria-hidden`.
 
 <a id="model-experience"></a>
 ## Model Experience
@@ -50,7 +50,7 @@ None; diagram rendering happens entirely in the browser and writes nothing to th
 - Embedded SVG icons (`<use>`) are unsupported: DOMPurify always cuts `use`, so a diagram with icons renders without them; a render left with no visible text degrades to the source with a notice.
 - Other diagram languages (graphviz, plantuml, d2), export, editing, and rendering outside the chat transcript (session titles, tool cards, `.md` previews) are out of scope.
 - The viewer is viewport-fit with the lightbox caps; there is no interactive zoom and no absolute 1:1 mode.
-- Width fitting with a natural-width scroll mode arrives with the fit rule; this package currently renders every diagram fitted to the column.
+- Every diagram renders fitted to the column; a natural-width horizontal-scroll mode for wide diagrams is absent.
 
 <a id="dev-note"></a>
 ### Dev Note

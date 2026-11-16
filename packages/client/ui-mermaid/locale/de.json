@@ -1,5 +1,6 @@
 {
   "meta": {
-    "title": "ui-mermaid"
+    "title": "Mermaid-Diagramme",
+    "description": "Stellt abgeschlossene Mermaid-Chat-Fences als bereinigte SVG-Diagrammkarten mit Quelltext und Betrachter dar."
   }
 }

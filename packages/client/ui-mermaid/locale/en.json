@@ -1,5 +1,6 @@
 {
   "meta": {
-    "title": "ui-mermaid"
+    "title": "Mermaid diagrams",
+    "description": "Render settled mermaid chat fences as sanitized SVG diagram cards with a source toggle and a lightbox viewer."
   }
 }

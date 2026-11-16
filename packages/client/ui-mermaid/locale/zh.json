@@ -1,5 +1,6 @@
 {
   "meta": {
-    "title": "ui-mermaid"
+    "title": "Mermaid 图表",
+    "description": "将已完成的 mermaid 聊天围栏渲染为净化的 SVG 图表卡片，支持源码切换与灯箱查看。"
   }
 }

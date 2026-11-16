@@ -22,7 +22,7 @@
 ## Охранники (зелёные на базе, не демо-носители)
 
 - `verify-client-packages`, `verify-cordis-config`, `pnpm run hygiene` на дереве тикета: три поверхности регистрации, `exports["./client"]`, `dsh.client`, `files` glob, `packageFileExtras`, classification-запись `PRODUCT_PACKAGE_POLICY` (optional).
-- `verify-locale-metadata`, `verify-client-ui-i18n`, `check:i18n`: словарь namespace `mermaid` + 7 locale JSON.
+- `verify-locale-metadata`, `verify-client-ui-i18n`, `check:i18n`: словарь namespace `mermaid` + 8 locale JSON.
 - `build:artifacts` + `build:check`.
 
 ## Примечания исполнения
@@ -30,13 +30,13 @@
 - jsdom не рендерит mermaid (`getBBox`): компонентные спеки только на фикстуре; настоящий settle-рендер — критерий 1.
 - Регистрация слоя: `ctx.slots.inject` с объектом `{ name: 'conversation.chat.markdown.fence', key: 'mermaid', id: '@deepseek-ai/dsh-client-ui-mermaid/fence/mermaid', locale: 'mermaid', inject }`; `children` не декларируются.
 - Измерение ширины в этом тикете не вводится (тикет 02); тело рендерится во вписанном режиме.
-## Отчёт исполнения (2026-11-16, коммит 89adc9bc0d)
+## Отчёт исполнения (2026-11-16, ветка mermaid-first-diagram)
 
 Реализация: пакет `packages/client/ui-mermaid` (fence-слой `conversation.chat.markdown.fence`, key `mermaid`), строка бандла `ui-mermaid` disabled:true, locale namespace `mermaid` (8 словарей + 8 metadata JSON), sanitize DOMPurify default + FORBID_TAGS foreignObject, контроллер рендера владельцем-инстансом в apply, тема через inject hooks compartment (чтение `getComputedStyle(document.body)` в async-шаге), a11y-обёртка role=img + aria-hidden внутренний svg, lazy-чанк `client.mermaid-entry.js` (вложенный rolldown codeSplitting:false, license banner, chained sourcemap).
 
 ### Доказательства по критериям
 
-1. Web-сценарий `snapshots/web/mermaid-fence/` (авторский keyless fixture, overlay `disabled: false` по shipped-id): голден `ui.expected.md` — ровно одна строка `- img "Mermaid diagram"`; `DSH_SNAPSHOT=replay` зелёный. Base-proof: на базовом коммите 5ab8637e2e сценарий падает таймаутом ожидания role=img (fence = код-блок) — `proofs/01-base-proof.log`.
+1. Web-сценарий `snapshots/web/mermaid-fence/` (авторский keyless fixture, overlay `disabled: false` по shipped-id): голден `ui.expected.md` — ровно одна строка `- img "Mermaid diagram"`; `DSH_SNAPSHOT=replay` зелёный. Base-proof: на базовом master (срез 2026-11-16) сценарий падает таймаутом ожидания role=img (fence = код-блок) — `proofs/01-base-proof.log`.
 2. Компонентные спеки четырёх состояний: `tests/fence-states.client.spec.tsx` (9 тестов) — passthrough стрима, код-блок загрузки, карточка с текстом фикстуры, notice при failed, stale игнорируется, remount/re-settle/theme-revision = новая попытка, cancel на unmount. Мутация: снятие notice-ветки → 2 красных.
 3. Sanitize на коммитируемой фикстуре `tests/fixtures/sanitize-vectors.json` (6 векторов: полные mermaid-исходники + записанный Chromium SVG, mermaid 11.17.2, securityLevel strict): `tests/sanitize.client.spec.ts` (11 тестов) — нет foreignObject/script/use/live HTML, видимый текст и атрибуты корня на месте, пустой текст и live-форма → notice-путь. Мутация ADD_TAGS foreignObject → красный (см. отклонение А).
 4. Контроллер: `tests/render-controller.client.spec.ts` (9 тестов) — stale по generation-token (в т.ч. во время импорта и во время рендера), cancel, сериализация двух карточек, re-settle с новым id, failed без повтора, dispose, политика импорта (reject → failed, следующий attempt реимпортит).
@@ -68,4 +68,4 @@ ui-settings-account (account + formatBalance, account ретраится), ui-de
 - reviewer-tests: без мерж-блокеров. P2 закрыты правками: синтетический сырой вектор с javascript:/onclick/use (разрез DOMPurify доказан, click-векторы переименованы в inert-pipeline), unmount-тест ассертит cancel. P3: литералы width/height, aria-label на синтетическом корне — закрыты; остаток в hooks.md.
 - reviewer-code: P1 нет. P2 (дубль paths-пары ui-mermaid в tsconfig.base.json) закрыт удалением мёртвой пары. P3 закрыты: viewBox читается с корня, catch-ветки именуют ошибку через console.debug; остаток (общая константа окна копирования) в hooks.md с причиной запрета рамки.
 - reviewer-spec: P1 (stale verify-config-catalog/verify-module-graph при зелёной базе) закрыт перегенерацией обоих каталогов в этом диффе. P2 скоупа (баннер/bundle-split/notices в 01) зафиксирован как pull-forward в slicing-check.md и тикете 03: чанк ships в 01, раскрытие и охранник формы не могут ждать 03. P2 дубля paths закрыт. P3: инвариант видимого текста теперь исключает title/desc/metadata (спека-тест добавлен); формулировка отклонения В уточнена; частичный 6b и README-вынужденность зафиксированы в нарезке.
-- reviewer-kb: отчёт ожидается в этом проходе; остаточные P3 — в hooks.md.
+- reviewer-kb: P1 закрыты: спека исключена из пейринга (fork-local English-only), хэши коммитов убраны из прозы тикетов (verify-repository-references зелёный), контурные цифры отчёта приведены к фактическим прогонам (test:docs 21/21 после правок). P2 закрыты: строка ui-mermaid в групповом индексе packages/client/README.md (+ zh-пара и перезапись i18n-record), locale-метаданные локализованы (title + description, 8 языков), README приведён к FORBID_TAGS. P3 закрыты: ссылки на тикеты 01–03 в «Порядке тикетов» continue.md, счёт locale-файлов унифицирован на 8 (projections.md сохраняет историческую формулировку как запись гейта), updated индекса планов, финальные переносы строк, склеенный bullet hooks.md, формулировка пробела fit без будущего времени. Базовые красные doc-sync (export-jsdoc, persistence-catalog/changes, plugin-packages, client-catalog) подтверждены на базе и названы в hooks.md.

@@ -53,6 +53,9 @@ GitHub Actions форка (решение оператора 2026-11-10): вор
 - [tickets/subagent-route-visibility/01-catalog-route-line.md](../../tickets/subagent-route-visibility/01-catalog-route-line.md) — строка маршрута в каталоге (ui-subagent); исполнен и слит в `master` (2026-11-13), отчёт доказательств в тикете.
 - [tickets/subagent-route-visibility/02-spawn-card-chip.md](../../tickets/subagent-route-visibility/02-spawn-card-chip.md) — чип маршрута в карточке спавна (ui-tool + словари ui-conversation + расширение фикстуры subagent-conversation); исполнен и слит в `master` (2026-11-14), отчёт доказательств в тикете.
 - [tickets/subagent-route-visibility/03-replay-refresh-acceptance.md](../../tickets/subagent-route-visibility/03-replay-refresh-acceptance.md) — replay-refresh по механическому критерию + финальная приёмка оператором; исполнен и слит в `master` (2026-11-15), отчёт доказательств в тикете; юнит закрыт.
+- [tickets/mermaid-fence-render/01-first-diagram.md](../../tickets/mermaid-fence-render/01-first-diagram.md) — первая диаграмма в чате (пакет ui-mermaid, fence-слой, web-сценарий); исполнен этим заходом (2026-11-16), приёмка по зелёному контуру ship.
+- [tickets/mermaid-fence-render/02-theme-and-fit.md](../../tickets/mermaid-fence-render/02-theme-and-fit.md) — правило вписывания и натуральная ширина со скроллом; блокирован 01.
+- [tickets/mermaid-fence-render/03-bundle-disclosure-docs.md](../../tickets/mermaid-fence-render/03-bundle-disclosure-docs.md) — финальная верификация бандла/раскрытия, каталоги, Agent Note; блокирован 01 и 02 (часть критериев приехала pull-forward'ом в 01 — см. slicing-check).
 - [tickets/subagent-route-visibility/04-panel-width-two-line-route.md](../../tickets/subagent-route-visibility/04-panel-width-two-line-route.md) — ширина панели по содержимому и двухстрочный маршрут (прямое решение оператора 2026-11-13); исполнен и слит в `master` (2026-11-13).
 
 ## Что осталось
