@@ -1,0 +1,31 @@
+Base-proof (web scenario): ticket-02 e2e + fixture copied onto the base tree, built there, run in replay mode.
+Command: DSH_SNAPSHOT=replay pnpm exec vitest run --config vitest.web.config.ts mermaid-fence
+ FAIL  apps/web/tests/mermaid-fence.e2e.ts > web e2e: mermaid fence diagram card > fits the small diagram and scrolls the wide one, switching mode on resize without re-render
+AssertionError: expected null to be 'fit' // Object.is equality
+
+- Expected:
+"fit"
+
++ Received:
+null
+
+ ❯ apps/web/tests/mermaid-fence.e2e.ts:82:66
+     80|     // The default column fits the 351px loop diagram and is far below…
+     81|     // wide pipeline's natural width: fitted vs natural branch side by…
+     82|     await expect.poll(() => small.getAttribute('data-fit-mode')).toBe(…
+       |                                                                  ^
+     83|     expect(await wide.getAttribute('data-fit-mode')).toBe('natural')
+     84|     const wideOverflow = await wide.locator('[role="img"]').evaluate(e…
+
+Caused by: Error: Matcher did not succeed in time.
+ ❯ apps/web/tests/mermaid-fence.e2e.ts:82:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 1 passed (2)
+   Start at  23:43:19
+   Duration  7.10s (transform 928ms, setup 0ms, import 1.53s, tests 5.45s, environment 0ms)
+
+base scenario exit=1

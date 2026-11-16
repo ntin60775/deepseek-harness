@@ -3,11 +3,30 @@ import { bindSnapshotSelector, makeTranslate } from '@deepseek-ai/dsh-client-tes
 import { en as commonEn } from '@deepseek-ai/dsh-client-locale/src/locales/en.ts'
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
+import { vi } from 'vitest'
 import { en } from '../src/client/locales.ts'
 import type { MermaidFenceLayerProps } from '../src/client/MermaidFenceLayer.tsx'
+import { createMermaidMeasureFace } from '../src/client/measure.ts'
 import type { MermaidAttempt, MermaidRenderResult } from '../src/client/render-controller.ts'
 import { createMermaidThemeChannel, type MermaidThemeChannel } from '../src/client/theme-state.ts'
 import type { ThemeSnapshot } from '@deepseek-ai/dsh-client-ui-theme/client'
+
+/** Controllable ResizeObserver stand-in: jsdom has no layout and no ResizeObserver. */
+export class FakeResizeObserver implements ResizeObserver {
+  static readonly made: FakeResizeObserver[] = []
+  readonly observe = vi.fn()
+  readonly unobserve = vi.fn()
+  readonly disconnect = vi.fn()
+  constructor(private readonly callback: ResizeObserverCallback) {
+    FakeResizeObserver.made.push(this)
+  }
+
+  /** Deliver one coalesced callback, as the browser does per frame. */
+  fire(): void {
+    this.callback([], this)
+  }
+}
+vi.stubGlobal('ResizeObserver', FakeResizeObserver)
 
 /** Locale seat stub over the package dictionary and the shared common vocabulary. */
 export const t = makeTranslate(en, commonEn)
@@ -42,7 +61,7 @@ export function stubAttempt(): StubAttempt {
 }
 
 /** Props fixture with a live theme channel; each render attempt gets a fresh controllable stub. */
-export function fenceFixture(options: { streaming?: boolean; code?: string } = {}) {
+export function fenceFixture(options: { streaming?: boolean; code?: string; minFitScale?: number } = {}) {
   const channel: MermaidThemeChannel = createMermaidThemeChannel({ revision: 1 } as ThemeSnapshot)
   const attempts: StubAttempt[] = []
   const renderDiagram = (code: string): MermaidAttempt => {
@@ -51,6 +70,7 @@ export function fenceFixture(options: { streaming?: boolean; code?: string } = {
     attempts.push(attempt)
     return attempt
   }
+  const measure = createMermaidMeasureFace({ minFitScale: options.minFitScale ?? 0.85 })
   const props = {
     lang: 'mermaid',
     code: options.code ?? diagramCode,
@@ -58,6 +78,7 @@ export function fenceFixture(options: { streaming?: boolean; code?: string } = {
     t,
     useMermaidTheme: bindSnapshotSelector(channel.source),
     renderDiagram,
+    createDiagramRef: measure.createDiagramRef,
   } as MermaidFenceLayerProps
   return { props, channel, attempts }
 }

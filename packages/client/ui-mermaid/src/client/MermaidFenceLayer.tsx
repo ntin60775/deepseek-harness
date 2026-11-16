@@ -5,12 +5,13 @@ import type {} from '@deepseek-ai/dsh-client-ui-chat/client'
 import { CodeBlock, IconFullscreenOutlineRegular, ImageLightbox, writeClipboard } from '@deepseek-ai/dsh-client-ui-primitives'
 import type { HocShare, HostObservable, InjectFace, PropsLocale, PropsRuntime, SlotMap } from '@deepseek-ai/dsh-client-ui-slots'
 import type { MermaidAttempt } from './render-controller.ts'
+import type { MermaidMeasureFace } from './measure.ts'
 import { prepareDiagramSvg, svgToDataUrl } from './svg.ts'
 import type { MermaidThemeState } from './theme-state.ts'
 import css from './MermaidFenceLayer.module.css'
 
-/** Inject face supplied by the plugin apply: theme channel and render attempts. */
-export interface MermaidFenceInjected {
+/** Inject face supplied by the plugin apply: theme channel, render attempts, and the measurement face. */
+export interface MermaidFenceInjected extends MermaidMeasureFace {
   hooks: { mermaidTheme: HostObservable<MermaidThemeState> }
   /** Start one serialized render attempt for a settled fence source. */
   renderDiagram: (code: string) => MermaidAttempt
@@ -34,18 +35,21 @@ const COPIED_WINDOW_MS = 1000
  * parse failure, a rejected import, or a render without visible text degrades
  * to the code block with a compact notice. The card header toggles the source,
  * copies it in both body states, and opens the lightbox viewer; Enter/Space on
- * the focused diagram wrapper opens the viewer as well.
+ * the focused diagram wrapper opens the viewer as well. The apply-owned
+ * measurement face publishes the card's fit mode from the measure container's
+ * pixel width; the component only attaches its ref.
  * @param props - the fence, the inner code block, locale, and the inject face.
  * @returns the fence presentation for its current state.
  */
 export function MermaidFenceLayer(
-  { lang, code, streaming, children, t, useMermaidTheme, renderDiagram }: MermaidFenceLayerProps,
+  { lang, code, streaming, children, t, useMermaidTheme, renderDiagram, createDiagramRef }: MermaidFenceLayerProps,
 ): ReactNode {
   const revision = useMermaidTheme(state => state.revision)
   const [body, setBody] = useState<BodyState>({ kind: 'loading' })
   const [showSource, setShowSource] = useState(false)
   const [viewerOpen, setViewerOpen] = useState(false)
   const [copied, setCopied] = useState(false)
+  const [diagramRef] = useState(createDiagramRef)
 
   useEffect(() => {
     if (streaming) return
@@ -109,14 +113,18 @@ export function MermaidFenceLayer(
       {showSource
         ? <CodeBlock code={code} lang="mermaid" showHeader={false} copyLabel={t('copy')} copiedLabel={t('copied')} />
         : (
-          <div
-            className={css.diagram}
-            role="img"
-            aria-label={t('diagram.label')}
-            tabIndex={0}
-            onKeyDown={onDiagramKeyDown}
-            dangerouslySetInnerHTML={{ __html: prepareDiagramSvg(body.svg) }}
-          />
+          <div className={css.body}>
+            <div ref={diagramRef}>
+              <div
+                className={css.diagram}
+                role="img"
+                aria-label={t('diagram.label')}
+                tabIndex={0}
+                onKeyDown={onDiagramKeyDown}
+                dangerouslySetInnerHTML={{ __html: prepareDiagramSvg(body.svg) }}
+              />
+            </div>
+          </div>
         )}
       {viewerSrc !== undefined && (
         <ImageLightbox

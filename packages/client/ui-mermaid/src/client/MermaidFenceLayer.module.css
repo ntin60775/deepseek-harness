@@ -62,8 +62,13 @@
   color: var(--dsw-alias-label-secondary);
 }
 
-.diagram {
+/* Body padding lives outside the measure container so its clientWidth equals
+   the diagram's available content width, keeping the fit floor exact. */
+.body {
   padding: 20px 16px;
+}
+
+.diagram {
   display: flex;
   justify-content: center;
 }
@@ -71,6 +76,21 @@
 .diagram svg {
   max-width: 100%;
   height: auto;
+}
+
+/* Natural branch: the explicit width attribute holds the natural W (mermaid's
+   inline max-width equals W, so it does not clamp); max-width: none covers
+   families without an inline style, and flex-shrink: 0 stops the flex row from
+   squeezing the svg. The height attribute carries the intrinsic H while
+   height: auto resolves the same value through the viewBox aspect. */
+.card[data-fit-mode='natural'] .diagram {
+  overflow-x: auto;
+  justify-content: flex-start;
+}
+
+.card[data-fit-mode='natural'] .diagram svg {
+  max-width: none;
+  flex-shrink: 0;
 }
 
 .degraded {

@@ -32,7 +32,9 @@ describe('web e2e: mermaid fence diagram card', () => {
     await page.locator('[role="treeitem"]').nth(1).click()
     // The overlay guard: without the enabled row the fence stays a code block
     // and this wait times out instead of snapshotting a stable code golden.
-    await page.getByRole('img', { name: DIAGRAM_NAME }).waitFor({ timeout: 30_000 })
+    await page.getByRole('img', { name: DIAGRAM_NAME }).first().waitFor({ timeout: 30_000 })
+    // Attempts serialize across cards; the wide pipeline fence settles second.
+    await page.getByRole('img', { name: DIAGRAM_NAME }).nth(1).waitFor({ timeout: 30_000 })
   }, 120_000)
 
   afterAll(async () => {
@@ -40,10 +42,10 @@ describe('web e2e: mermaid fence diagram card', () => {
     await scaffold?.close()
   })
 
-  it('renders exactly one named diagram card with source swap and a viewport-fit viewer', async () => {
+  it('renders two named diagram cards with source swap and a viewport-fit viewer', async () => {
     onTestFailed(() => saveFailureShot(page, 'web-e2e-mermaid-fence'))
-    const card = page.locator('[data-mermaid-card]')
-    expect(await card.count()).toBe(1)
+    const card = page.locator('[data-mermaid-card]').first()
+    expect(await page.locator('[data-mermaid-card]').count()).toBe(2)
     const golden = await captureStableAria(page, '[data-mermaid-card]', scaffold.workspaceCwd)
     expect(golden.match(/img "Mermaid diagram"/gu)).toHaveLength(1)
     await compareOrRefreshGolden(join(SNAPSHOT_DIR, 'ui.expected.md'), golden, MODE)
@@ -52,10 +54,10 @@ describe('web e2e: mermaid fence diagram card', () => {
     await toggle.click()
     expect(await toggle.getAttribute('aria-pressed')).toBe('true')
     expect(await card.locator('pre').textContent()).toContain('flowchart LR')
-    expect(await page.getByRole('img', { name: DIAGRAM_NAME }).count()).toBe(0)
+    expect(await card.getByRole('img', { name: DIAGRAM_NAME }).count()).toBe(0)
     await toggle.click()
     expect(await toggle.getAttribute('aria-pressed')).toBe('false')
-    await page.getByRole('img', { name: DIAGRAM_NAME }).waitFor()
+    await card.getByRole('img', { name: DIAGRAM_NAME }).waitFor()
 
     await card.getByRole('button', { name: 'Open diagram in viewer' }).click()
     const dialog = page.getByRole('dialog', { name: 'Diagram viewer' })
@@ -68,5 +70,39 @@ describe('web e2e: mermaid fence diagram card', () => {
     expect(tripwire.pageErrors).toEqual([])
     expect(tripwire.warnings).toEqual([])
     await assertFixtureInventory(SNAPSHOT_DIR, ['session.v4.jsonl', 'ui.expected.md'])
+  })
+
+  it('fits the small diagram and scrolls the wide one, switching mode on resize without re-render', async () => {
+    onTestFailed(() => saveFailureShot(page, 'web-e2e-mermaid-fit'))
+    const cards = page.locator('[data-mermaid-card]')
+    const small = cards.first()
+    const wide = cards.nth(1)
+    // The default column fits the 351px loop diagram and is far below the
+    // wide pipeline's natural width: fitted vs natural branch side by side.
+    await expect.poll(() => small.getAttribute('data-fit-mode')).toBe('fit')
+    // The fitted svg's real scale equals the computed fit: its width is
+    // min(measureWidth, W), with body padding outside the measure container.
+    const fitted = await small.evaluate((card) => {
+      const measure = card.querySelector('[role="img"]')!.parentElement as HTMLElement
+      const svg = card.querySelector('[role="img"] svg') as SVGSVGElement
+      return { measure: measure.clientWidth, width: svg.viewBox.baseVal.width, svg: svg.getBoundingClientRect().width }
+    })
+    expect(fitted.svg).toBeCloseTo(Math.min(fitted.measure, fitted.width), 0)
+    expect(await wide.getAttribute('data-fit-mode')).toBe('natural')
+    const wideOverflow = await wide.locator('[role="img"]').evaluate(el => ({ scroll: el.scrollWidth, client: el.clientWidth }))
+    expect(wideOverflow.scroll).toBeGreaterThan(wideOverflow.client)
+    // The cached svg node survives resize: a mode switch rewrites attributes
+    // only, it never swaps the rendered diagram.
+    await wide.locator('[role="img"] svg').evaluate(el => el.setAttribute('data-resize-probe', 'kept'))
+    await page.setViewportSize({ width: 320, height: 1000 })
+    await expect.poll(() => small.getAttribute('data-fit-mode')).toBe('natural')
+    const narrowOverflow = await small.locator('[role="img"]').evaluate(el => ({ scroll: el.scrollWidth, client: el.clientWidth }))
+    expect(narrowOverflow.scroll).toBeGreaterThan(narrowOverflow.client)
+    expect(await wide.getAttribute('data-fit-mode')).toBe('natural')
+    expect(await wide.locator('[role="img"] svg').getAttribute('data-resize-probe')).toBe('kept')
+    await page.setViewportSize({ width: 1680, height: 1000 })
+    await expect.poll(() => small.getAttribute('data-fit-mode')).toBe('fit')
+    expect(await wide.locator('[role="img"] svg').getAttribute('data-resize-probe')).toBe('kept')
+    expect(tripwire.pageErrors).toEqual([])
   })
 })

@@ -99,6 +99,7 @@ describe('mermaid theme channel', () => {
     const first = await controller.attempt('flowchart LR\n A-->B').promise
     expect(first.kind).toBe('rendered')
     expect(channel.source.getSnapshot().variables?.primaryColor).toBe(LITERALS['--dsw-alias-bg-layer-2'])
+    expect(channel.source.getSnapshot().variables?.fontSize).toBe('13px')
     const darker = { ...LITERALS, '--dsw-alias-bg-layer-2': 'rgb(30, 32, 40)' }
     for (const [token, value] of Object.entries(darker)) root.style.setProperty(token, value)
     channel.change(themeSnapshot(2))
@@ -106,6 +107,9 @@ describe('mermaid theme channel', () => {
     const second = await controller.attempt('flowchart LR\n A-->B').promise
     expect(second.kind).toBe('rendered')
     expect(channel.source.getSnapshot().variables?.primaryColor).toBe('rgb(30, 32, 40)')
+    // Metrics are theme-independent: the darker sheet changes colors only.
+    expect(channel.source.getSnapshot().variables?.fontSize).toBe('13px')
+    expect(channel.source.getSnapshot().variables?.fontFamily).toBe('inherit')
     for (const token of Object.keys(LITERALS)) root.style.removeProperty(token)
     controller.dispose()
   })
