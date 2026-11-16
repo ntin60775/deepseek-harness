@@ -17,3 +17,4 @@ links:
 - [doc-budgets-ontoship-region.md](doc-budgets-ontoship-region.md) — split the root `AGENTS.md` word budget between its body and the knowledge-base region the `init` skill writes.
 - [transcript-readability.md](transcript-readability.md) — separate machine work, agent speech, and the final answer in the visible transcript; keep the todo list live during work.
 - [subagent-route-visibility.md](subagent-route-visibility.md) — show each subagent's recorded model selection (`provider/model` + effort) as a catalog row line and a spawn-card chip.
+- [upstream-sync-rc3.md](upstream-sync-rc3.md) — merge upstream `0.2.2-rc.3` into the fork, restore the fork surfaces, and turn the UI element classifiers into a checked table.

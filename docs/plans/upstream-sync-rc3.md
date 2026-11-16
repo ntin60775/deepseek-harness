@@ -1,0 +1,56 @@
+---
+node_type: plan
+title: Обновление форка до апстрима 0.2.2-rc.3 с пересборкой классификаторов UI
+service: _platform
+status: active
+updated: 2026-11-16
+tags: [fork, upstream-merge, ui, theme, plugins, ontoship]
+links:
+  part_of: [README.md]
+  documents:
+    - ../../scripts/fork-merge-ritual.sh
+    - ../../packages/fork/README.md
+    - ../../AGENTS.md
+    - ../../tickets/upstream-sync-rc3/diagnosis.md
+  relates_to:
+    - ../ops/continue.md
+---
+
+# Обновление форка до апстрима 0.2.2-rc.3 с пересборкой классификаторов UI
+
+## Цель
+
+Влить `upstream/master` среза 2026-11-16 (448 коммитов от базы прошлого мержа 2026-11-11, версия `0.2.2-rc.3`, Cordis `4.0.0-rc.12`) в форк так, чтобы 90 локальных коммитов — карточки реплик и синяя полоса финала, контейнер процесса, живой todo dock, очередь сообщений, маршрут субагента, скроллер сайдбара, удаление сессий, `mcp` structuredContent — остались рабочими, а UI-плагин темы (`theme-omp`) после мержа рисовал новый набор элементов, а не дефолтный. Классификаторы UI-элементов перестают быть прозой: таблица «элемент → слот/вид узла/`data-*`-хук → правило темы» со скриптом сверки против дерева чекаута даёт на каждом следующем мерже машинный дифф «добавлено/удалено» вместо ручного аудита. Диагностика всех плагинов — [tickets/upstream-sync-rc3/diagnosis.md](../../tickets/upstream-sync-rc3/diagnosis.md).
+
+## Решения гейта
+
+- Решение оператора 2026-11-16: верификация UI — второй Host на `:3081` с изолированным `DSH_HOME` и Playwright против него; `:3080` не рестартится и не трогается.
+- Решение оператора 2026-11-16: классификаторы обновляются в трёх носителях — проза инвентаризации, CSS темы и машинная таблица со скриптом проверки; альтернативы «только проза/CSS» и «только CSS» отклонены.
+- Решение оператора 2026-11-16: `ui-refinement` считается мёртвым и в план не входит; `fin-agent` удалён оператором, в план не входит.
+- План-гейт 2026-11-16, оператор: спека утверждена.
+- Принято агентом по фильтру тривиальности: машинная таблица и скрипт живут в репозитории темы (`/home/prog7/home/dev/dsh-plugins/theme-omp/verify/`), потому что потребитель один — тема, а каталог вне чекаута и мержем не затрагивается; в чекауте форка не появляется нового пакета.
+- Принято агентом: нарезка — четыре тикета по рёбрам (мерж и восстановление поверхностей → классификатор и CSS → плагины профиля → живая проба и приёмка); детали режет `to-tickets` после гейта проекций.
+
+## Готово
+
+1. **Мерж и ритуал.** `upstream/master` влит в `master` через [scripts/fork-merge-ritual.sh](../../scripts/fork-merge-ritual.sh); конфликты разрешены по политике скрипта: генерённые доки и `pnpm-lock.yaml` — сторона апстрима плюс перегенерация и `pnpm install`; конфликтные файлы обеих сторон (98 файлов, концентрация: ui-workspace 15, ui-sidebar 11, ui-conversation 7, mcp-client 6, session-persistence-jsonl 5, ui-primitives 4, ui-chat 4) разрешены сохранением форк-поведения и апстрим-структуры. Носитель: вывод ритуала фазы за фазой, список конфликтов с решением по каждому, зелёные `typecheck`, `constraints`, `test:docs`, `test:snapshot`.
+2. **Форк-поверхности живы.** Девять локальных фич работают на смерженном дереве: карточки реплик и синяя полоса финала (`data-reply-card`/`data-final-answer` форка), контейнер группы процесса, todo dock, `QueueDock` и 37 правил темы на `data-queue-dock`, маршрут в каталоге субагентов и чип в карточке спавна, скроллер сайдбара, удаление сессии, `mcp` structuredContent. Носители: focused спеки ui-chat/ui-conversation/ui-subagent/ui-tool/ui-sidebar/mcp-client зелёные, `test:gui` без новых падений относительно списка чужих падений в [docs/ops/continue.md](../ops/continue.md), replay-голдены обновлены только по механическому критерию своих спек.
+3. **Классификатор UI как данные.** В `theme-omp/verify/surfaces.json` лежит таблица классов элементов: идентификатор, вид (вид узла чата, поверхность инструмента, панель, композер, сайдбар, терминал), носитель (`data-*`, `data-chat-flow-kind`, имя слота), отпечаток в исходнике апстрима (пакет + файл), правило темы (`styles/tui.css` селектор или строка виджета), решение (стилизуется / наследует DSH / вне темы). `theme-omp/verify/classify.mjs` сверяет таблицу с деревом чекаута по `--checkout`: пропавший хук или вид узла — `ERROR` и ненулевой выход, новый неклассифицированный хук или вид узла — строка отчёта `NEW`. Носитель: прогон на смерженном дереве даёт `0 ERROR`, отчёт перечисляет `inherited-history`, `data-terminal-banner|output|prompt|state-label`, `data-dockkit-pane-body`, `data-model-menu|-pane`, `data-path`, 8 новых слотов; таблица содержит решение по каждому.
+4. **Классификатор UI как проза и CSS.** `DSH-CHAT-SURFACES.md`, `OMP-ELEMENT-MAPPING.md` и `docs/audit/dsh-surfaces.md` в каталоге темы (`/home/prog7/home/dev/dsh-plugins/theme-omp`) переписаны под новую базу (сейчас прибиты к базе `0.2.2-rc.2`); в `styles/tui.css` новый вид узла `inherited-history` получает правило уровня разделителя (не наследует стиль реплики), терминальные подэлементы и тело панели dockkit получают правила, мёртвые `[data-composer-stats]` и `_version` сняты; `client.js` пересобран `scripts/build-client.mjs`, `scripts/smoke-client.mjs` зелёный. Носитель: дифф `styles/tui.css`/`surfaces.json` с перечисленными решениями, smoke-прогон.
+5. **Каскад и токены после смены установки CSS.** `ui-theme` в rc.3 ставит CSS модульными ресурсами через рендерер, а не `<style data-plugin-css>` из `apply`; тема обязана сохранить приоритет своих поверхностных правил над базовым CSS и над `scrollbar.css`/`focus.css`/`shiki.css`. Носитель: `verify/inspect.mjs --expected tokens.json` без расхождений в обеих схемах, `verify/contrast.mjs` без новых FAIL, скриншоты `verify/shot.mjs --strict-console` обеих тем прочитаны исполнителем.
+6. **Плагины профиля и форк-пакет.** Для каждого — названный прогон и вердикт: `ontoship-chain-board` (тесты пакета; живая проба вкладки через `sidebar.right.pane.tab` и `ctx.sidebarRight.openTab`; `remote.workspaceFiles` чтение/листинг/changes), `omp-demo-panel` (открытие/закрытие правой панели), `ontoship-team`, `ontoship-team-1c`, `dsh-1c-contour` (vitest пакетов; `engines.dsh >=0.2.2-rc.2 <0.3.0` покрывает rc.3; `ctx.tools.register` не менялся), `packages/fork/web-search-zai` (тесты и smoke провайдеров `ctx.web`; коды `WebError` и `web/src/types.ts` без диффа). Носитель: значения команд и вердикты в отчёте тикета; матрица диагностики — раздел 4 отчёта.
+7. **Профильная конфигурация и живая проба.** Профиль `web` стартует на `:3081` с изолированным `DSH_HOME` (копия профиля с линками на те же пакеты) без ошибок загрузки: патч-ключи `llm-pi-ai`, `permission-presets`, `ui-theme`, `ui-settings-general` принимаются; `theme-omp` занимает `conversation.composer.dock`, board — `sidebar.right.pane.tab`. Носитель: лог старта без `failed to load`, `cordis_inspect_query` по слотам, скриншоты композера и правой панели на `:3081`.
+8. **Гейты форка зелёные.** `verify-doc-budgets` (корневой `AGENTS.md` уложен в 2080 после апстрим-ссылки на `verify-empty-catch`), `gen-doc-graphs`, `gen-config-catalog`, `gen-tsconfig-paths` перегенерированы, `verify-translation-pairing`, `test:docs`, `build:artifacts` + `build:check` зелёные; KB переиндексирован (`gitmark index`, `lint --strict` без `ERR`); [docs/ops/continue.md](../ops/continue.md) и индекс `docs/plans/README.md` обновлены.
+9. **Отчёт диагностики актуален.** [tickets/upstream-sync-rc3/diagnosis.md](../../tickets/upstream-sync-rc3/diagnosis.md) отражает фактическое состояние после мержа: дельта, матрица плагинов, найденные новые/пропавшие хуки, упавшие и починенные гейты. Носитель: сверка отчёта с выводом `classify.mjs` и прогонов.
+
+## Рамки
+
+Не входит: push в `origin` (CI форка выключен вручную, команда оператора не выдавалась); возврат в профиль `ui-refinement` и `fin-agent`; новые UI-фичи и переделка дизайна темы; правки апстрим-пакетов за пределами разрешения конфликтов; перевод апстрим-гайдов `docs/upgrade-guide/`; обновление Python SDK, desktop-приложений и vendor-пакетов сверх того, что тянет мерж. Машинная таблица описывает решения темы по элементам, а не заменяет собой каталог слотов: источник истины — исходники чекаута, таблица фиксирует принятую стилизацию.
+
+## Ограничения
+
+`:3080` не рестартится и не гасится: сессия исполнения живёт внутри него, поэтому живая проба идёт на втором инстансе `dsh web --port 3081`. Общий `~/.dsh` между инстансами рискован (сессии, SQLite, HMR-вотчер профиля), поэтому второй инстанс получает отдельный `DSH_HOME` с копией `package.json`/`cordis.patch.yml` и теми же линками; критерий успеха — второй инстанс отдаёт страницу и не пишет в базу основного. Апстрим-гайд `client-module-metadata` меняет схему имён CSS-модулей статических либ и переносит установку CSS в рендерер: селекторы темы обязаны оставаться substring-формами без завершающего `_`, а расхождение каскада ловится computed-стилями, а не глазами. Рукописный бандл темы остаётся «earlier preset»: Modules больше не снимает чужие `<style>` при live-замене, собственный disposer темы тег снимает; если HMR-перезагрузка профиля (`patchReload: live`) оставит старый лист, это фиксируется как «требуется reload страницы» и не считается дефектом тикета. Корневой `AGENTS.md` держит бюджет 2080/2080, апстрим добавил ссылку в правило про пустой `catch`: до прогона `verify-doc-budgets` нужен condense или relocate по [docs/plans/doc-budgets-ontoship-region.md](doc-budgets-ontoship-region.md). `pnpm-lock.yaml` и генерённые каталоги разрешаются стороной апстрима с последующей перегенерацией, ручная правка этих файлов запрещена. Push без команды оператора не делается; приёмка оператором обязательна, PR-путь не проверяется (CI выключен).
+
+## Контекст
+
+Апстрим ушёл на `0.2.2-rc.3` и Cordis `4.0.0-rc.12`; гайды `cordis-root-and-intercept-metadata` (ctx.root → `ctx[Context.root]`, `Service.config` → `Service.metadata`), `connection-page-peer` (аутентификация маршрутов, `webserver/entry-url`), `session-status-package` (`useSessionStatus` переехал в `ui-session-status`), `package-export-cleanup` и `client-module-metadata` описывают ломающие изменения для внешних плагинов. Форк-плагины этих API не используют: в их `client.js`/`index.js` нет `ctx.root`, `Service.config`, `useSessionStatus`, `ctx.uiSession` и снятых подпутей; `theme-omp` работает через `theme.overrideTokens`, `slots`, `locale` и проекции, `ontoship-chain-board` — через `sidebarRightTabs`/`sidebarRight`/`remote.workspaceFiles`, контракты которых в rc.3 не менялись (дифф `ui-sidebar-right` — shell и shortcuts). Новые UI-поверхности апстрима: вид узла `inherited-history` (разделитель наследованной истории fork-сессии), размеченный `TerminalBlock`, тело панели dockkit, меню выбора модели, 8 слотов; плюс `ui-session-status` как отдельный клиентский плагин. Форк-local хуки `data-reply-card`/`data-final-answer`/`data-process-*` в апстриме отсутствуют по определению, тема на них не опирается; `data-queue-dock` — опирается (37 правил) и обязан выжить. Историческая практика мержа и список восстанавливаемых поверхностей — [packages/fork/README.md](../../packages/fork/README.md) и [.agents/notes/implemented/process/2026-09-08-fork-merge-ritual.md](../../.agents/notes/implemented/process/2026-09-08-fork-merge-ritual.md).
