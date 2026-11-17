@@ -2,7 +2,7 @@
 
 Разовый замер размеров стартового бандла до/после юнита и ленивого чанка; новый gate не строится. «До» — дерево master до тикета 01 (пакет ui-mermaid отсутствует), «после» — финальное дерево тикета 03 после лицензионного фикса баннера. Оба дерева собраны `pnpm run build:artifacts` (8/8) под Node 24. Метод: `ls -l`/`stat -c%s` (байты), `gzip -c | wc -c` (gzip), оракул отсутствия — sourcemap `sources` (фильтр `/mermaid@`, `/dompurify@`) и строковый grep `mermaid` по тексту стартовых чанков.
 
-Провенанс: стартовый dist собран с shipped-строкой `ui-mermaid` `disabled: true` (packages/bundle/web-app/cordis.patch.yml), поэтому в dist нет ни чанка mermaid, ни client.js пакета — отсутствие mermaid в стартовом бандле верно и для выключенного профиля. Ленивость включённого профиля доказывают bundle-split-спека (пин `require.async`) и web-сценарий с overlay `disabled: false` (apps/web/tests/mermaid-fence.overlay.yml), не этот замер.
+Условие съёма: стартовый dist собран с shipped-строкой `ui-mermaid` `disabled: true` (packages/bundle/web-app/cordis.patch.yml), поэтому в dist нет ни чанка mermaid, ни client.js пакета — отсутствие mermaid в стартовом бандле верно и для выключенного профиля. Ленивость включённого профиля доказывают bundle-split-спека (пин `require.async`) и web-сценарий с overlay `disabled: false` (apps/web/tests/mermaid-fence.overlay.yml), не этот замер.
 
 ## Стартовый бандл (apps/web/dist)
 
