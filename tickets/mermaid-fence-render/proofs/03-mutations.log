@@ -1,0 +1,14 @@
+Mutation probes on the ticket 03 tree (component specs of tickets 01-02 remain load-bearing). Each mutation applied alone to the named file, target spec run with pnpm exec vitest run, then restored.
+
+M1 fit threshold: src/client/fit.ts `fit < config.minFitScale` -> `fit <=` (equality flips to natural).
+  tests/fit.client.spec.ts: 2 failed (equality and configured-floor cases).
+M2 Config default: src/client/index.ts `.default(0.85)` -> `.default(0.8)`.
+  tests/config.client.spec.ts: 1 failed (default assertion).
+M3 natural branch removed: src/client/measure.ts if/else replaced by the fitted branch only.
+  tests/measure.client.spec.tsx: 5 failed (natural-mode width/height and scroll cases).
+M4 sanitize config pin: src/client/sanitize.ts FORBID_TAGS -> ADD_TAGS ['foreignObject'] (ticket 01 deviation A: removing FORBID is behaviorally neutral because dompurify 3.4.16 already lists foreignobject in svgDisallowed; the guard is the inverse mutation).
+  tests/sanitize.client.spec.ts: 1 failed — "cuts foreignObject even when visible SVG text survives beside it".
+M5 notice copy removed: src/client/MermaidFenceLayer.tsx notice paragraph body -> null.
+  tests/fence-states.client.spec.tsx: 2 failed (parse-failure and import-reject notice cases).
+
+After restore: focused run pnpm exec vitest run --coverage packages/client/ui-mermaid packages/bundle/web-app/tests/mermaid-fence.spec.ts — 79 passed (13 files), see 03-coverage.log.

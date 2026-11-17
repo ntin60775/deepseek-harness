@@ -576,6 +576,7 @@ export class SessionManager {
    * The Session must not be held by a live Agent; that refusal arrives as
    * `session/live` and leaves the row in place.
    * @param sessionId - Session to delete.
+   * @param options - `stopActivity` stops running work instead of refusing.
    * @returns the Host confirmation, or the Remote failure.
    */
   async deleteSession(
