@@ -1,38 +1,47 @@
 import { readFileSync, readdirSync } from 'node:fs'
 import { createRequire } from 'node:module'
-import { basename, join } from 'node:path'
+import { join } from 'node:path'
 import { Rolldown, type UserConfig } from 'tsdown'
+import { installedDependencyRoots, packageRootOfResolved } from '../../../scripts/installed-dependency-closure.ts'
 import { clientBundle } from '../tsdown.client.ts'
 
 const require = createRequire(import.meta.url)
 const mermaidEntryMarker = '?dsh-mermaid-bundle'
 
 /**
- * Package root of a resolved dependency entry: the last `node_modules/<name>`
- * segment of its physical path. Packages without a `./package.json` export
- * (DOMPurify) resolve through their main entry instead.
+ * License blocks of one package root: every dedicated license file, else the
+ * README's license section (fastdom ships its MIT text there). A root with
+ * neither fails loud instead of distributing undisclosed code.
  */
-function dependencyRoot(requireFn: NodeJS.Require, name: string): string {
-  const resolved = requireFn.resolve(name)
-  const matches = [...resolved.matchAll(/node_modules\/(@[^/]+\/[^/]+|[^/]+)\//gu)]
-  const last = matches.at(-1)
-  if (last === undefined) throw new Error(`cannot locate package root of ${name} in ${resolved}`)
-  return resolved.slice(0, last.index! + last[0].length - 1)
+function licenseBlocks(root: string): string[] {
+  const name = (JSON.parse(readFileSync(join(root, 'package.json'), 'utf8')) as { name: string }).name
+  const files = readdirSync(root).filter(file => /^(license|licence|notice)(\.|$)/iu.test(file)).sort()
+  if (files.length > 0) {
+    return files.map(file => `${name} ${file}\n\n${readFileSync(join(root, file), 'utf8').trimEnd()}`)
+  }
+  const readme = readdirSync(root).find(file => /^readme(\.md)?$/iu.test(file))
+  if (readme !== undefined) {
+    const lines = readFileSync(join(root, readme), 'utf8').split('\n')
+    const start = lines.findIndex(line => /^#{1,6}\s+license\b/iu.test(line))
+    if (start >= 0) {
+      const end = lines.findIndex((line, index) => index > start && /^#{1,6}\s/u.test(line))
+      const body = lines.slice(start + 1, end === -1 ? undefined : end).join('\n').trimEnd()
+      if (body.length > 0) return [`${name} ${readme}\n\n${body}`]
+    }
+  }
+  throw new Error(`mermaid license banner: no license text found for ${name} at ${root}`)
 }
 
 /**
- * License files of every private copy inside the mermaid tree. DOMPurify
+ * License files of every private copy inside the mermaid tree: the installed
+ * dependency closure of mermaid, which is exactly the set the nested bundle
+ * embeds (type-only packages are erased and excluded by the walk). DOMPurify
  * arrives transitively through mermaid, so the tree carries one copy.
  */
 function mermaidLicenseBanner(): string {
-  const mermaidRoot = dependencyRoot(require, 'mermaid')
-  const mermaidRequire = createRequire(join(mermaidRoot, 'package.json'))
-  const roots = [mermaidRoot, ...['dompurify', 'd3', 'cytoscape', 'katex', 'marked', 'roughjs']
-    .map(name => dependencyRoot(mermaidRequire, name))]
-  const notices = roots.flatMap(root => readdirSync(root)
-    .filter(name => /^(LICENSE|LICENCE|NOTICE)(\.|$)/u.test(name)).sort()
-    .map(name => `${basename(root)} ${name}\n\n${readFileSync(join(root, name), 'utf8').trimEnd()}`))
-  return ['//! Bundled Mermaid license notices', ...notices.join('\n\n').split('\n').map(line => `// ${line}`)].join('\n')
+  const mermaidRoot = packageRootOfResolved(require.resolve('mermaid'))
+  const blocks = [...new Set(installedDependencyRoots(mermaidRoot).flatMap(licenseBlocks))]
+  return ['//! Bundled Mermaid license notices', ...blocks.join('\n\n').split('\n').map(line => `// ${line}`)].join('\n')
 }
 
 const bundle = clientBundle(import.meta.dirname, ['lib/types/index.js'], {

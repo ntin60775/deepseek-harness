@@ -9,6 +9,7 @@ import {
   claudeDistributionFromManifest,
   collectPythonDependencies,
   collectBundledPythonDependencies,
+  expandBrowserClosure,
   isOwnerAuthorizedRuntime,
   isPermissive,
   type Manifest,
@@ -40,6 +41,13 @@ describe('THIRD_PARTY_NOTICES.md', () => {
     expect(generated).toContain('Recipients must have access to those corresponding sources and notices.')
     expect(generated.split('## Development-only npm dependencies')[0]).toContain('| [`chrome-devtools-frontend`]')
     expect(generated.split('## Development-only npm dependencies')[0]).toContain('| [`@botiverse/oar`]')
+    // The mermaid browser chunk embeds its whole dependency tree; the closure
+    // disclosure moves those packages out of the development-only tier.
+    const runtimeSection = generated.split('## Development-only npm dependencies')[0]
+    expect(runtimeSection).toContain('| [`lodash-es`]')
+    expect(runtimeSection).toContain('| [`khroma`]')
+    expect(runtimeSection).toContain('| [`cytoscape`]')
+    expect(runtimeSection).toContain('| [`dayjs`]')
     expect(generated).toContain('third-party license and notice files supplied by the npm source')
     expect(readFileSync(resolve(root, 'THIRD_PARTY_NOTICES.md'), 'utf8'), 'stale notices — run `pnpm run gen-third-party-notices`').toBe(generated)
   })
@@ -54,6 +62,23 @@ function workspace(entries: Record<string, Manifest>): { manifests: Map<string, 
   }
   return { manifests, names }
 }
+
+describe('expandBrowserClosure', () => {
+  it('discloses the installed closure of every direct browser input', () => {
+    // closureOf models installedDependencyRoots: the full transitive tree.
+    const closure: Record<string, readonly string[]> = { mermaid: ['d3', 'd3-array', 'khroma'], d3: ['d3-array'], khroma: [] }
+    const bundled = expandBrowserClosure(new Set(['mermaid']), name => closure[name] ?? [], new Set())
+    expect([...bundled].sort()).toEqual(['d3', 'd3-array', 'khroma', 'mermaid'])
+  })
+  it('keeps workspace packages out of the disclosure set', () => {
+    const bundled = expandBrowserClosure(new Set(['lib']), () => ['@dsh/workspace-pkg', 'other'], new Set(['@dsh/workspace-pkg']))
+    expect([...bundled].sort()).toEqual(['lib', 'other'])
+  })
+  it('retains a direct input whose installed closure cannot be resolved', () => {
+    const bundled = expandBrowserClosure(new Set(['chrome-devtools-frontend']), () => [], new Set())
+    expect([...bundled]).toEqual(['chrome-devtools-frontend'])
+  })
+})
 
 describe('tierExternalDeps', () => {
   it('discloses host-bundled OAR as runtime code and applies runtime license checks', () => {
@@ -136,6 +161,18 @@ describe('tierExternalDeps', () => {
     })
     expect(tierExternalDeps(manifests, names, new Set(['react', 'browser-lib']))).toEqual(new Map([
       ['tsx', true], ['react', true], ['browser-lib', true], ['type-only', false],
+    ]))
+  })
+
+  it('moves a dev-declared package into runtime when a browser closure distributes it', () => {
+    const { manifests, names } = workspace({
+      'website/package.json': { name: '@fixture/website', devDependencies: { 'tree-lib': '^1' } },
+      'packages/client/ui/package.json': { name: '@fixture/ui', devDependencies: { 'browser-lib': '^1' } },
+    })
+    // tree-lib is only a website dev declaration, but browser-lib's installed
+    // closure embeds it into the distributed chunk.
+    expect(tierExternalDeps(manifests, names, new Set(['browser-lib']), new Set(['browser-lib', 'tree-lib']))).toEqual(new Map([
+      ['tsx', true], ['tree-lib', true], ['browser-lib', true],
     ]))
   })
 

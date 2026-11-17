@@ -1,0 +1,36 @@
+Base-proof capture for ticket 03 (criteria 4-5; criteria 1-3 base-proof is zeroed by the ticket 01 pull-forward, see the ticket amendment section). Captured on the untouched ticket worktree at the base commit (master, tree of ticket 02) before any edit, Node 24. Gates run via pnpm exec tsx scripts/<gate>.ts --check; output lines below are verbatim tails.
+
+=== criterion 4: catalog verify gates on base ===
+verify-client-catalog:
+gen-client-catalog: stale — packages/extensions/cordis-client-runner/src/client/slot-catalog.ts. Run `pnpm run gen-client-catalog` and commit the result.
+verify-plugin-packages:
+gen-plugin-packages: packages/preset/agent-preset/skills/dsh-doc/references/packages.md is stale. Run `pnpm run gen-plugin-packages` and commit packages/preset/agent-preset/skills/dsh-doc/references/packages.md.
+verify-persistence-catalog:
+gen-persistence-catalog: docs/persistence-catalog.md, docs/persistence-catalog.zh.md, docs/persistence-catalog.i18n.yaml, docs/persistence-schema.json stale. Run `pnpm run gen-persistence-catalog` and commit the result.
+verify-persistence-changes:
+docs/persistence-schema.json is stale; regenerate the persistence catalog
+verify-export-jsdoc:
+verify-export-jsdoc: 1 JSDoc completeness violation(s) (see AGENTS.md):
+  exported class method 'SessionManager.deleteSession' (packages/api/session-controller/src/client/sessions/manager.ts:581) is missing @param options.
+verify-config-catalog:
+gen-config-catalog: 3 artifact(s) are up to date.
+verify-module-graph:
+gen-module-graph: 3 artifact(s) are up to date.
+verify-dependency-catalog:
+dependency-catalog: JSON matches the recorded npm resolution
+verify-third-party-notices:
+gen-third-party-notices: THIRD_PARTY_NOTICES.md is up to date.
+
+Config-catalog tension fact (base): docs/config-catalog.md row 5277 lists @deepseek-ai/dsh-client-ui-mermaid with "—" — the scanner reads the host entry src/index.ts (empty apply, no Config); the client Config minFitScale is outside the generator's ownership. Precedent row 5263: ui-context-menu with client Config resolutionTimeoutMs also shows "—". Operator decision 2026-11-17: amend the criterion wording (catalogs reflect generator ownership; README documents the Config), recorded in the ticket.
+
+Drift volume measured by running the generators on the base tree and diffing (then restored):
+- slot-catalog.ts +3/-2: mermaid keyDomain + occupant line (unit), ui-sidebar source line-number shift 86->83 (foreign).
+- packages.md +7: ui-mermaid row (unit), new "## fork" section with @local/dsh-web-search-zai (foreign).
+- persistence 15+/15- across 4 files: session-controller types.ts line-number shifts and i18n hashes; type SHA-256 values unchanged (foreign).
+Operator decision 2026-11-17: sweep inside ticket 03.
+
+=== criterion 3: publish set on base (pull-forward verification) ===
+pnpm run hygiene on base: 20 passed, 5 failed. Failed = the known base reds: vendor rescope, optional dependency imports, plugin locale metadata, no new unknown casts, Cordis config. PASS: publint, constraints, client packages, plugin entry exports, package dependencies. The files glob lib/client*.js, the packageFileExtras entry (scripts/check-workspace-constraints.ts:217), and the pins mermaid 11.17.2 / dompurify ^3.4.16 arrived with ticket 01; criterion 3 is green on base and verifies the final publish set in 03.
+
+=== criterion 5: documents on base ===
+The Agent Note .agents/notes/implemented/feature/2026-11-16-mermaid-fence-diagram-cards.md is absent on base (file listing); no gate mechanically requires this specific note, so the base proof is the absence of the record itself, not a red gate. README sections Model Experience / Known Limitations / Fit rule and configuration are present from tickets 01-02 (pull-forward); test:docs on base is 21/21.

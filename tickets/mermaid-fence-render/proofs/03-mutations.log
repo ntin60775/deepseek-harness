@@ -1,14 +1,16 @@
-Mutation probes on the ticket 03 tree (component specs of tickets 01-02 remain load-bearing). Each mutation applied alone to the named file, target spec run with pnpm exec vitest run, then restored.
+Mutation probes on the ticket 03 tree (component specs of tickets 01-02 remain load-bearing; the banner-coverage guard is new in 03). Method: M1/M2/M4 ran in one batch with all four src mutations applied, but each target spec is isolated from the other mutations by its import graph and assertions (fit spec imports only fit.ts; config spec asserts only the Config default; sanitize spec imports only sanitize.ts). M3 and M5 were re-run alone on the otherwise clean tree because their specs import sibling modules; the solo counts below are the recorded ones. Every mutation restored after its run; the banner probe rebuilds the package bundle.
 
 M1 fit threshold: src/client/fit.ts `fit < config.minFitScale` -> `fit <=` (equality flips to natural).
   tests/fit.client.spec.ts: 2 failed (equality and configured-floor cases).
 M2 Config default: src/client/index.ts `.default(0.85)` -> `.default(0.8)`.
   tests/config.client.spec.ts: 1 failed (default assertion).
-M3 natural branch removed: src/client/measure.ts if/else replaced by the fitted branch only.
-  tests/measure.client.spec.tsx: 5 failed (natural-mode width/height and scroll cases).
+M3 natural branch removed (solo): src/client/measure.ts if/else replaced by the fitted branch only.
+  tests/measure.client.spec.tsx: 3 failed — injects natural size from viewBox.baseVal; holds natural size against mermaid-style inline max-width; switches mode in the RO callback by attributes only. (The earlier batch run showed 5 because M1's equality flip also reddened two mode cases; the solo count is 3.)
 M4 sanitize config pin: src/client/sanitize.ts FORBID_TAGS -> ADD_TAGS ['foreignObject'] (ticket 01 deviation A: removing FORBID is behaviorally neutral because dompurify 3.4.16 already lists foreignobject in svgDisallowed; the guard is the inverse mutation).
   tests/sanitize.client.spec.ts: 1 failed — "cuts foreignObject even when visible SVG text survives beside it".
-M5 notice copy removed: src/client/MermaidFenceLayer.tsx notice paragraph body -> null.
-  tests/fence-states.client.spec.tsx: 2 failed (parse-failure and import-reject notice cases).
+M5 notice copy removed (solo): src/client/MermaidFenceLayer.tsx notice paragraph body -> null.
+  tests/fence-states.client.spec.tsx: 2 failed — degrades to the code block with a notice on a failed render; starts a new attempt on remount after a failed import.
+M6 banner coverage (new guard): tsdown.config.ts mermaidLicenseBanner drops the khroma root, package bundle rebuilt.
+  tests/bundle-split.client.spec.ts: 1 failed — "credits every bundled package root in the license banner", uncredited list exactly ['khroma']. Restored and rebuilt; 2/2 green.
 
-After restore: focused run pnpm exec vitest run --coverage packages/client/ui-mermaid packages/bundle/web-app/tests/mermaid-fence.spec.ts — 79 passed (13 files), see 03-coverage.log.
+After restore: focused run pnpm exec vitest run --coverage packages/client/ui-mermaid packages/bundle/web-app/tests/mermaid-fence.spec.ts — 80 passed (13 files), see 03-coverage.log.
