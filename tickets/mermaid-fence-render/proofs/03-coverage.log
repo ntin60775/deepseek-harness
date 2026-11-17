@@ -1,0 +1,24 @@
+Focused coverage run: pnpm exec vitest run --coverage packages/client/ui-mermaid packages/bundle/web-app/tests/mermaid-fence.spec.ts
+Captured on the ticket 03 tree after the license-banner fix (bundle-split spec gained the banner-coverage guard: 80 tests vs 79 in ticket 02). ui-mermaid src is unchanged from ticket 02, so the client-half numbers reproduce 02; the swept src elsewhere (slot-catalog.ts generated data, manager.ts one JSDoc line) is non-behavioral.
+80 tests passed (13 files). Global per-file thresholds error only on packages outside this focused run (their specs did not execute here); zero errors and zero uncovered locations for ui-mermaid.
+Host half src/index.ts is an empty apply with no executable code; the reporter lists it at 0 without a threshold error or uncovered location.
+
+-------------------|---------|----------|---------|---------|-------------------
+File               | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s
+-------------------|---------|----------|---------|---------|-------------------
+ ...ui-mermaid/src |       0 |        0 |       0 |       0 |
+  css-modules.d.ts |       0 |        0 |       0 |       0 |
+  index.ts         |       0 |        0 |       0 |       0 |
+ ...aid/src/client |     100 |      100 |     100 |     100 |
+  ...enceLayer.tsx |     100 |      100 |     100 |     100 |
+  fit.ts           |     100 |      100 |     100 |     100 |
+  index.ts         |     100 |      100 |     100 |     100 |
+  locales.ts       |     100 |      100 |     100 |     100 |
+  measure.ts       |     100 |      100 |     100 |     100 |
+  mermaid-entry.ts |     100 |      100 |     100 |     100 |
+  ...controller.ts |     100 |      100 |     100 |     100 |
+  sanitize.ts      |     100 |      100 |     100 |     100 |
+  svg.ts           |     100 |      100 |     100 |     100 |
+  theme-state.ts   |     100 |      100 |     100 |     100 |
+  ...-variables.ts |     100 |      100 |     100 |     100 |
+-------------------|---------|----------|---------|---------|-------------------

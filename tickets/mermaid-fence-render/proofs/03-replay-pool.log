@@ -1,0 +1,372 @@
+Replay pool in CI order on the final ticket 03 tree (serial owners client-plugin-live/present-svg run separately before; hmr-live base-red excluded), parallel maxWorkers=3.
+Command: DSH_SNAPSHOT=replay pnpm exec vitest run --config vitest.web.config.ts --exclude=apps/web/tests/hmr-live.e2e.ts --exclude=apps/web/tests/client-plugin-live.e2e.ts --exclude=apps/web/tests/present-svg.e2e.ts --fileParallelism --maxWorkers=3
+Result: 52 failed | 1006 passed | 35 skipped; red set = exactly the 30 base-red files of master (01 sweep list, verified file-by-file including the two WebKit-project failures declared-reasoning/menu-position); mermaid-fence 2/2 green, goldens without diff; 4 unhandled SessionHandleClosedError teardown rejections originate in base-red queue-actions/queue-image; no new reds from this ticket.
+Serial owners: present-svg 3/3 passed; client-plugin-live 1 failed | 5 passed — the base-red golden row '+ - menuitem "Delete session"'.
+
+ ❯ apps/web/tests/lifecycle-chrome.e2e.ts (15 tests | 6 failed) 68625ms
+ ❯ apps/web/tests/chat-scroll-contract.e2e.ts (17 tests | 1 failed) 108691ms
+ ❯ apps/web/tests/turn-tail-actions.e2e.ts (11 tests | 1 failed | 1 skipped) 51173ms
+ ❯ apps/web/tests/context-menus.e2e.ts (24 tests | 6 failed) 126541ms
+ ❯ apps/web/tests/sidebar-alignment.e2e.ts (18 tests | 1 failed) 39952ms
+ ❯ apps/web/tests/open-in-app-menus.e2e.ts (17 tests | 1 failed) 36525ms
+ ❯ apps/web/tests/workspace-new-session-folding.e2e.ts (2 tests | 2 failed) 35821ms
+ ❯ apps/web/tests/sidebar-drawer.e2e.ts (7 tests | 1 failed) 31016ms
+ ❯ apps/web/tests/question-composer.e2e.ts (11 tests | 1 failed) 34142ms
+ ❯ apps/web/tests/deepseek-messages-settings.e2e.ts (10 tests | 2 failed) 36410ms
+ ❯ apps/web/tests/models-settings.e2e.ts (19 tests | 2 failed) 28493ms
+ ❯ apps/web/tests/composer-focus.e2e.ts (2 tests | 1 failed) 19962ms
+ ❯ apps/web/tests/shortcuts-workspace.e2e.ts (4 tests | 1 failed) 18946ms
+ ❯ apps/web/tests/queue-actions.e2e.ts (5 tests | 3 failed) 17727ms
+ ❯ apps/web/tests/default-workspace.e2e.ts (5 tests | 1 failed) 16228ms
+ ❯ apps/web/tests/context-meter.e2e.ts (4 tests | 2 failed) 16194ms
+ ❯ apps/web/tests/seeded-history.e2e.ts (16 tests | 5 failed | 1 skipped) 13830ms
+ ❯ apps/web/tests/session-inspector.e2e.ts (3 tests | 1 failed) 13036ms
+ ❯ apps/web/tests/thinking-markdown.e2e.ts (1 test | 1 failed) 11487ms
+ ❯ apps/web/tests/session-replay-reload.e2e.ts (2 tests | 1 failed) 9187ms
+ ❯ apps/web/tests/declared-reasoning.e2e.ts (8 tests | 4 skipped) 9237ms
+ ❯ apps/web/tests/markdown-wide-table.e2e.ts (12 tests | 3 failed) 11245ms
+ ❯ apps/web/tests/subagent-interrupt-ui.e2e.ts (3 tests | 2 failed) 9537ms
+ ❯ apps/web/tests/session-reading.e2e.ts (3 tests | 1 failed) 8736ms
+ ❯ apps/web/tests/menu-material.e2e.ts (2 tests | 2 failed) 6692ms
+ ❯ apps/web/tests/github-ready-review.e2e.ts (1 test | 1 failed) 4826ms
+ ❯ apps/web/tests/queue-image.e2e.ts (1 test | 1 failed) 4953ms
+ ❯ apps/web/tests/menu-position.e2e.ts (14 tests | 7 skipped) 671ms
+ ❯ apps/web/tests/anchored-panels.e2e.ts (2 tests | 1 failed) 1215ms
+ ❯ apps/web/tests/cold-blank-session.e2e.ts (1 test | 1 failed) 4908ms
+ ✓ apps/web/tests/document-preview.e2e.ts (7 tests) 156253ms
+ ✓ apps/web/tests/fold-blank-matrix.e2e.ts (28 tests) 242529ms
+ ✓ apps/web/tests/plugin-manager.e2e.ts (26 tests) 92299ms
+ ✓ apps/web/tests/forge-panel.e2e.ts (29 tests) 307190ms
+ ✓ apps/web/tests/preview-boot.e2e.ts (1 test) 68360ms
+ ✓ apps/web/tests/sidebar-terminal.e2e.ts (11 tests) 86234ms
+ ✓ apps/web/tests/settings-chrome.e2e.ts (19 tests) 61878ms
+ ✓ apps/web/tests/window-drag-coverage.e2e.ts (18 tests) 52944ms
+ ✓ apps/web/tests/plugin-hmr-lifecycle.e2e.ts (6 tests) 61855ms
+ ✓ apps/web/tests/steering.e2e.ts (8 tests) 53659ms
+ ✓ apps/web/tests/draft-initialization.e2e.ts (9 tests) 45495ms
+ ✓ apps/web/tests/additional-locales.e2e.ts (11 tests) 52325ms
+ ✓ apps/web/tests/shortcuts-panels.e2e.ts (4 tests) 47049ms
+ ✓ apps/web/tests/sidebar-right.e2e.ts (22 tests) 44197ms
+ ✓ apps/web/tests/live-interactions.e2e.ts (11 tests | 1 skipped) 44279ms
+ ✓ apps/web/tests/agent-team-panel.e2e.ts (20 tests) 36171ms
+ ✓ apps/web/tests/navigation-panes.e2e.ts (14 tests | 1 skipped) 39357ms
+ ✓ apps/web/tests/workspace-management.e2e.ts (17 tests) 34672ms
+ ✓ apps/web/tests/plugin-install-github.e2e.ts (3 tests) 34794ms
+ ✓ apps/web/tests/shortcuts.e2e.ts (7 tests) 28871ms
+ ✓ apps/web/tests/shell-command-details.e2e.ts (7 tests) 31394ms
+ ✓ apps/web/tests/shared-inspector.e2e.ts (5 tests) 27211ms
+ ✓ apps/web/tests/hover-input.e2e.ts (6 tests) 25720ms
+ ✓ apps/web/tests/built-boot.expected.e2e.ts (2 tests) 30556ms
+ ✓ apps/web/tests/schedule-after.e2e.ts (11 tests) 27519ms
+ ✓ apps/web/tests/schedule-pickers.e2e.ts (6 tests) 29194ms
+ ✓ apps/web/tests/schedule-phone.e2e.ts (4 tests) 27063ms
+ ✓ apps/web/tests/subagent-conversation.e2e.ts (17 tests) 26174ms
+ ✓ apps/web/tests/schedule-manual.e2e.ts (7 tests) 27135ms
+ ✓ apps/web/tests/plan-review.e2e.ts (7 tests) 29329ms
+ ✓ apps/web/tests/inspector-source-build.e2e.ts (2 tests) 25197ms
+ ✓ apps/web/tests/desktop-onboarding.e2e.ts (4 tests) 26173ms
+ ✓ apps/web/tests/plugin-sticky-motion.e2e.ts (3 tests) 27293ms
+ ✓ apps/web/tests/server-restart.e2e.ts (3 tests) 20631ms
+ ✓ apps/web/tests/smoke-real.e2e.ts (13 tests | 8 skipped) 20763ms
+ ✓ apps/web/tests/file-browser.e2e.ts (3 tests) 22281ms
+ ✓ apps/web/tests/inspector-panels.e2e.ts (3 tests) 18856ms
+ ✓ apps/web/tests/excel-opc.e2e.ts (1 test) 23897ms
+ ✓ apps/web/tests/voice-download.e2e.ts (5 tests) 23511ms
+ ✓ apps/web/tests/focus-rings.e2e.ts (13 tests) 20185ms
+ ✓ apps/web/tests/plugin-install-registry.e2e.ts (2 tests) 20107ms
+ ✓ apps/web/tests/changed-files-turn.e2e.ts (8 tests) 21183ms
+ ✓ apps/web/tests/settings-appearance.e2e.ts (3 tests) 20840ms
+ ✓ apps/web/tests/shortcuts-desktop.e2e.ts (2 tests) 22338ms
+ ✓ apps/web/tests/default-model.e2e.ts (15 tests) 20764ms
+ ✓ apps/web/tests/bonus-notice.e2e.ts (1 test) 16969ms
+ ✓ apps/web/tests/agent-preset-selection.e2e.ts (10 tests) 19361ms
+ ✓ apps/web/tests/plugin-config.e2e.ts (11 tests) 20163ms
+ ✓ apps/web/tests/minimal-preset.snapshot.ts (13 tests) 19951ms
+ ✓ apps/web/tests/feedback-release.e2e.ts (12 tests) 16885ms
+ ✓ apps/web/tests/details-session-lifecycle.e2e.ts (1 test) 19948ms
+ ✓ apps/web/tests/plugin-install-cancel.e2e.ts (1 test) 14848ms
+ ✓ apps/web/tests/idle-submission-handoff.e2e.ts (2 tests) 14892ms
+ ✓ apps/web/tests/rich-text-quotes.e2e.ts (2 tests) 14681ms
+ ✓ apps/web/tests/model-menu-observer.e2e.ts (8 tests | 4 skipped) 16231ms
+ ✓ apps/web/tests/shipped-composition.e2e.ts (7 tests) 14285ms
+ ✓ apps/web/tests/cot-translation.e2e.ts (1 test) 13363ms
+ ✓ apps/web/tests/input-plugin-extensions.e2e.ts (2 tests) 12976ms
+ ✓ apps/web/tests/onboarding-deepseek-config.e2e.ts (5 tests) 12280ms
+ ✓ apps/web/tests/chat-fold-opened-group.e2e.ts (2 tests) 12989ms
+ ✓ apps/web/tests/present.e2e.ts (3 tests) 13334ms
+ ✓ apps/web/tests/subagent-result-notice.e2e.ts (3 tests) 12757ms
+ ✓ apps/web/tests/tool-details.e2e.ts (2 tests) 12866ms
+ ✓ apps/web/tests/official-subagent-bundle.e2e.ts (3 tests) 10414ms
+ ✓ apps/web/tests/blank-writer-reuse.e2e.ts (2 tests) 11954ms
+ ✓ apps/web/tests/worktree-opt-in.e2e.ts (1 test) 13658ms
+ ✓ apps/web/tests/access-confirmation.e2e.ts (6 tests) 12390ms
+ ✓ apps/web/tests/skill-menu-plugin-change.e2e.ts (1 test) 14216ms
+ ✓ apps/web/tests/plan-control-row.e2e.ts (3 tests) 13030ms
+ ✓ apps/web/tests/cot-translation-paid.e2e.ts (1 test) 14236ms
+ ✓ apps/web/tests/markdown-file-links.e2e.ts (4 tests) 12814ms
+ ✓ apps/web/tests/permission-policy-context.e2e.ts (3 tests) 13000ms
+ ✓ apps/web/tests/reasoning-preview.e2e.ts (2 tests) 10875ms
+ ✓ apps/web/tests/composer-tab-geometry.e2e.ts (11 tests) 12020ms
+ ✓ apps/web/tests/chat-flow-layout.e2e.ts (3 tests) 11341ms
+ ✓ apps/web/tests/sessionless-header.e2e.ts (4 tests) 9692ms
+ ✓ apps/web/tests/home-whale.e2e.ts (5 tests) 11908ms
+ ✓ apps/web/tests/image-display.expected.e2e.ts (4 tests) 11611ms
+ ✓ apps/web/tests/notice-wake-tail.e2e.ts (2 tests) 10977ms
+ ✓ apps/web/tests/composer-paste-routing.e2e.ts (3 tests) 10794ms
+ ✓ apps/web/tests/goal-multi-turn-actions.e2e.ts (3 tests | 1 skipped) 10421ms
+ ✓ apps/web/tests/session-archive-active.e2e.ts (4 tests) 10737ms
+ ✓ apps/web/tests/voice-input.e2e.ts (1 test) 9195ms
+ ✓ apps/web/tests/sidebar-scrollbar.e2e.ts (11 tests) 10515ms
+ ✓ apps/web/tests/composer-draft-scroll.e2e.ts (8 tests) 10103ms
+ ✓ apps/web/tests/subagent-summary.e2e.ts (4 tests) 9234ms
+ ✓ apps/web/tests/onboarding-native.e2e.ts (2 tests) 10157ms
+ ✓ apps/web/tests/chat-continuous-conversation.e2e.ts (1 test) 10287ms
+ ✓ apps/web/tests/connection-recovery.e2e.ts (2 tests) 10410ms
+ ✓ apps/web/tests/voice-setup.e2e.ts (1 test) 10615ms
+ ✓ apps/web/tests/message-actions.e2e.ts (8 tests) 9739ms
+ ✓ apps/web/tests/sidebar-title-hover-scroll.e2e.ts (1 test) 9469ms
+ ✓ apps/web/tests/desktop-updates.e2e.ts (2 tests) 9604ms
+ ✓ apps/web/tests/plugin-recommendations.e2e.ts (1 test) 9545ms
+ ✓ apps/web/tests/ptc-round.e2e.ts (8 tests) 9424ms
+ ✓ apps/web/tests/replay-round-trip.e2e.ts (8 tests) 10135ms
+ ✓ apps/web/tests/developer-tools-settings.e2e.ts (1 test) 9973ms
+ ✓ apps/web/tests/chat-long-interactions.e2e.ts (1 test) 9945ms
+ ✓ apps/web/tests/approval-composer.e2e.ts (4 tests) 11988ms
+ ✓ apps/web/tests/file-upload-round.e2e.ts (8 tests) 10870ms
+ ✓ apps/web/tests/creation-recommendations.e2e.ts (1 test) 10786ms
+ ✓ apps/web/tests/shortcuts-fixed.e2e.ts (2 tests) 9788ms
+ ✓ apps/web/tests/collapse-timing.e2e.ts (1 test) 10182ms
+ ✓ apps/web/tests/workspace-recency.e2e.ts (1 test) 9604ms
+ ✓ apps/web/tests/plugin-install-approve.e2e.ts (1 test) 8256ms
+ ✓ apps/web/tests/clickable-links-gallery.e2e.ts (1 test) 9592ms
+ ✓ apps/web/tests/code-language.snapshot.ts (1 test) 7880ms
+ ✓ apps/web/tests/command-image-envelope.expected.e2e.ts (3 tests) 7509ms
+ ✓ apps/web/tests/workflow-run.e2e.ts (3 tests) 7935ms
+ ✓ apps/web/tests/background-job-list.e2e.ts (4 tests) 7766ms
+ ✓ apps/web/tests/inspector-late-enable.e2e.ts (1 test) 8049ms
+ ✓ apps/web/tests/trajectory-virtualization.e2e.ts (1 test) 7819ms
+ ✓ apps/web/tests/file-browser-composition.e2e.ts (2 tests) 7615ms
+ ✓ apps/web/tests/reference-composer.e2e.ts (6 tests) 8341ms
+ ✓ apps/web/tests/session-log-upload.e2e.ts (1 test) 7565ms
+ ✓ apps/web/tests/remote-settings.e2e.ts (1 test) 8650ms
+ ✓ apps/web/tests/blank-preset-reuse.e2e.ts (3 tests) 6758ms
+ ✓ apps/web/tests/markdown-images.e2e.ts (2 tests) 7070ms
+ ✓ apps/web/tests/diff-context.e2e.ts (2 tests) 7340ms
+ ✓ apps/web/tests/bundle-platform.e2e.ts (1 test) 5973ms
+ ✓ apps/web/tests/desktop-locale.e2e.ts (1 test) 7094ms
+ ✓ apps/web/tests/plugin-install-silent-failure.e2e.ts (1 test) 6662ms
+ ✓ apps/web/tests/question-ptc.e2e.ts (1 test) 6312ms
+ ✓ apps/web/tests/entry-customization.e2e.ts (1 test) 7130ms
+ ✓ apps/web/tests/model-badge.e2e.ts (3 tests) 6425ms
+ ✓ apps/web/tests/message-feedback.e2e.ts (3 tests) 6871ms
+ ✓ apps/web/tests/caption-overlays.e2e.ts (1 test) 7161ms
+ ✓ apps/web/tests/skill-user-invoke.e2e.ts (3 tests) 6773ms
+ ✓ apps/web/tests/cua-run-code.e2e.ts (1 test) 6908ms
+ ✓ apps/web/tests/ptc-escalation.e2e.ts (2 tests) 6969ms
+ ✓ apps/web/tests/skill-invocation-policy.e2e.ts (2 tests) 5813ms
+ ✓ apps/web/tests/session-unarchive.e2e.ts (1 test) 5354ms
+ ✓ apps/web/tests/schedule-header.e2e.ts (1 test) 4843ms
+ ✓ apps/web/tests/jobs-menu-layering.e2e.ts (1 test) 4769ms
+ ✓ apps/web/tests/question-composer-recommended.e2e.ts (1 test) 4571ms
+ ✓ apps/web/tests/goal-bar.e2e.ts (3 tests) 5085ms
+ ✓ apps/web/tests/sidebar-browser.e2e.ts (1 test) 5132ms
+ ✓ apps/web/tests/conversation-view-tabs.e2e.ts (2 tests) 4353ms
+ ✓ apps/web/tests/devtools-frontend.e2e.ts (1 test) 5283ms
+ ✓ apps/web/tests/layout-bottom.e2e.ts (1 test) 5383ms
+ ✓ apps/web/tests/live-job-stream.e2e.ts (2 tests) 5149ms
+ ✓ apps/web/tests/pwa-manifest.e2e.ts (5 tests) 5026ms
+ ✓ apps/web/tests/streaming-fence-highlight.e2e.ts (1 test) 5272ms
+ ✓ apps/web/tests/prompt-admission.e2e.ts (1 test) 4918ms
+ ✓ apps/web/tests/goal-command-presentation.e2e.ts (2 tests) 4684ms
+ ✓ apps/web/tests/trajectory-image-display.expected.e2e.ts (1 test) 4423ms
+ ✓ apps/web/tests/standalone-string-editor.e2e.ts (2 tests) 5008ms
+ ✓ apps/web/tests/plugin-market-toolbar.e2e.ts (1 test) 5244ms
+ ✓ apps/web/tests/sidebar-subagent-activity.e2e.ts (1 test) 4921ms
+ ✓ apps/web/tests/models-settings-recovery.e2e.ts (2 tests) 4693ms
+ ✓ apps/web/tests/startup-auto-selection.e2e.ts (2 tests) 4652ms
+ ✓ apps/web/tests/reasoning-spacing.e2e.ts (1 test) 3984ms
+ ✓ apps/web/tests/stats-truncated-tooltip.e2e.ts (2 tests) 4688ms
+ ✓ apps/web/tests/subagent-fork-divider.e2e.ts (1 test) 4671ms
+ ✓ apps/web/tests/desktop-channel.e2e.ts (1 test) 4580ms
+ ✓ apps/web/tests/onboarding-usable-provider.e2e.ts (3 tests) 5305ms
+ ✓ apps/web/tests/agent-preset-authoring.e2e.ts (5 tests) 4683ms
+ ✓ apps/web/tests/code-card-layout.e2e.ts (4 tests) 4477ms
+ ✓ apps/web/tests/web-search-round.e2e.ts (6 tests) 4593ms
+ ✓ apps/web/tests/fork-mid-turn.e2e.ts (4 tests) 4539ms
+ ✓ apps/web/tests/feedback-command.e2e.ts (3 tests) 4765ms
+ ✓ apps/web/tests/deepseek-messages-chat.e2e.ts (2 tests) 4461ms
+ ✓ apps/web/tests/session-delete.e2e.ts (1 test) 5026ms
+ ✓ apps/web/tests/mermaid-fence.e2e.ts (2 tests) 5109ms
+ ✓ apps/web/tests/account-login.e2e.ts (1 test) 4955ms
+ ✓ apps/web/tests/auto-review-denial.e2e.ts (2 tests) 4496ms
+ ✓ apps/web/tests/composer-placeholder.e2e.ts (1 test) 4136ms
+ ✓ apps/web/tests/composer-shortcuts.e2e.ts (1 test) 4349ms
+ ✓ apps/web/tests/rail-search-expand.e2e.ts (1 test) 4422ms
+ ✓ apps/web/tests/bash-abort-row.e2e.ts (2 tests) 4583ms
+ ✓ apps/web/tests/auto-review-approval.e2e.ts (2 tests) 4813ms
+ ✓ apps/web/tests/markdown-image-refresh.e2e.ts (1 test) 3920ms
+ ✓ apps/web/tests/standard-dsh-doc.e2e.ts (1 test) 4069ms
+ ✓ apps/web/tests/creator-persona.e2e.ts (1 test) 4264ms
+ ✓ apps/web/tests/public-mount.e2e.ts (2 tests) 3535ms
+ ✓ apps/web/tests/open-in-app-ssh.e2e.ts (1 test) 3848ms
+ ✓ apps/web/tests/cordis-tool-round.e2e.ts (1 test) 4255ms
+ ✓ apps/web/tests/skill-tool-row.e2e.ts (3 tests) 4038ms
+ ✓ apps/web/tests/user-text-secret-mask.e2e.ts (1 test) 3823ms
+ ✓ apps/web/tests/web-fetch-failure-row.e2e.ts (2 tests) 3887ms
+ ✓ apps/web/tests/japanese-plugin-metadata.e2e.ts (1 test) 4479ms
+ ✓ apps/web/tests/search-empty-include.e2e.ts (1 test) 3990ms
+ ✓ apps/web/tests/produced-file-mentions.e2e.ts (1 test) 3758ms
+ ✓ apps/web/tests/client-ui-stats-panel.e2e.ts (3 tests) 4014ms
+ ✓ apps/web/tests/math-rendering.e2e.ts (2 tests) 3969ms
+ ✓ apps/web/tests/deepseek-chat-import.e2e.ts (2 tests) 4069ms
+ ✓ apps/web/tests/interrupted-turn.e2e.ts (2 tests) 3745ms
+ ✓ apps/web/tests/markdown-cjk-strong.e2e.ts (1 test) 4148ms
+ ✓ apps/web/tests/present-after-closing-reply.e2e.ts (1 test) 3843ms
+ ✓ apps/web/tests/markdown-inline-code-links.e2e.ts (1 test) 3801ms
+ ✓ apps/web/tests/home-path-tilde.expected.e2e.ts (1 test) 3805ms
+ ✓ apps/web/tests/stats-paged-history.e2e.ts (3 tests) 3963ms
+ ✓ apps/web/tests/default-product-isolation.e2e.ts (1 test) 4023ms
+ ✓ apps/web/tests/startup-rpc-budget.e2e.ts (1 test) 3385ms
+ ✓ apps/web/tests/new-session-refused.e2e.ts (1 test) 3563ms
+ ✓ apps/web/tests/settings-import.e2e.ts (1 test) 3444ms
+ ✓ apps/web/tests/submission-echo.e2e.ts (1 test) 3343ms
+ ✓ apps/web/tests/autolink-cjk-punctuation.e2e.ts (1 test) 3614ms
+ ✓ apps/web/tests/markdown-cjk-strong-open.e2e.ts (1 test) 3603ms
+ ✓ apps/web/tests/icon-skin.e2e.ts (1 test) 3394ms
+ ✓ apps/web/tests/preset-migration.snapshot.ts (2 tests) 3457ms
+ ✓ apps/web/tests/search-card.expected.e2e.ts (1 test) 2914ms
+ ✓ apps/web/tests/todo-row.expected.e2e.ts (1 test) 2937ms
+ ✓ apps/web/tests/max-tokens-notice.expected.e2e.ts (1 test) 3036ms
+ ✓ apps/web/tests/message-feedback-protocol.snapshot.ts (1 test) 2085ms
+ ✓ apps/web/tests/subagent-interrupt.e2e.ts (1 test) 2378ms
+ ✓ apps/web/tests/subagent-fork-schedule.snapshot.ts (1 test) 2407ms
+ ✓ apps/web/tests/window-drag-inheritance.e2e.ts (1 test) 350ms
+ ✓ apps/web/tests/pinned-clock.e2e.ts (8 tests) 1347ms
+ ✓ apps/web/tests/vite-entry.e2e.ts (2 tests) 804ms
+ ✓ apps/web/tests/scaffold-hermetic.e2e.ts (1 test) 2108ms
+ ✓ apps/web/tests/support-timezone.e2e.ts (3 tests) 673ms
+ ✓ apps/web/tests/clock.e2e.ts (1 test) 283ms
+ ❯ apps/web/tests/declared-reasoning.e2e.ts:57:28
+ ❯ apps/web/tests/lifecycle-chrome.e2e.ts:72:5
+ ❯ apps/web/tests/lifecycle-chrome.e2e.ts:72:5
+ ❯ apps/web/tests/menu-position.e2e.ts:29:28
+ ❯ apps/web/tests/subagent-interrupt-ui.e2e.ts:182:21
+ ❯ apps/web/tests/anchored-panels.e2e.ts:25:34
+ ❯ apps/web/tests/chat-scroll-contract.e2e.ts:734:42
+ ❯ apps/web/tests/chat-scroll-contract.e2e.ts:668:7
+ ❯ apps/web/tests/chat-scroll-contract.e2e.ts:668:7
+ ❯ apps/web/tests/cold-blank-session.e2e.ts:64:5
+ ❯ apps/web/tests/composer-focus.e2e.ts:284:22
+ ❯ apps/web/tests/context-menus.e2e.ts:82:26
+ ❯ apps/web/tests/context-menus.e2e.ts:131:18
+ ❯ apps/web/tests/context-meter.e2e.ts:111:22
+ ❯ apps/web/tests/deepseek-messages-settings.e2e.ts:129:30
+ ❯ apps/web/tests/deepseek-messages-settings.e2e.ts:176:30
+ ❯ apps/web/tests/default-workspace.e2e.ts:77:36
+ ❯ apps/web/tests/github-ready-review.e2e.ts:205:5
+ ❯ apps/web/tests/lifecycle-chrome.e2e.ts:231:7
+ ❯ apps/web/tests/lifecycle-chrome.e2e.ts:297:7
+ ❯ apps/web/tests/lifecycle-chrome.e2e.ts:327:7
+ ❯ apps/web/tests/lifecycle-chrome.e2e.ts:383:105
+ ❯ apps/web/tests/lifecycle-chrome.e2e.ts:383:5
+ ❯ apps/web/tests/lifecycle-chrome.e2e.ts:406:20
+ ❯ apps/web/tests/lifecycle-chrome.e2e.ts:445:105
+ ❯ apps/web/tests/lifecycle-chrome.e2e.ts:445:5
+ ❯ apps/web/tests/markdown-wide-table.e2e.ts:350:95
+ ❯ apps/web/tests/markdown-wide-table.e2e.ts:379:63
+ ❯ apps/web/tests/markdown-wide-table.e2e.ts:570:5
+ ❯ apps/web/tests/menu-material.e2e.ts:16:32
+ ❯ apps/web/tests/menu-material.e2e.ts:147:3
+ ❯ apps/web/tests/models-settings.e2e.ts:670:38
+ ❯ apps/web/tests/models-settings.e2e.ts:773:44
+ ❯ apps/web/tests/open-in-app-menus.e2e.ts:235:37
+ ❯ apps/web/tests/question-composer.e2e.ts:1022:5
+ ❯ apps/web/tests/queue-actions.e2e.ts:156:5
+ ❯ apps/web/tests/queue-actions.e2e.ts:64:20
+ ❯ apps/web/tests/queue-actions.e2e.ts:64:20
+ ❯ apps/web/tests/queue-actions.e2e.ts:380:5
+ ❯ apps/web/tests/queue-image.e2e.ts:149:7
+ ❯ apps/web/tests/queue-image.e2e.ts:59:20
+ ❯ apps/web/tests/seeded-history.e2e.ts:391:23
+ ❯ apps/web/tests/seeded-history.e2e.ts:447:5
+ ❯ apps/web/tests/seeded-history.e2e.ts:496:26
+ ❯ apps/web/tests/seeded-history.e2e.ts:776:5
+ ❯ apps/web/tests/seeded-history.e2e.ts:813:7
+ ❯ apps/web/tests/session-inspector.e2e.ts:34:32
+ ❯ apps/web/tests/session-inspector.e2e.ts:24:56
+ ❯ apps/web/tests/session-inspector.e2e.ts:24:56
+ ❯ apps/web/tests/session-reading.e2e.ts:83:3
+ ❯ apps/web/tests/session-replay-reload.e2e.ts:35:36
+ ❯ apps/web/tests/shortcuts-workspace.e2e.ts:112:5
+ ❯ apps/web/tests/sidebar-alignment.e2e.ts:590:57
+ ❯ apps/web/tests/sidebar-drawer.e2e.ts:327:38
+ ❯ apps/web/tests/subagent-interrupt-ui.e2e.ts:232:7
+ ❯ apps/web/tests/subagent-interrupt-ui.e2e.ts:321:5
+ ❯ apps/web/tests/thinking-markdown.e2e.ts:256:29
+ ❯ apps/web/tests/thinking-markdown.e2e.ts:243:5
+ ❯ apps/web/tests/turn-tail-actions.e2e.ts:354:33
+ ❯ apps/web/tests/workspace-new-session-folding.e2e.ts:99:5
+ ❯ apps/web/tests/workspace-new-session-folding.e2e.ts:119:74
+
+Failed Tests (names):
+ FAIL  apps/web/tests/anchored-panels.e2e.ts > retains horizontal anchors when tall panels exhaust both sides ('WebKit')
+ FAIL  apps/web/tests/chat-scroll-contract.e2e.ts > web e2e: long Chat scroll contract > uses only visible fold room in one upward movement: large-input
+ FAIL  apps/web/tests/cold-blank-session.e2e.ts > web e2e: cold Inbox recovery > restores a pending row on opening and reload, then edits and removes it
+ FAIL  apps/web/tests/composer-focus.e2e.ts > keeps mobile submission keyboard navigation in the composer while retaining desktop focus
+ FAIL  apps/web/tests/context-menus.e2e.ts > web context menus on Linux x86_64 > shares Session entries without selecting the background Session, and dismisses at viewport edges
+ FAIL  apps/web/tests/context-menus.e2e.ts > web context menus on Linux x86_64 > updates an open Session menu from another window’s shortcut preferences and still renames the captured row
+ FAIL  apps/web/tests/context-menus.e2e.ts > web context menus on MacIntel > shares Session entries without selecting the background Session, and dismisses at viewport edges
+ FAIL  apps/web/tests/context-menus.e2e.ts > web context menus on MacIntel > updates an open Session menu from another window’s shortcut preferences and still renames the captured row
+ FAIL  apps/web/tests/context-menus.e2e.ts > web context menus on Win32 > shares Session entries without selecting the background Session, and dismisses at viewport edges
+ FAIL  apps/web/tests/context-menus.e2e.ts > web context menus on Win32 > updates an open Session menu from another window’s shortcut preferences and still renames the captured row
+ FAIL  apps/web/tests/context-meter.e2e.ts > web e2e: context details placement ('WebKit') > keeps details visible while resizing the window (Chat statistics: false)
+ FAIL  apps/web/tests/context-meter.e2e.ts > web e2e: context details placement ('WebKit') > keeps details visible while resizing the window (Chat statistics: true)
+ FAIL  apps/web/tests/declared-reasoning.e2e.ts > web e2e: declared reasoning efforts reach the composer ('WebKit')
+ FAIL  apps/web/tests/deepseek-messages-settings.e2e.ts > keeps a foreign model drag from editing another provider input in 'WebKit'
+ FAIL  apps/web/tests/deepseek-messages-settings.e2e.ts > protects saved keys and reveals only unsaved replacements in 'WebKit'
+ FAIL  apps/web/tests/default-workspace.e2e.ts > web e2e: default Workspace > opens the default Workspace chooser from its external trigger ('WebKit')
+ FAIL  apps/web/tests/github-ready-review.e2e.ts > web e2e: GitHub ready-for-review > isolates ingress and creates a browsable Workspace Session
+ FAIL  apps/web/tests/lifecycle-chrome.e2e.ts > web e2e: lifecycle & chrome (workspace flow / reload / dark mode)
+ FAIL  apps/web/tests/lifecycle-chrome.e2e.ts > web e2e: lifecycle & chrome (workspace flow / reload / dark mode) > materialized a real Workspace and Session over the wire
+ FAIL  apps/web/tests/lifecycle-chrome.e2e.ts > web e2e: lifecycle & chrome (workspace flow / reload / dark mode) > pins an open Think header to the conversation scrollport (real layout)
+ FAIL  apps/web/tests/lifecycle-chrome.e2e.ts > web e2e: lifecycle & chrome (workspace flow / reload / dark mode) > recovers the whole surface across a reload from the log alone
+ FAIL  apps/web/tests/lifecycle-chrome.e2e.ts > web e2e: lifecycle & chrome (workspace flow / reload / dark mode) > sends the first prompt from the empty-state hero (all modes)
+ FAIL  apps/web/tests/lifecycle-chrome.e2e.ts > web e2e: lifecycle & chrome (workspace flow / reload / dark mode) > shows active Plan as the business-state status action
+ FAIL  apps/web/tests/lifecycle-chrome.e2e.ts > web e2e: lifecycle & chrome (workspace flow / reload / dark mode) > shows the active Plan chip with the Chinese copy
+ FAIL  apps/web/tests/markdown-wide-table.e2e.ts > web e2e: markdown tables fill the column, wide ones break out and scroll > fills narrow tables, scrolls wide ones, and breaks them out where the transcript is wider
+ FAIL  apps/web/tests/markdown-wide-table.e2e.ts > web e2e: markdown tables fill the column, wide ones break out and scroll > keeps wide tables horizontally scrollable without hover in webkit
+ FAIL  apps/web/tests/markdown-wide-table.e2e.ts > web e2e: markdown tables fill the column, wide ones break out and scroll > matches the committed geometry golden
+ FAIL  apps/web/tests/menu-material.e2e.ts > keeps the view options menu anchored and dismissible through WebKit window resizing
+ FAIL  apps/web/tests/menu-material.e2e.ts > shares menu transparency and blur across palettes and follows native menu bounds
+ FAIL  apps/web/tests/menu-position.e2e.ts > menu layout margins ('WebKit')
+ FAIL  apps/web/tests/models-settings.e2e.ts > web e2e: Models settings page configures a dormant provider > keeps keyboard reorder focus and visibility in 'WebKit'
+ FAIL  apps/web/tests/models-settings.e2e.ts > web e2e: Models settings page configures a dormant provider > keeps mobile model actions, focus and keyboard order in 'WebKit'
+ FAIL  apps/web/tests/open-in-app-menus.e2e.ts > Open in Session menus > tracks real geometry and ignores unrelated portals in 'WebKit'
+ FAIL  apps/web/tests/question-composer.e2e.ts > web e2e: queued question reply > keeps a submitted reply read-only across a browser reload
+ FAIL  apps/web/tests/queue-actions.e2e.ts > web e2e: queue row actions > edits and removes exact occurrences and preserves Queue across button stop
+ FAIL  apps/web/tests/queue-actions.e2e.ts > web e2e: queue row actions > edits and removes exact occurrences and preserves Queue across keyboard stop
+ FAIL  apps/web/tests/queue-actions.e2e.ts > web e2e: queue row actions > orders Todo before Goal and Queue on one responsive card column
+ FAIL  apps/web/tests/queue-image.e2e.ts > web e2e: queued image submission > queues a text-plus-image submission with a thumbnail and delivers it as the next turn
+ FAIL  apps/web/tests/seeded-history.e2e.ts > web e2e: seeded history renders through cold resume > an Access-chip switch persists its command without adding a Chat row
+ FAIL  apps/web/tests/seeded-history.e2e.ts > web e2e: seeded history renders through cold resume > lists the seeded session cold and renders its history from the log
+ FAIL  apps/web/tests/seeded-history.e2e.ts > web e2e: seeded history renders through cold resume > matches the historical conversation aria golden
+ FAIL  apps/web/tests/seeded-history.e2e.ts > web e2e: seeded history renders through cold resume > reports full feedback correlation ids in an expandable two-line row
+ FAIL  apps/web/tests/seeded-history.e2e.ts > web e2e: seeded history renders through cold resume > shows ordinary instructions as one collapsed Context row that expands to their logged content
+ FAIL  apps/web/tests/session-inspector.e2e.ts > inspects a replayed Session log and Chat groups through the optional bundle ('WebKit')
+ FAIL  apps/web/tests/session-reading.e2e.ts > synchronizes manual marks, retains them across reload, and acknowledges only on a new view entry
+ FAIL  apps/web/tests/session-replay-reload.e2e.ts > web session replay > 'WebKit' restores an active stream, a completed turn, and a reopened session
+ FAIL  apps/web/tests/shortcuts-workspace.e2e.ts > web e2e: workspace shortcuts > runs seven owner operations with saved bindings and preserves the completed fork prefix
+ FAIL  apps/web/tests/sidebar-alignment.e2e.ts > web e2e: sidebar search alignment and row action targets > keeps session action glyphs in 16px layout space with 24px buttons
+ FAIL  apps/web/tests/sidebar-drawer.e2e.ts > overlays the conversation and closes after navigation without losing its sidebar content
+ FAIL  apps/web/tests/subagent-interrupt-ui.e2e.ts > web e2e: composer interrupt for a running continuable child
+ FAIL  apps/web/tests/subagent-interrupt-ui.e2e.ts > web e2e: composer interrupt for a running continuable child > interrupts through subagents/interruptByUser, parks the follow-up, and resumes it FIFO
+ FAIL  apps/web/tests/subagent-interrupt-ui.e2e.ts > web e2e: composer interrupt for a running continuable child > queues and interrupts the live child despite its creator being listed offline
+ FAIL  apps/web/tests/thinking-markdown.e2e.ts > web e2e: secondary Thinking Markdown > renders semantic blocks without promoting headings or overflowing the column
+ FAIL  apps/web/tests/turn-tail-actions.e2e.ts > keeps copy tooltips hidden during a WebKit touch copy
+ FAIL  apps/web/tests/workspace-new-session-folding.e2e.ts > web e2e: blank New Session folding quota > keeps five established sessions beside the provisional row
+ FAIL  apps/web/tests/workspace-new-session-folding.e2e.ts > web e2e: blank New Session folding quota > raises the watermark to the open session, keeps it after leaving, and resets it on fold
+
+ Test Files  30 failed | 214 passed | 3 skipped (247)
+      Tests  52 failed | 1006 passed | 35 skipped (1093)
+     Errors  4 errors
+   Duration  1491.72s (transform 10.72s, setup 0ms, import 180.37s, tests 4255.64s, environment 5.57s)

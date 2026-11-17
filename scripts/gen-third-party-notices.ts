@@ -1,20 +1,23 @@
 /**
  * Generate `THIRD_PARTY_NOTICES.md` from the workspace manifests: every
- * external dependency named by a workspace `package.json`, the vendored-package
- * manifest in `vendor/README.md`, the Python `pyproject.toml` files, the shared
- * Python distribution lock, and the pnpm patch list. npm metadata comes from the installed
- * store, so the tree must be installed. `--check` verifies the committed
- * artifact. Tier policy and ownership live in
+ * external dependency named by a workspace `package.json`, the installed
+ * dependency closure of every private third-party copy the browser bundles
+ * distribute, the vendored-package manifest in `vendor/README.md`, the Python
+ * `pyproject.toml` files, the shared Python distribution lock, and the pnpm
+ * patch list. npm metadata comes from the installed store, so the tree must be
+ * installed. `--check` verifies the committed artifact. Tier policy and
+ * ownership live in
  * `.agents/notes/implemented/process/2026-07-30-generated-third-party-notices.md`.
  */
 
 import { existsSync, globSync, readdirSync, readFileSync, writeFileSync } from 'node:fs'
-import { dirname, resolve } from 'node:path'
+import { dirname, join, resolve } from 'node:path'
 import * as yaml from 'js-yaml'
 import { parse as parseToml, type TomlTableWithoutBigInt, type TomlValueWithoutBigInt } from 'smol-toml'
 import parseSpdx from 'spdx-expression-parse'
 import primaryRuntimeLock from './primary-runtime/lock.json' with { type: 'json' }
 import { browserBundledExternals } from './browser-bundled-externals.ts'
+import { installedDependencyRoots } from './installed-dependency-closure.ts'
 import { DEVTOOLS_NPM_VERSION, DEVTOOLS_SOURCE_REVISION } from '../packages/experimental/inspector/scripts/devtools/source.ts'
 
 const root = resolve(import.meta.dirname, '..')
@@ -94,7 +97,15 @@ const OVERRIDES: Record<string, { license?: string; repo?: string }> = {
   '@modelcontextprotocol/server-filesystem': { license: 'MIT / Apache-2.0', repo: 'https://github.com/modelcontextprotocol/servers' },
   // No repository field in the published manifest.
   'node-addon-require-builtin': { repo: 'https://www.npmjs.com/package/node-addon-require-builtin' },
-  // No `license` field in the published manifest; the tarball's LICENSE.txt is the MIT text.
+  // No `license` field in the published manifest; the tarball's `license` file is the MIT text.
+  'khroma': { license: 'MIT' },
+  // No `license` field in the published manifest; the tarball's LICENSE file is the MIT text.
+  'jstat': { license: 'MIT' },
+  // The 2011 tarball predates the upstream license field; Debian's copyright
+  // review records MIT from the upstream repository's package.json.
+  'buffers': { license: 'MIT' },
+  // No repository or homepage field in the published manifest.
+  '@fortune-sheet/formula-parser': { repo: 'https://www.npmjs.com/package/@fortune-sheet/formula-parser' },
 }
 
 /**
@@ -263,7 +274,7 @@ export function claudeDistributionFromManifest(
 }
 
 /**
- * Resolve one package's manifest inside a pnpm virtual store. The prefix scan
+ * Resolve one package's directory inside a pnpm virtual store. The prefix scan
  * matches ordinary `@scope+name@version` directory names; pnpm 11 truncates
  * long names (a peer-suffixed name past the length limit becomes
  * `<prefix>_<hash>`), so a content scan falls back over the whole store when
@@ -272,28 +283,45 @@ export function claudeDistributionFromManifest(
  * @param virtual - the `.pnpm` virtual store directory to scan.
  * @param name - the external package name, exactly as `node_modules` spells it.
  * @param expectedVersion - exact version required when the store retains more than one.
- * @returns the parsed manifest, or `undefined` when neither the prefix match
- *   nor the content scan finds the requested package version.
+ * @returns the package root directory, or `undefined` when neither the prefix
+ *   match nor the content scan finds the requested package version.
+ */
+export function virtualPackageDir(
+  virtual: string,
+  name: string,
+  expectedVersion?: string,
+): string | undefined {
+  const prefix = `${name.replace('/', '+')}@`
+  const entries = readdirSync(virtual)
+  for (const entry of entries.filter(dir => dir.startsWith(prefix))) {
+    const dir = resolve(virtual, entry, 'node_modules', name)
+    const manifest = JSON.parse(readFileSync(join(dir, 'package.json'), 'utf8')) as VirtualManifest
+    if (expectedVersion === undefined || manifest.version === expectedVersion) return dir
+  }
+  for (const dir of entries) {
+    const candidate = resolve(virtual, dir, 'node_modules', name)
+    if (existsSync(join(candidate, 'package.json'))) {
+      const manifest = JSON.parse(readFileSync(join(candidate, 'package.json'), 'utf8')) as VirtualManifest
+      if (expectedVersion === undefined || manifest.version === expectedVersion) return candidate
+    }
+  }
+  return undefined
+}
+
+/**
+ * Resolve one package's manifest inside a pnpm virtual store.
+ * @param virtual - the `.pnpm` virtual store directory to scan.
+ * @param name - the external package name, exactly as `node_modules` spells it.
+ * @param expectedVersion - exact version required when the store retains more than one.
+ * @returns the parsed manifest, or `undefined` when the package version is not in the store.
  */
 export function virtualManifest(
   virtual: string,
   name: string,
   expectedVersion?: string,
 ): VirtualManifest | undefined {
-  const prefix = `${name.replace('/', '+')}@`
-  const entries = readdirSync(virtual)
-  for (const entry of entries.filter(dir => dir.startsWith(prefix))) {
-    const manifest = JSON.parse(readFileSync(resolve(virtual, entry, 'node_modules', name, 'package.json'), 'utf8')) as VirtualManifest
-    if (expectedVersion === undefined || manifest.version === expectedVersion) return manifest
-  }
-  for (const dir of entries) {
-    const candidate = resolve(virtual, dir, 'node_modules', name, 'package.json')
-    if (existsSync(candidate)) {
-      const manifest = JSON.parse(readFileSync(candidate, 'utf8')) as VirtualManifest
-      if (expectedVersion === undefined || manifest.version === expectedVersion) return manifest
-    }
-  }
-  return undefined
+  const dir = virtualPackageDir(virtual, name, expectedVersion)
+  return dir === undefined ? undefined : JSON.parse(readFileSync(join(dir, 'package.json'), 'utf8')) as VirtualManifest
 }
 
 const workspaceLinkedManifestCache = new Map<string, VirtualManifest | undefined>()
@@ -324,24 +352,63 @@ function workspaceLinkedManifest(name: string, manifests: Map<string, Manifest>)
 function installedManifest(name: string, manifests: Map<string, Manifest>, expectedVersion?: string): VirtualManifest | undefined {
   const linked = workspaceLinkedManifest(name, manifests)
   if (linked !== undefined && (expectedVersion === undefined || linked.version === expectedVersion)) return linked
-  let manifest: (Manifest & { license?: string; repository?: string | { url?: string }; homepage?: string }) | undefined
-  // Workspace-local link farms can expose a dependency that is not linked at
-  // the repository root; both are backed by the root workspace's lockfile.
+  const dir = installedPackageRoot(name, manifests, expectedVersion)
+  return dir === undefined ? undefined : JSON.parse(readFileSync(join(dir, 'package.json'), 'utf8')) as VirtualManifest
+}
+
+/**
+ * Installed root directory of one external package: the first current workspace
+ * link, then the root and native link farms, then either pnpm virtual store.
+ * Workspace-local link farms can expose a dependency that is not linked at the
+ * repository root; both are backed by the root workspace's lockfile.
+ * @param name - external package identity.
+ * @param manifests - workspace manifests already loaded by the caller.
+ * @param expectedVersion - exact version required when the store retains more than one.
+ * @returns the package root directory, or undefined when no installed copy matches.
+ */
+function installedPackageRoot(name: string, manifests: Map<string, Manifest>, expectedVersion?: string): string | undefined {
+  const matches = (dir: string): boolean => {
+    if (expectedVersion === undefined) return true
+    const manifest = JSON.parse(readFileSync(join(dir, 'package.json'), 'utf8')) as VirtualManifest
+    return manifest.version === expectedVersion
+  }
+  for (const [path, manifest] of manifests) {
+    if (!ALL_KINDS.some(kind => name in (manifest[kind] ?? {}))) continue
+    const linked = resolve(root, dirname(path), 'node_modules', name)
+    if (existsSync(join(linked, 'package.json')) && matches(linked)) return linked
+  }
   for (const store of ['node_modules', 'native/system/node_modules']) {
-    const direct = resolve(root, store, name, 'package.json')
-    if (existsSync(direct)) {
-      const candidate = JSON.parse(readFileSync(direct, 'utf8')) as typeof manifest
-      if (expectedVersion === undefined || candidate?.version === expectedVersion) {
-        manifest = candidate
-        break
-      }
-    }
+    const direct = resolve(root, store, name)
+    if (existsSync(join(direct, 'package.json')) && matches(direct)) return direct
     const virtual = resolve(root, store, '.pnpm')
     if (!existsSync(virtual)) continue
-    manifest = virtualManifest(virtual, name, expectedVersion)
-    if (manifest !== undefined) break
+    const dir = virtualPackageDir(virtual, name, expectedVersion)
+    if (dir !== undefined) return dir
   }
-  return manifest
+  return undefined
+}
+
+/**
+ * Disclosure set of the browser artifacts: every direct distributed input plus
+ * the installed dependency closure of each, because a private copy ships its
+ * whole tree inside the same bundle. Workspace packages are never external.
+ * @param direct - direct third-party packages the browser builds distribute.
+ * @param closureOf - installed dependency names of one direct package.
+ * @param workspaceNames - workspace package names, excluded from disclosure.
+ * @returns every package name whose code the browser artifacts distribute.
+ */
+export function expandBrowserClosure(
+  direct: ReadonlySet<string>,
+  closureOf: (name: string) => readonly string[],
+  workspaceNames: ReadonlySet<string>,
+): Set<string> {
+  const bundled = new Set(direct)
+  for (const name of direct) {
+    for (const member of closureOf(name)) {
+      if (!workspaceNames.has(member)) bundled.add(member)
+    }
+  }
+  return bundled
 }
 
 /** License and repository URL for an installed external package, from the pnpm store. */
@@ -404,10 +471,17 @@ function normalizeRepo(raw: string | undefined): string | undefined {
 
 /**
  * Direct npm dependencies distributed through installed runtime libraries or
- * embedded in Host and browser bundles. Tooling declarations alone do not imply distribution.
+ * embedded in Host and browser bundles, plus the installed dependency closure
+ * of every distributed browser input. Tooling declarations alone do not imply distribution.
  */
-function collectNpmDeps(manifests: Map<string, Manifest>, names: Set<string>, browser: ReadonlySet<string>): ExternalDep[] {
-  return [...tierExternalDeps(manifests, names, browser)]
+function collectNpmDeps(
+  manifests: Map<string, Manifest>, names: Set<string>, browser: ReadonlySet<string>, bundled: ReadonlySet<string>,
+): ExternalDep[] {
+  const tiers = tierExternalDeps(manifests, names, browser, bundled)
+  for (const name of bundled) {
+    if (!names.has(name) && !tiers.has(name)) tiers.set(name, true)
+  }
+  return [...tiers]
     .filter(([name]) => !FIRST_PARTY.has(name))
     .sort(([a], [b]) => a.localeCompare(b))
     .map(([name, runtime]) => ({ name, ...installedMetadata(name, manifests), runtime }))
@@ -418,10 +492,11 @@ function collectNpmDeps(manifests: Map<string, Manifest>, names: Set<string>, br
  * @param manifests - workspace manifests keyed by repository-relative path.
  * @param names - every workspace package name, which never counts as external.
  * @param browser - Direct third-party packages resolved by the browser builds.
+ * @param bundled - Browser disclosure set including installed dependency closures; distribution outranks any development declaration.
  * @returns each external package mapped to whether it is a runtime dependency.
  */
 export function tierExternalDeps(
-  manifests: Map<string, Manifest>, names: Set<string>, browser: ReadonlySet<string> = new Set(),
+  manifests: Map<string, Manifest>, names: Set<string>, browser: ReadonlySet<string> = new Set(), bundled: ReadonlySet<string> = new Set(),
 ): Map<string, boolean> {
   const tiers = new Map<string, boolean>()
   // `tsx` is runtime by fiat: the root source-run scripts execute through its ESM hook.
@@ -437,7 +512,7 @@ export function tierExternalDeps(
     for (const kind of ALL_KINDS) {
       for (const [dep, range] of Object.entries(manifest[kind] ?? {})) {
         if (names.has(dep) || range.startsWith('workspace:')) continue
-        const runtime = browser.has(dep) || hostBundled.includes(dep)
+        const runtime = bundled.has(dep) || browser.has(dep) || hostBundled.includes(dep)
           || !devOnly && (RUNTIME_KINDS as readonly string[]).includes(kind)
         tiers.set(dep, (tiers.get(dep) ?? false) || runtime)
       }
@@ -764,7 +839,15 @@ export async function render(): Promise<string> {
   // the manifests map it was resolved from; render() owns that single load.
   workspaceLinkedManifestCache.clear()
   const { manifests, names } = loadWorkspaceManifests()
-  const npm = collectNpmDeps(manifests, names, browser)
+  const bundled = expandBrowserClosure(browser, (name) => {
+    const dir = installedPackageRoot(name, manifests)
+    if (dir === undefined) return []
+    return installedDependencyRoots(dir).flatMap((rootDir) => {
+      const member = (JSON.parse(readFileSync(join(rootDir, 'package.json'), 'utf8')) as Manifest).name
+      return member === undefined ? [] : [member]
+    })
+  }, names)
+  const npm = collectNpmDeps(manifests, names, browser, bundled)
   const runtimeDeps = npm.filter(dep => dep.runtime)
   const devDeps = npm.filter(dep => !dep.runtime)
   const kitRuntime = runtimeDeps.some(dep => dep.name === LIBREOFFICE_KIT_PACKAGE)
@@ -789,7 +872,7 @@ export async function render(): Promise<string> {
 
 DeepSeek Harness is licensed under [MIT](LICENSE). It depends on the third-party software listed below. Each project remains under its own license; nothing in this file changes those terms.
 
-This file lists **direct** dependencies declared by the workspace, the explicitly disclosed official Claude Code platform payload closure, and the Bundled Python distributions. It is generated by \`scripts/gen-third-party-notices.ts\`, and \`scripts/gen-third-party-notices.spec.ts\` asserts in the test lane that the committed bytes match. Run \`pnpm run gen-third-party-notices\` after changing one of its inputs, or \`pnpm run verify-third-party-notices\` for the standalone check.
+This file lists **direct** dependencies declared by the workspace, the installed dependency closure of every private third-party copy the browser bundles distribute, the explicitly disclosed official Claude Code platform payload closure, and the Bundled Python distributions. It is generated by \`scripts/gen-third-party-notices.ts\`, and \`scripts/gen-third-party-notices.spec.ts\` asserts in the test lane that the committed bytes match. Run \`pnpm run gen-third-party-notices\` after changing one of its inputs, or \`pnpm run verify-third-party-notices\` for the standalone check.
 
 The complete npm transitive closure, including the Landlock launcher workspace, is recorded with exact pinned versions in [\`pnpm-lock.yaml\`](pnpm-lock.yaml) — inspect it with \`pnpm licenses list\`. The Python SDK closure is recorded separately in [\`python/sdk/uv.lock\`](python/sdk/uv.lock).
 
@@ -803,7 +886,7 @@ ${vendored.map(row => `| \`${row.npmName}\` | \`${row.upstreamName}\` | [${row.s
 
 ## Runtime npm dependencies
 
-External packages installed for runtime use or embedded in distributed Host or browser artifacts. Browser inputs are resolved through the shipping tsdown and Vite configurations, independently of npm dependency sections. Host embedding declarations identify the distributing package and its embedded dependencies. The tier covers every plugin a user can mount from \`cordis.yml\` — not only what the \`dsh\` CLI, Web UI, and Python SDK runtime load by default.
+External packages installed for runtime use or embedded in distributed Host or browser artifacts. Browser inputs are resolved through the shipping tsdown and Vite configurations, independently of npm dependency sections; the transitive dependencies of a bundled browser package ship inside the same artifact and are disclosed with it. Host embedding declarations identify the distributing package and its embedded dependencies. The tier covers every plugin a user can mount from \`cordis.yml\` — not only what the \`dsh\` CLI, Web UI, and Python SDK runtime load by default.
 
 ${renderNpmTable(runtimeDeps)}
 

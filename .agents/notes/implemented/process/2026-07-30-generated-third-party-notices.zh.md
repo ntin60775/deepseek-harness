@@ -16,7 +16,7 @@ Status: implemented
 
 **新鲜度由测试 lane 保证。** 已提交的字节由 [`scripts/gen-third-party-notices.spec.ts`](../../../../scripts/gen-third-party-notices.spec.ts) 断言，而测试 lane 本就会跑这个文件，其中包括 PR 必过的 `node 24 / coverage` lane——这项校验不增加门禁进程、不占调度位、也不新增 CI 步骤。改动生成器任一输入——任何 manifest、工作区声明、根锁文件或共享运行时锁文件、`vendor/README.md`、某个 `pyproject.toml`、生成器自身，或持有构建期 pin 的脚本——的贡献者运行 `pnpm run gen-third-party-notices`；需要单独校验时，`pnpm run verify-third-party-notices` 仍然可用。没有 Git 钩子重新生成该文件：浏览器输入使每个包源码文件都成为生成器输入，钩子会让几乎每个提交都运行约 16 秒的生成器，而改变输出的提交很少。
 
-文件默认只披露**直接**依赖；完整的 npm 与 Python SDK 闭包保留在各自锁文件中。两组独立分发的载荷会明确列出：`@anthropic-ai/claude-agent-sdk` 声明的官方 Claude 可执行包，以及共享运行时锁文件 `pythonPackages` 中的每个分发包。内置条目包含归一化名称、精确版本和已记录的许可证元数据；元数据缺失、归一化后名称重复或版本冲突都会使生成失败。共享 wheel 集合独立于 `python/` 下的 manifest，仅扫描后者会遗漏已打包的 Office 库。内置分发包同样通过运行时许可证检查，其中包括 Pillow 与 typing-extensions 声明的宽松许可证标识 `MIT-CMU` 和 `PSF-2.0`。
+文件默认只披露**直接**依赖；完整的 npm 与 Python SDK 闭包保留在各自锁文件中。两组独立分发的载荷会明确列出：`@anthropic-ai/claude-agent-sdk` 声明的官方 Claude 可执行包，以及共享运行时锁文件 `pythonPackages` 中的每个分发包。每个被分发的浏览器输入的已安装依赖闭包也一并披露；[浏览器捆绑声明闭包](2026-11-17-browser-bundled-notices-closure.md)拥有这项修正。内置条目包含归一化名称、精确版本和已记录的许可证元数据；元数据缺失、归一化后名称重复或版本冲突都会使生成失败。共享 wheel 集合独立于 `python/` 下的 manifest，仅扫描后者会遗漏已打包的 Office 库。内置分发包同样通过运行时许可证检查，其中包括 Pillow 与 typing-extensions 声明的宽松许可证标识 `MIT-CMU` 和 `PSF-2.0`。
 
 **分层依据是分发内容，而非 manifest 字段名。** 安装的运行时库由 `DEV_ONLY_AREAS` 之外的 `dependencies` 或 `optionalDependencies` 识别；排除区域为根 manifest、`packages/test-support/`、`packages/test-support/client-runtime/`、`website/`、`native/`。发布所用的 tsdown 与 Vite 配置解析到的浏览器输入也属于运行时，即使它们位于 `devDependencies`；[浏览器第三方构建输入](2026-08-26-published-dependency-faces.zh.md)拥有这项分类。测试支撑依赖不会仅因字段写成 `dependencies` 就被交付，而生成器显式披露 `tsx`，因为源码启动通过其 ESM 钩子执行。
 
