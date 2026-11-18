@@ -5,10 +5,17 @@
  * inside both projects; unset must keep Vitest's defaults, under which the
  * fixture's per-test and hook waits pass and its poll ends at the 1000 ms
  * default; a malformed value must fail at config load.
+ *
+ * The root config's local fork budget is probed by evaluating the config module
+ * in a child process: a static import would pull the root config into the
+ * composite Host program, which does not list it. The probe asserts the budget
+ * invariants (positive, halved below the reported CPUs, within the memory cap);
+ * the formula's corner values are pinned by scripts/parallelism.spec.ts.
  */
 import { spawnSync } from 'node:child_process'
 import { mkdtempSync, rmSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { createRequire } from 'node:module'
+import { availableParallelism, tmpdir } from 'node:os'
 import { join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
@@ -118,5 +125,26 @@ describe('lane test budget', () => {
     expect(output).toContain(`${COVERAGE_TEST_TIMEOUT_ENV} must be a positive integer, got "90000ms".`)
     expect(fixtureSummaries(output)).toEqual([])
     expect(status).toBe(1)
+  })
+})
+
+describe('local worker budget applied by the root config', () => {
+  it('halves the reported CPUs under the memory cap outside CI', { timeout: 60_000 }, () => {
+    const tsxEsm = createRequire(import.meta.url).resolve('tsx/esm')
+    const probe = spawnSync(process.execPath, [
+      '--import', tsxEsm, '--input-type=module', '-e',
+      "const config = (await import('./vitest.config.ts')).default; console.log(JSON.stringify(config.test?.maxWorkers ?? null))",
+    ], { cwd: root, encoding: 'utf8', timeout: 30_000 })
+    expect(probe.status).toBe(0)
+    const applied: number | null = JSON.parse(probe.stdout.trim().split('\n').at(-1) ?? 'null')
+    if (process.env.CI === 'true') {
+      expect(applied).toBeNull()
+      return
+    }
+    const available = availableParallelism()
+    expect(Number.isInteger(applied)).toBe(true)
+    expect(applied).toBeGreaterThanOrEqual(1)
+    expect(applied).toBeLessThanOrEqual(48)
+    if (available > 1) expect(applied).toBeLessThan(available)
   })
 })

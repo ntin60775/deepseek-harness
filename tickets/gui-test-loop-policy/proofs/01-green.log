@@ -1,0 +1,37 @@
+# Зелёный прогон носителей тикета 01 (после правок ревью, 2026-11-18)
+
+Команда: pnpm exec vitest run scripts/parallelism.spec.ts scripts/run-gates.spec.ts scripts/lane-test-budget.spec.ts --maxWorkers=2
+
+```
+ Test Files  3 passed (3)
+      Tests  176 passed (176)
+   Start at  17:54:19
+   Duration  23.26s (transform 1.33s, setup 746ms, import 1.05s, tests 34.35s, environment 1ms)
+```
+
+Новые кейсы: parallelism.spec «halves local Vitest forks under the memory cap» (12→6, 1→1, 3→1, 256→48, CI 256→256, LOCAL_TEST_PARALLELISM_CAP=48); run-gates.spec «halves the local coverage budget below the memory cap» (16 CPU → MAX_WORKERS '8', PARTITIONS '6'); lane-test-budget.spec «halves the reported CPUs under the memory cap outside CI» — runtime-зонд вычисляет корневой конфиг в дочернем процессе и ассертит инварианты applied-бюджета. Существующие кейсы (CI-ветка, override '6', невалидный override, 256→48/32, defaultConcurrency, timeout-бюджеты) зелёные без правок.
+
+# Наблюдаемый applied-бюджет (критерии 3–4)
+
+Зонд: node --import tsx/esm --input-type=module -e "const config = (await import('./vitest.config.ts')).default; console.log(config.test?.maxWorkers)"
+
+```
+base applied maxWorkers: 12   (mutation-проба на базе master до реализации)
+fixed applied maxWorkers: 6   (дерево тикета, 12 CPU)
+```
+
+Фокусный прогон lane-test-budget.spec -t 'local worker budget': 1 passed, Start at после правок; зонд-кейс 2982ms.
+
+# Живая проба (критерий 4)
+
+Команда: pnpm exec vitest run packages/client/ui-mermaid (без --maxWorkers, дефолт нового бюджета; прогон до правок ревью, поведение бюджета не менялось правками)
+
+```
+ Test Files  11 passed | 1 skipped (12)
+      Tests  77 passed | 2 skipped (79)
+   Start at  17:38:12
+   Duration  18.97s
+real 0m22,941s  user 0m35,205s  sys 0m5,177s
+```
+
+Прогон зелёный; применённый бюджет 6 форков подтверждён зондом выше (витест-репортер число воркеров не печатает).

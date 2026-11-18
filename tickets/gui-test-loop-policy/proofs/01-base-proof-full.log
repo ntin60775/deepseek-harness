@@ -1,0 +1,242 @@
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+
+ RUN  v4.1.11 /home/prog7/home/dev/contrib/forks/deepseek-harness/.worktrees/gui-loop-worker-budget
+
+ ↓ |thread-safe| scripts/run-gates.spec.ts > CI worker allocation > shares a 1 CPU coverage budget without multiplying pools
+ ↓ |thread-safe| scripts/run-gates.spec.ts > CI worker allocation > shares a 2 CPU coverage budget without multiplying pools
+ ↓ |thread-safe| scripts/run-gates.spec.ts > CI worker allocation > shares a 4 CPU coverage budget without multiplying pools
+ ↓ |thread-safe| scripts/run-gates.spec.ts > CI worker allocation > shares a 8 CPU coverage budget without multiplying pools
+ ↓ |thread-safe| scripts/run-gates.spec.ts > CI worker allocation > shares a 16 CPU coverage budget without multiplying pools
+ ↓ |thread-safe| scripts/run-gates.spec.ts > CI worker allocation > shares a 64 CPU coverage budget without multiplying pools
+ ↓ |thread-safe| scripts/run-gates.spec.ts > CI worker allocation > bounds overlapping readers and lets the isolated browser pool use the runner
+ ↓ |thread-safe| scripts/run-gates.spec.ts > CI worker allocation > caps local defaults below the CPU count Node reports
+ × |thread-safe| scripts/run-gates.spec.ts > CI worker allocation > halves the local coverage budget below the memory cap 76ms
+   → expected { DSH_OXLINT_THREADS: '6', …(6) } to match object { DSH_COVERAGE_MAX_WORKERS: '8', …(1) }
+(5 matching properties omitted from actual)
+ ↓ |thread-safe| scripts/run-gates.spec.ts > CI worker allocation > preserves serial reference overrides on large hosts
+ ↓ |thread-safe| scripts/run-gates.spec.ts > CI worker allocation > honors an explicit coverage budget and partition override
+ ↓ |thread-safe| scripts/run-gates.spec.ts > CI worker allocation > leaves the plain unit inventory with the environment pnpm run test finds
+ ↓ |thread-safe| scripts/run-gates.spec.ts > CI worker allocation > rejects invalid worker budget 0
+ ↓ |thread-safe| scripts/run-gates.spec.ts > CI worker allocation > rejects invalid worker budget -1
+ ↓ |thread-safe| scripts/run-gates.spec.ts > CI worker allocation > rejects invalid worker budget NaN
+ ↓ |thread-safe| scripts/run-gates.spec.ts > CI worker allocation > rejects invalid worker budget 2.5
+ ↓ |thread-safe| scripts/run-gates.spec.ts > CI worker allocation > keeps local documentation defaults unchanged
+ ↓ |thread-safe| scripts/run-gates.spec.ts > gate graph validation > constructs and executes preflight for a valid non-empty ci-primary graph
+ ↓ |thread-safe| scripts/run-gates.spec.ts > gate graph validation > constructs and executes preflight for a valid non-empty ci-linux-primary graph
+ ↓ |thread-safe| scripts/run-gates.spec.ts > gate graph validation > constructs and executes preflight for a valid non-empty ci-static graph
+ ↓ |thread-safe| scripts/run-gates.spec.ts > gate graph validation > constructs and executes preflight for a valid non-empty ci-lint-contracts-ready graph
+ ↓ |thread-safe| scripts/run-gates.spec.ts > gate graph validation > constructs and executes preflight for a valid non-empty ci-coverage graph
+ ↓ |thread-safe| scripts/run-gates.spec.ts > gate graph validation > constructs and executes preflight for a valid non-empty ci-unit graph
+ ↓ |thread-safe| scripts/run-gates.spec.ts > gate graph validation > constructs and executes preflight for a valid non-empty ci-bench graph
+ ↓ |thread-safe| scripts/run-gates.spec.ts > gate graph validation > constructs and executes preflight for a valid non-empty ci-snapshot graph
+ ↓ |thread-safe| scripts/run-gates.spec.ts > gate graph validation > constructs and executes preflight for a valid non-empty ci-artifacts graph
+ ↓ |thread-safe| scripts/run-gates.spec.ts > gate graph validation > constructs and executes preflight for a valid non-empty ci-consumers graph
+ ↓ |thread-safe| scripts/run-gates.spec.ts > gate graph validation > constructs and executes preflight for a valid non-empty ci-windows-blocking graph
+ ↓ |thread-safe| scripts/run-gates.spec.ts > gate graph validation > constructs and executes preflight for a valid non-empty ci-windows-complete graph
+ ↓ |thread-safe| scripts/run-gates.spec.ts > gate graph validation > constructs and executes preflight for a valid non-empty ci-windows-observational-ready graph
+ ↓ |thread-safe| scripts/run-gates.spec.ts > gate graph validation > constructs and executes preflight for a valid non-empty node-compat graph
+ ↓ |thread-safe| scripts/run-gates.spec.ts > gate graph validation > constructs and executes preflight for a valid non-empty check-all graph
+ ↓ |thread-safe| scripts/run-gates.spec.ts > gate graph validation > constructs and executes preflight for a valid non-empty hygiene graph
+ ↓ |thread-safe| scripts/run-gates.spec.ts > gate graph validation > constructs and executes preflight for a valid non-empty doc-sync graph
+ ↓ |thread-safe| scripts/run-gates.spec.ts > gate graph validation > constructs and executes preflight for a valid non-empty doc-quick graph
+ ↓ |thread-safe| scripts/run-gates.spec.ts > gate graph validation > uses the internal CI benchmark runner without changing the public benchmark scripts
+ ↓ |thread-safe| scripts/run-gates.spec.ts > gate graph validation > checks all maintained repository references locally and in CI
+ ↓ |thread-safe| scripts/run-gates.spec.ts > gate graph validation > keeps the public repository link policy in the documentation gate
+ ↓ |thread-safe| scripts/run-gates.spec.ts > gate graph validation > allocates one CLI help child inside each aggregate when its allowance is undefined
+ ↓ |thread-safe| scripts/run-gates.spec.ts > gate graph validation > allocates one CLI help child inside each aggregate when its allowance is ""
+ ↓ |thread-safe| scripts/run-gates.spec.ts > gate graph validation > passes an explicit CLI help allowance "3" to its owner
+ ↓ |thread-safe| scripts/run-gates.spec.ts > gate graph validation > passes an explicit CLI help allowance "invalid" to its owner
+ ↓ |thread-safe| scripts/run-gates.spec.ts > gate graph validation > keeps the concrete terminology policy in the documentation gate
+ ↓ |thread-safe| scripts/run-gates.spec.ts > gate graph validation > checks retrospective releases alongside the current persistence history
+ ↓ |thread-safe| scripts/run-gates.spec.ts > gate graph validation > requires complete Session format references locally and in CI
+ ↓ |thread-safe| scripts/run-gates.spec.ts > gate graph validation > keeps package-group subsystem ownership in the documentation gate
+ ↓ |thread-safe| scripts/run-gates.spec.ts > gate graph validation > keeps the package README Summary limit in the documentation gate
+ ↓ |thread-safe| scripts/run-gates.spec.ts > gate graph validation > derives the quick documentation aggregate from marked doc-sync leaves
+ ↓ |thread-safe| scripts/run-gates.spec.ts > gate graph validation > checks the recorded npm dependency catalog in both documentation aggregates
+ ↓ |thread-safe| scripts/run-gates.spec.ts > gate graph validation > keeps the hygiene aggregate aligned with the package script checks
+ ↓ |thread-safe| scripts/run-gates.spec.ts > gate graph validation > includes JSON resource checks in local and CI aggregates
+ ↓ |thread-safe| scripts/run-gates.spec.ts > gate graph validation > caps the local hygiene aggregate at eight workers
+ ↓ |thread-safe| scripts/run-gates.spec.ts > gate graph validation > schedules the longest documentation leaves before short checks
+ ↓ |thread-safe| scripts/run-gates.spec.ts > gate graph validation > launches a native pnpm entrypoint directly
+ ↓ |thread-safe| scripts/run-gates.spec.ts > gate graph validation > keeps the DSH package license policy in ci-primary
+ ↓ |thread-safe| scripts/run-gates.spec.ts > gate graph validation > keeps the DSH package license policy in ci-static
+ ↓ |thread-safe| scripts/run-gates.spec.ts > gate graph validation > keeps the DSH package license policy in check-all
+ ↓ |thread-safe| scripts/run-gates.spec.ts > gate graph validation > rejects new unknown casts in ci-primary
+ ↓ |thread-safe| scripts/run-gates.spec.ts > gate graph validation > rejects new unknown casts in ci-static
+ ↓ |thread-safe| scripts/run-gates.spec.ts > gate graph validation > rejects new unknown casts in check-all
+ ↓ |thread-safe| scripts/run-gates.spec.ts > gate graph validation > rejects new unknown casts in hygiene
+ ↓ |thread-safe| scripts/run-gates.spec.ts > gate graph validation > rejects silent empty catches in ci-primary
+ ↓ |thread-safe| scripts/run-gates.spec.ts > gate graph validation > rejects silent empty catches in ci-static
+ ↓ |thread-safe| scripts/run-gates.spec.ts > gate graph validation > rejects silent empty catches in check-all
+ ↓ |thread-safe| scripts/run-gates.spec.ts > gate graph validation > rejects silent empty catches in hygiene
+ ↓ |thread-safe| scripts/run-gates.spec.ts > gate graph validation > rejects new Cordis root reads in ci-primary
+ ↓ |thread-safe| scripts/run-gates.spec.ts > gate graph validation > rejects new Cordis root reads in ci-static
+ ↓ |thread-safe| scripts/run-gates.spec.ts > gate graph validation > rejects new Cordis root reads in check-all
+ ↓ |thread-safe| scripts/run-gates.spec.ts > gate graph validation > rejects new Cordis root reads in hygiene
+ ↓ |thread-safe| scripts/run-gates.spec.ts > gate graph validation > keeps package dependency enforcement in ci-primary
+ ↓ |thread-safe| scripts/run-gates.spec.ts > gate graph validation > keeps package dependency enforcement in ci-static
+ ↓ |thread-safe| scripts/run-gates.spec.ts > gate graph validation > keeps package dependency enforcement in check-all
+ ↓ |thread-safe| scripts/run-gates.spec.ts > gate graph validation > keeps package dependency enforcement in hygiene
+ ↓ |thread-safe| scripts/run-gates.spec.ts > gate graph validation > executes default-product experimental isolation in ci-primary
+ ↓ |thread-safe| scripts/run-gates.spec.ts > gate graph validation > executes default-product experimental isolation in ci-static
+ ↓ |thread-safe| scripts/run-gates.spec.ts > gate graph validation > executes default-product experimental isolation in check-all
+ ↓ |thread-safe| scripts/run-gates.spec.ts > gate graph validation > executes default-product experimental isolation in hygiene
+ ↓ |thread-safe| scripts/run-gates.spec.ts > gate graph validation > keeps the client dependency policy in ci-primary
+ ↓ |thread-safe| scripts/run-gates.spec.ts > gate graph validation > keeps the client dependency policy in ci-static
+ ↓ |thread-safe| scripts/run-gates.spec.ts > gate graph validation > keeps the client dependency policy in check-all
+ ↓ |thread-safe| scripts/run-gates.spec.ts > gate graph validation > keeps weighted approval policy tests in ci-primary
+ ↓ |thread-safe| scripts/run-gates.spec.ts > gate graph validation > keeps weighted approval policy tests in ci-static
+ ↓ |thread-safe| scripts/run-gates.spec.ts > gate graph validation > keeps weighted approval policy tests in check-all
+ ↓ |thread-safe| scripts/run-gates.spec.ts > gate graph validation > keeps hard-coded Client UI copy enforcement in ci-primary
+ ↓ |thread-safe| scripts/run-gates.spec.ts > gate graph validation > keeps hard-coded Client UI copy enforcement in ci-static
+ ↓ |thread-safe| scripts/run-gates.spec.ts > gate graph validation > keeps hard-coded Client UI copy enforcement in check-all
+ ↓ |thread-safe| scripts/run-gates.spec.ts > gate graph validation > keeps hard-coded Client UI copy enforcement in hygiene
+ ↓ |thread-safe| scripts/run-gates.spec.ts > gate graph validation > keeps browser app-route resolution enforcement in ci-primary
+ ↓ |thread-safe| scripts/run-gates.spec.ts > gate graph validation > keeps browser app-route resolution enforcement in ci-static
+ ↓ |thread-safe| scripts/run-gates.spec.ts > gate graph validation > keeps browser app-route resolution enforcement in check-all
+ ↓ |thread-safe| scripts/run-gates.spec.ts > gate graph validation > keeps browser app-route resolution enforcement in hygiene
+ ↓ |thread-safe| scripts/run-gates.spec.ts > gate graph validation > keeps application entrypoint enforcement in ci-primary
+ ↓ |thread-safe| scripts/run-gates.spec.ts > gate graph validation > keeps application entrypoint enforcement in ci-static
+ ↓ |thread-safe| scripts/run-gates.spec.ts > gate graph validation > keeps application entrypoint enforcement in check-all
+ ↓ |thread-safe| scripts/run-gates.spec.ts > gate graph validation > keeps application entrypoint enforcement in hygiene
+ ↓ |thread-safe| scripts/run-gates.spec.ts > gate graph validation > keeps native Windows coverage blocking and behind the complete build
+ ↓ |thread-safe| scripts/run-gates.spec.ts > gate graph validation > runs the Windows built-bin smoke after other observational gates settle
+ ↓ |thread-safe| scripts/run-gates.spec.ts > gate graph validation > reuses the Windows build without dropping diagnostics or rebuilding the workspace
+ ↓ |thread-safe| scripts/run-gates.spec.ts > gate graph validation > runs built Windows smoke after failed diagnostics settle on an existing build
+ ↓ |thread-safe| scripts/run-gates.spec.ts > gate graph validation > provisions Electron before Windows coverage with partition count undefined
+ ↓ |thread-safe| scripts/run-gates.spec.ts > gate graph validation > provisions Electron before Windows coverage with partition count 3
+ ↓ |thread-safe| scripts/run-gates.spec.ts > gate graph validation > provisions the locked Electron binary before built smoke in ci-windows-complete
+ ↓ |thread-safe| scripts/run-gates.spec.ts > gate graph validation > provisions the locked Electron binary before built smoke in ci-windows-observational-ready
+ ↓ |thread-safe| scripts/run-gates.spec.ts > gate graph validation > keeps failed Electron provisioning visible without stopping unrelated diagnostics in ci-windows-complete
+ ↓ |thread-safe| scripts/run-gates.spec.ts > gate graph validation > keeps failed Electron provisioning visible without stopping unrelated diagnostics in ci-windows-observational-ready
+ ↓ |thread-safe| scripts/run-gates.spec.ts > gate graph validation > only provisions Electron for native Windows coverage in ci-coverage
+ ↓ |thread-safe| scripts/run-gates.spec.ts > gate graph validation > only provisions Electron for native Windows coverage in ci-artifacts
+ ↓ |thread-safe| scripts/run-gates.spec.ts > gate graph validation > only provisions Electron for native Windows coverage in ci-windows-blocking
+ ↓ |thread-safe| scripts/run-gates.spec.ts > gate graph validation > restores the platform descriptor when coverage configuration is rejected
+ ↓ |thread-safe| scripts/run-gates.spec.ts > gate graph validation > leaves the lane test budget to the inherited environment on both coverage gates
+ ↓ |thread-safe| scripts/run-gates.spec.ts > gate graph validation > runs the plain unit inventory after the native build and leaves its budget to the inherited environment
+ ↓ |thread-safe| scripts/run-gates.spec.ts > gate graph validation > selects partitioned coverage only when explicitly configured
+ ↓ |thread-safe| scripts/run-gates.spec.ts > gate graph validation > rejects an invalid coverage partition count before starting a gate
+ ↓ |thread-safe| scripts/run-gates.spec.ts > gate graph validation > rejects empty before starting a child
+ ↓ |thread-safe| scripts/run-gates.spec.ts > gate graph validation > rejects duplicate ids before starting a child
+ ↓ |thread-safe| scripts/run-gates.spec.ts > gate graph validation > rejects unknown dependencies before starting a child
+ ↓ |thread-safe| scripts/run-gates.spec.ts > gate graph validation > rejects unknown ordering predecessors before starting a child
+ ↓ |thread-safe| scripts/run-gates.spec.ts > gate graph validation > rejects cycles before starting a child
+ ↓ |thread-safe| scripts/run-gates.spec.ts > gate graph validation > rejects mixed cycles before starting a child
+ ↓ |thread-safe| scripts/run-gates.spec.ts > gate graph validation > rejects an invalid worker count before starting a child
+ ↓ |thread-safe| scripts/run-gates.spec.ts > gate graph validation > skips dependents after their prerequisite fails
+ ↓ |thread-safe| scripts/run-gates.spec.ts > gate graph validation > runs an ordered follower after its predecessor fails
+ ↓ |thread-safe| scripts/run-gates.spec.ts > gate graph validation > runs an ordered follower after its predecessor is skipped
+ ↓ |thread-safe| scripts/run-gates.spec.ts > Oxlint gate > uses the package script when no worker bound is configured
+ ↓ |thread-safe| scripts/run-gates.spec.ts > Oxlint gate > surfaces the configured worker bound on the shared package script
+ ↓ |thread-safe| scripts/run-gates.spec.ts > Typert contract preparation > prepares primary source consumers once before they run
+ ↓ |thread-safe| scripts/run-gates.spec.ts > Typert contract preparation > reuses contracts from the validated consumer build
+ ↓ |thread-safe| scripts/run-gates.spec.ts > Typert contract preparation > keeps standalone doc sync responsible for preparation
+ ↓ |thread-safe| scripts/run-gates.spec.ts > Node compatibility graph > runs all source compatibility smokes serially on Node 24.9.0
+ ↓ |thread-safe| scripts/run-gates.spec.ts > Node compatibility graph > runs all source compatibility smokes serially on Node 24.19.0
+ ↓ |thread-safe| scripts/run-gates.spec.ts > Node compatibility graph > runs all source compatibility smokes serially on Node 26.0.0
+ ↓ |thread-safe| scripts/run-gates.spec.ts > Node compatibility graph > keeps source compatibility smokes serial with inherited VITEST_MAX_WORKERS=1
+ ↓ |thread-safe| scripts/run-gates.spec.ts > Node compatibility graph > keeps source compatibility smokes serial with inherited VITEST_MAX_WORKERS=8
+ ↓ |thread-safe| scripts/run-gates.spec.ts > Node compatibility graph > keeps Node 24.19.0 compatibility source-only
+ ↓ |thread-safe| scripts/run-gates.spec.ts > Node compatibility graph > keeps Node 26.0.0 compatibility source-only
+ ↓ |thread-safe| scripts/run-gates.spec.ts > Node compatibility graph > builds the complete Node 24.9 artifacts once with skip-typecheck=undefined
+ ↓ |thread-safe| scripts/run-gates.spec.ts > Node compatibility graph > builds the complete Node 24.9 artifacts once with skip-typecheck=1
+ ↓ |thread-safe| scripts/run-gates.spec.ts > Node compatibility graph > runs the Node 24.9 lazy-search smoke only after a passed build (passed)
+ ↓ |thread-safe| scripts/run-gates.spec.ts > Node compatibility graph > runs the Node 24.9 lazy-search smoke only after a passed build (failed)
+ ↓ |thread-safe| scripts/run-gates.spec.ts > Node 24 lane ownership > keeps the static lane source-only
+ ↓ |thread-safe| scripts/run-gates.spec.ts > Node 24 lane ownership > owns the build and orders its artifact consumers
+ ↓ |thread-safe| scripts/run-gates.spec.ts > Linux primary graph > adds the same compare-only web gate after built client artifacts
+ ↓ |thread-safe| scripts/run-gates.spec.ts > gate process outcomes > streams selected gate output without retaining it
+ ↓ |thread-safe| scripts/run-gates.spec.ts > gate process outcomes > reports signal termination independently from exit status
+ ↓ |thread-safe| scripts/run-gates.spec.ts > gate retries > runs a gate that declares no retries exactly once
+ ↓ |thread-safe| scripts/run-gates.spec.ts > gate retries > repeats a failed gate until a later attempt passes
+ ↓ |thread-safe| scripts/run-gates.spec.ts > gate retries > stops at the declared attempt count and keeps the last failure
+ ↓ |thread-safe| scripts/run-gates.spec.ts > gate retries > does not repeat a gate that the fail-fast signal terminated
+ ↓ |thread-safe| scripts/run-gates.spec.ts > fail-fast scheduling > aborts the aggregate at the first blocking failure
+ ↓ |thread-safe| scripts/run-gates.spec.ts > fail-fast scheduling > does not abort on a non-blocking gate failure
+ ↓ |thread-safe| scripts/run-gates.spec.ts > fail-fast scheduling > runs independent gates to completion when fail-fast is disabled
+ ↓ |thread-safe| scripts/run-gates.spec.ts > fail-fast scheduling > kills the child when the abort signal fires
+ ↓ |thread-safe| scripts/run-gates.spec.ts > fail-fast scheduling > marks a zero-exit child as aborted when the signal fired
+ ↓ |thread-safe| scripts/run-gates.spec.ts > fail-fast scheduling > kills the whole gate process tree when the abort signal fires
+ ↓ |thread-safe| scripts/run-gates.spec.ts > fail-fast scheduling > forwards host interruption signals to the abort path
+ ↓ |thread-safe| scripts/run-gates.spec.ts > fail-fast scheduling > pairs host signal forwarding with fail-fast at the CLI entrypoint
+ ↓ |thread-safe| scripts/run-gates.spec.ts > fail-fast scheduling > rejects host signal forwarding without fail-fast
+ ↓ |thread-safe| scripts/run-gates.spec.ts > fail-fast scheduling > leaves an un-aborted child running to completion
+ ↓ |thread-safe| scripts/run-gates.spec.ts > fail-fast scheduling > kills a detached descendant that outlived the child when the abort arrives later
+ ↓ |thread-safe| scripts/run-gates.spec.ts > fail-fast scheduling > keeps a reparented detached descendant tracked across a sampler tick
+ ↓ |thread-safe| scripts/run-gates.spec.ts > process-table parsing > excludes the root when a parent link returns to it
+ ↓ |thread-safe| scripts/run-gates.spec.ts > process-table parsing > visits duplicate and cyclic descendant links only once
+ ↓ |thread-safe| scripts/run-gates.spec.ts > process-table parsing > returns no descendants for an isolated or self-parented root
+ ↓ |thread-safe| scripts/run-gates.spec.ts > process-table parsing > walks a wide child set without spreading it into call arguments
+ ↓ |thread-safe| scripts/run-gates.spec.ts > process-table parsing > parses `pid ppid` rows from a POSIX ps dump
+ ↓ |thread-safe| scripts/run-gates.spec.ts > process-table parsing > parses Windows PowerShell Get-CimInstance output of the same shape
+ ↓ |thread-safe| scripts/run-gates.spec.ts > process-table parsing > drops blank and malformed lines
+ ↓ |thread-safe| scripts/run-gates.spec.ts > Windows tree termination > targets the root first and each captured descendant after it
+ ↓ |thread-safe| scripts/run-gates.spec.ts > Windows tree termination > terminates the root alone when no descendant was captured
+ ↓ |thread-safe| scripts/parallelism.spec.ts > default worker budget > uses every reported CPU in CI
+ ↓ |thread-safe| scripts/parallelism.spec.ts > default worker budget > caps local runs without exceeding the reported CPUs
+ × |thread-safe| scripts/parallelism.spec.ts > default worker budget > halves local Vitest forks under the memory cap 7ms
+   → defaultTestParallelism is not a function
+ ↓ |thread-safe| scripts/lane-test-budget.spec.ts > lane test budget > ends per-test, hook, and expect.poll waits in both inline projects
+ ↓ |thread-safe| scripts/lane-test-budget.spec.ts > lane test budget > keeps Vitest defaults when the budget is unset
+ ↓ |thread-safe| scripts/lane-test-budget.spec.ts > lane test budget > refuses a malformed budget at config load before any test runs
+ × |thread-safe| scripts/lane-test-budget.spec.ts > local worker budget applied by the root config > halves the reported CPUs under the memory cap outside CI 2493ms
+   → expected 12 to be less than 12
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |thread-safe| scripts/lane-test-budget.spec.ts > local worker budget applied by the root config > halves the reported CPUs under the memory cap outside CI
+AssertionError: expected 12 to be less than 12
+ ❯ scripts/lane-test-budget.spec.ts:148:40
+    146|     expect(applied).toBeGreaterThanOrEqual(1)
+    147|     expect(applied).toBeLessThanOrEqual(48)
+    148|     if (available > 1) expect(applied).toBeLessThan(available)
+       |                                        ^
+    149|   })
+    150| })
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  |thread-safe| scripts/parallelism.spec.ts > default worker budget > halves local Vitest forks under the memory cap
+TypeError: defaultTestParallelism is not a function
+ ❯ scripts/parallelism.spec.ts:20:12
+     18|   it('halves local Vitest forks under the memory cap', () => {
+     19|     expect(LOCAL_TEST_PARALLELISM_CAP).toBe(48)
+     20|     expect(defaultTestParallelism({}, 12)).toBe(6)
+       |            ^
+     21|     expect(defaultTestParallelism({}, 1)).toBe(1)
+     22|     expect(defaultTestParallelism({}, 3)).toBe(1)
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  |thread-safe| scripts/run-gates.spec.ts > CI worker allocation > halves the local coverage budget below the memory cap
+AssertionError: expected { DSH_OXLINT_THREADS: '6', …(6) } to match object { DSH_COVERAGE_MAX_WORKERS: '8', …(1) }
+(5 matching properties omitted from actual)
+
+- Expected
++ Received
+
+  {
+-   "DSH_COVERAGE_MAX_WORKERS": "8",
+-   "DSH_COVERAGE_PARTITIONS": "6",
++   "DSH_COVERAGE_MAX_WORKERS": "16",
++   "DSH_COVERAGE_PARTITIONS": "11",
+  }
+
+ ❯ scripts/run-gates.spec.ts:207:56
+    205|
+    206|   it('halves the local coverage budget below the memory cap', () => {
+    207|     expect(ciWorkerEnvironment('ci-coverage', {}, 16)).toMatchObject({
+       |                                                        ^
+    208|       DSH_COVERAGE_MAX_WORKERS: '8',
+    209|       DSH_COVERAGE_PARTITIONS: '6',
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+
+ Test Files  3 failed (3)
+      Tests  3 failed | 173 skipped (176)
+   Start at  17:55:08
+   Duration  3.37s (transform 892ms, setup 346ms, import 949ms, tests 2.61s, environment 1ms)
