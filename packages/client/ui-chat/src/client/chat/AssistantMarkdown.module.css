@@ -28,13 +28,13 @@
   box-shadow: var(--dsw-elevation-panel);
 }
 
-/* Final-answer tint: the completed closing reply keeps the card and dyes its
-   background with the theme's business tertiary surface — the tint density is
-   theme-owned, so no fixed mix lives here. Declared after `.card` so the
-   equal-specificity selector wins. No caption and no bar: the tint alone
-   marks the result. */
+/* Final-answer lift: the completed closing reply keeps the card and lifts its
+   background toward the text colour, so the difference is lightness only — no
+   accent hue reaches the reply, and text, inline code, and code-block colours
+   read exactly as on the plain card in every theme. Declared after `.card` so
+   the equal-specificity selector wins. No caption and no bar. */
 .finalAnswer {
-  background: var(--dsw-alias-state-business-tertiary);
+  background: color-mix(in srgb, var(--dsw-alias-label-primary) 12%, var(--dsw-specific-input-major));
 }
 
 .body {
