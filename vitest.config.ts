@@ -165,7 +165,8 @@ const coveragePartitionMode = coveragePartitionRaw === '1'
 // project below because CLI flags do not reach them (coverageTestTimeoutOptions
 // owns the rule and its reach).
 const laneTestBudget = coverageTestTimeoutOptions(process.env[COVERAGE_TEST_TIMEOUT_ENV])
-// Outside CI, forks follow the local worker budget; CI keeps Vitest's own default for its runner.
+// Outside CI, forks follow the halved local Vitest budget; CI passes no maxWorkers and keeps
+// Vitest's own default for its runner (the helper's CI branch serves run-gates instead).
 const localWorkerBudget = process.env.CI === 'true' ? {} : { maxWorkers: defaultTestParallelism(process.env) }
 
 // These suites exercise process-global state, process APIs, or timing-sensitive process I/O

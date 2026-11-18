@@ -3,10 +3,10 @@
  *
  * In CI (`CI=true`) the budget is the CPU count Node reports for the runner. Elsewhere it is capped at
  * {@link LOCAL_PARALLELISM_CAP}, while Vitest forks follow {@link defaultTestParallelism}: half the
- * reported CPUs under {@link LOCAL_TEST_PARALLELISM_CAP}, because `os.availableParallelism()` reports
- * host CPUs rather than a container's CPU quota and local runs share the workstation. Each tool's
- * explicit override (`DSH_GATE_CONCURRENCY`, `DSH_OXLINT_THREADS`, `DSH_COVERAGE_MAX_WORKERS`,
- * `--maxWorkers`) still wins.
+ * reported CPUs, at least one fork and at most {@link LOCAL_TEST_PARALLELISM_CAP}, because
+ * `os.availableParallelism()` reports host CPUs rather than a container's CPU quota and local runs
+ * share the workstation. Each tool's explicit override (`DSH_GATE_CONCURRENCY`, `DSH_OXLINT_THREADS`,
+ * `DSH_COVERAGE_MAX_WORKERS`, `--maxWorkers`) still wins.
  */
 
 import { availableParallelism } from 'node:os'
@@ -21,15 +21,13 @@ export const LOCAL_TEST_PARALLELISM_CAP = 48
  * Resolve the default worker budget for one process.
  * @param env - Environment whose `CI` value selects the CI budget.
  * @param available - CPU count Node reports for this process.
- * @param cap - Local cap; {@link LOCAL_TEST_PARALLELISM_CAP} for Vitest forks.
- * @returns `available` in CI, otherwise `available` capped at `cap`.
+ * @returns `available` in CI, otherwise `available` capped at {@link LOCAL_PARALLELISM_CAP}.
  */
 export function defaultParallelism(
   env: NodeJS.ProcessEnv = process.env,
   available: number = availableParallelism(),
-  cap: number = LOCAL_PARALLELISM_CAP,
 ): number {
-  return env.CI === 'true' ? available : Math.min(available, cap)
+  return env.CI === 'true' ? available : Math.min(available, LOCAL_PARALLELISM_CAP)
 }
 
 /**
@@ -37,9 +35,12 @@ export function defaultParallelism(
  *
  * Outside CI the budget is half the reported CPUs, at least one fork, never above
  * {@link LOCAL_TEST_PARALLELISM_CAP}: interactive runs leave the other half of the
- * workstation to the operator, and the cap keeps the measured fork-memory guard on
- * large hosts. Explicit overrides (`--maxWorkers`, `DSH_COVERAGE_MAX_WORKERS`) are
- * applied by the consumers and win over this default.
+ * workstation to the operator, and the cap keeps the
+ * [measured fork-memory guard](../.agents/notes/implemented/process/2026-10-12-local-gate-speedups.md)
+ * on large hosts. The CI branch serves `run-gates`, which allocates coverage workers from it;
+ * `vitest.config.ts` instead passes no `maxWorkers` in CI and keeps Vitest's own default.
+ * Explicit overrides win where their consumer applies them: `run-gates` translates
+ * `DSH_COVERAGE_MAX_WORKERS` into the coverage environment, and the Vitest CLI applies `--maxWorkers`.
  * @param env - Environment whose `CI` value selects the CI budget.
  * @param available - CPU count Node reports for this process.
  * @returns `available` in CI, otherwise `max(1, min(floor(available / 2), LOCAL_TEST_PARALLELISM_CAP))`.

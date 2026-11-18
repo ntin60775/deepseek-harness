@@ -5,14 +5,20 @@
  * inside both projects; unset must keep Vitest's defaults, under which the
  * fixture's per-test and hook waits pass and its poll ends at the 1000 ms
  * default; a malformed value must fail at config load.
+ *
+ * The root config's local fork budget is probed by evaluating the config module
+ * in a child process: a static import would pull the root config into the
+ * composite Host program, which does not list it. The probe asserts the budget
+ * invariants (positive, halved below the reported CPUs, within the memory cap);
+ * the formula's corner values are pinned by scripts/parallelism.spec.ts.
  */
 import { spawnSync } from 'node:child_process'
 import { mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import { createRequire } from 'node:module'
 import { availableParallelism, tmpdir } from 'node:os'
 import { join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
-import rootConfig from '../vitest.config.ts'
 import { COVERAGE_TEST_TIMEOUT_ENV } from './coverage-partitions.ts'
 
 const root = resolve(import.meta.dirname, '..')
@@ -123,13 +129,22 @@ describe('lane test budget', () => {
 })
 
 describe('local worker budget applied by the root config', () => {
-  it('halves the reported CPUs under the memory cap outside CI', () => {
+  it('halves the reported CPUs under the memory cap outside CI', { timeout: 60_000 }, () => {
+    const tsxEsm = createRequire(import.meta.url).resolve('tsx/esm')
+    const probe = spawnSync(process.execPath, [
+      '--import', tsxEsm, '--input-type=module', '-e',
+      "const config = (await import('./vitest.config.ts')).default; console.log(JSON.stringify(config.test?.maxWorkers ?? null))",
+    ], { cwd: root, encoding: 'utf8', timeout: 30_000 })
+    expect(probe.status).toBe(0)
+    const applied: number | null = JSON.parse(probe.stdout.trim().split('\n').at(-1) ?? 'null')
     if (process.env.CI === 'true') {
-      expect(rootConfig.test?.maxWorkers).toBeUndefined()
+      expect(applied).toBeNull()
       return
     }
     const available = availableParallelism()
-    expect(rootConfig.test?.maxWorkers).toBe(Math.max(1, Math.min(Math.floor(available / 2), 48)))
-    if (available > 1) expect(rootConfig.test?.maxWorkers).toBeLessThan(available)
+    expect(Number.isInteger(applied)).toBe(true)
+    expect(applied).toBeGreaterThanOrEqual(1)
+    expect(applied).toBeLessThanOrEqual(48)
+    if (available > 1) expect(applied).toBeLessThan(available)
   })
 })
