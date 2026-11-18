@@ -33,10 +33,8 @@ function pinSpinner(element: SVGSVGElement): void {
   for (const animation of spinner.getAnimations?.({ subtree: true }) ?? []) animation.startTime = 0
 }
 
-/** Segmented ongoing ring: twelve arc ticks with a fading trail, stepped rotation. */
-const SEGMENT_COUNT = 12
-const SEGMENT_CIRCUMFERENCE = 2 * Math.PI * 9.5
-const SEGMENT_ARC = (SEGMENT_CIRCUMFERENCE / SEGMENT_COUNT) * 0.62
+/** Segmented ongoing sun: eight thick radial spokes with a fading trail, stepped rotation. */
+const SEGMENT_COUNT = 8
 
 /**
  * Render a state dot.
@@ -44,7 +42,7 @@ const SEGMENT_ARC = (SEGMENT_CIRCUMFERENCE / SEGMENT_COUNT) * 0.62
  * @param props.size - outer diameter in px; defaults to 14 for ongoing and 10 for solid states.
  * @param props.className - extra class for layout placement.
  * @param props.appearance - compact dot by default; step uses a filled check or hollow pending
- * circle; segments renders ongoing as a twelve-tick segmented circle instead of the smooth ring.
+ * circle; segments renders ongoing as an eight-spoke segmented sun instead of the smooth ring.
  * @returns the dot element (aria-hidden; pair with text for accessibility).
  */
 export function StateDot({ state, size, className, appearance = 'dot' }: {
@@ -67,12 +65,11 @@ export function StateDot({ state, size, className, appearance = 'dot' }: {
       >
         <g className={css.segMotion}>
           {Array.from({ length: SEGMENT_COUNT }, (_, i) => (
-            <circle
+            <line
               key={i}
               className={css.seg}
-              cx="12" cy="12" r="9.5"
-              strokeDasharray={`${SEGMENT_ARC} ${SEGMENT_CIRCUMFERENCE}`}
-              opacity={0.15 + (0.85 * i) / (SEGMENT_COUNT - 1)}
+              x1="12" y1="2.2" x2="12" y2="7.5"
+              opacity={0.25 + (0.75 * i) / (SEGMENT_COUNT - 1)}
               transform={`rotate(${(360 / SEGMENT_COUNT) * i} 12 12)`}
             />
           ))}

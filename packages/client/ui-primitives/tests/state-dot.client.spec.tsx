@@ -50,14 +50,14 @@ describe('StateDot', () => {
     expect(spinner.getAttribute('height')).toBe('14')
   })
 
-  it('renders ongoing as a twelve-segment fading circle with the segments appearance', () => {
+  it('renders ongoing as an eight-spoke fading sun with the segments appearance', () => {
     const { container, rerender } = render(<StateDot state="ongoing" appearance="segments" />)
     const spinner = container.firstElementChild as SVGSVGElement
     expect(spinner.tagName).toBe('svg')
-    const segments = spinner.querySelectorAll('circle')
-    expect(segments).toHaveLength(12)
+    const segments = spinner.querySelectorAll('line')
+    expect(segments).toHaveLength(8)
     expect([...segments].map(segment => Number(segment.getAttribute('opacity'))))
-      .toEqual(Array.from({ length: 12 }, (_, i) => 0.15 + (0.85 * i) / 11))
+      .toEqual(Array.from({ length: 8 }, (_, i) => 0.25 + (0.75 * i) / 7))
     // Solid states keep their span shape regardless of the appearance.
     rerender(<StateDot state="done" appearance="segments" />)
     expect(container.firstElementChild?.tagName).toBe('SPAN')

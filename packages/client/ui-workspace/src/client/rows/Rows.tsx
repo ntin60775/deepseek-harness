@@ -229,7 +229,7 @@ function ProjectRow({
       </span>
       {group.containsRunning && (
         <span className={css.folderRun}>
-          <StateDot state="ongoing" appearance="segments" size={12} />
+          <StateDot state="ongoing" appearance="segments" size={14} />
           <span className={css.visuallyHidden}>{t('status.running')}</span>
         </span>
       )}
@@ -365,7 +365,7 @@ function SessionStatusDots({ statuses }: { statuses: readonly [SessionStatus, ..
     <>
       <StateDot
         state={primary.state}
-        size={primary.state === 'ongoing' ? undefined : 12}
+        size={primary.state === 'ongoing' ? 16 : 12}
         appearance={primary.state === 'ongoing' ? 'segments' : 'dot'}
       />
       {statuses.map(status => (

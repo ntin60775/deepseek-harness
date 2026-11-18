@@ -82,17 +82,16 @@
   }
 }
 
-/* Segmented ongoing: discrete ticks rotate one segment per step so the trail
- * reads as a segmented circle rather than a smooth ring. */
+/* Segmented ongoing: thick spokes rotate one segment per step so the trail
+ * reads as a segmented sun rather than a smooth ring. */
 .segMotion {
   transform-origin: center;
-  animation: dsh-state-dot-seg 1s steps(12, end) infinite;
+  animation: dsh-state-dot-seg 1s steps(8, end) infinite;
 }
 
 .seg {
-  fill: none;
   stroke: currentColor;
-  stroke-width: 2;
+  stroke-width: 3.5;
   stroke-linecap: round;
 }
 
