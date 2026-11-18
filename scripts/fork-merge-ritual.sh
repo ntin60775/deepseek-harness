@@ -47,6 +47,10 @@ GENERATED_CONFLICTS=(
   docs/event-producer-consumer.md
   docs/event-producer-consumer.zh.md
   docs/event-producer-consumer.i18n.yaml
+  docs/persistence-catalog.md
+  docs/persistence-catalog.zh.md
+  docs/persistence-catalog.i18n.yaml
+  docs/persistence-schema.json
   docs/capability-seams.md
   docs/agent-lifecycle.md
   docs/tool-execution-pipeline.md
@@ -137,6 +141,8 @@ log "docs: regenerate catalogs"
 pnpm run gen-tsconfig-paths
 pnpm run gen-doc-graphs
 pnpm run gen-config-catalog
+pnpm run gen-persistence-catalog
+pnpm run gen-client-catalog
 
 # The regenerated catalogs' recorded pairing hashes are stale until re-recorded.
 log "docs: re-record pairing"
