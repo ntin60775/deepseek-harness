@@ -1,0 +1,15 @@
+$ tsx scripts/run-gui-changed.ts
+run-gui-changed: 1 changed in scope, 6 out of scope, 0 deletion package(s)
+
+ RUN  v4.1.11 /home/prog7/home/dev/contrib/forks/deepseek-harness/.worktrees/gui-loop-changed-command
+
+ ✓ |thread-safe| packages/client/ui-mermaid/tests/apply.client.spec.tsx (6 tests) 237ms
+
+ Test Files  1 passed (1)
+      Tests  6 passed (6)
+   Start at  18:55:38
+   Duration  3.37s (transform 1.50s, setup 34ms, import 2.42s, tests 237ms, environment 549ms)
+
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
