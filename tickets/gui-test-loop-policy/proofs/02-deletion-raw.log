@@ -1,0 +1,12 @@
+run-gui-changed: 1 changed in scope, 0 out of scope, 1 deletion package(s)
+run-gui-changed: deletion package scope: packages/client/demo
+
+ RUN  v4.1.11 /tmp/gui-changed-deletion-S3Vu
+
+ ✓ packages/client/demo/tests/b.spec.ts (1 test) 3ms
+ ✓ packages/client/demo/tests/a.spec.ts (1 test) 3ms
+
+ Test Files  2 passed (2)
+      Tests  2 passed (2)
+   Start at  18:56:06
+   Duration  147ms (transform 33ms, setup 0ms, import 53ms, tests 6ms, environment 0ms)

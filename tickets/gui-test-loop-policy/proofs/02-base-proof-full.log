@@ -11,7 +11,7 @@ The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths r
  FAIL  |thread-safe| scripts/run-gui-changed.spec.ts [ scripts/run-gui-changed.spec.ts ]
 Error: Cannot find module './run-gui-changed.ts' imported from /home/prog7/home/dev/contrib/forks/deepseek-harness/.worktrees/gui-loop-changed-command/scripts/run-gui-changed.spec.ts
  ❯ scripts/run-gui-changed.spec.ts:15:1
-     13| import { fileURLToPath } from 'node:url'
+     13| import { join, resolve } from 'node:path'
      14| import { afterEach, describe, expect, it } from 'vitest'
      15| import { collectGuiChanges } from './run-gui-changed.ts'
        | ^
@@ -23,5 +23,5 @@ Error: Cannot find module './run-gui-changed.ts' imported from /home/prog7/home/
 
  Test Files  1 failed (1)
       Tests  no tests
-   Start at  17:57:57
-   Duration  969ms (transform 365ms, setup 380ms, import 0ms, tests 0ms, environment 0ms)
+   Start at  18:53:55
+   Duration  191ms (transform 53ms, setup 56ms, import 0ms, tests 0ms, environment 0ms)

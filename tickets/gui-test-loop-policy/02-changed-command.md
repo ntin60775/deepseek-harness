@@ -27,15 +27,19 @@
 - Прецеденты fixture-git спек: `scripts/translation-pairing.spec.ts`, `scripts/rescope-vendor.spec.ts`.
 - Отчёт доказательств — в этот файл; proofs — `tickets/gui-test-loop-policy/proofs/`.
 
-## Доказательства по критериям
+## Доказательства по критериям (финальное дерево, proofs пересняты после правок панели)
 
-1. **Команда существует.** Артефакт: строка `test:gui:changed` в package.json + `scripts/run-gui-changed.ts` + вывод запуска в `proofs/02-green.log`. Ожидание: сбор tracked + untracked выборки, передача в vitest related. Факт: проба 1 выбрала 2 related-спеки. На базе: команды нет (`proofs/02-base-proof.log`). Расхождений не было.
-2. **Fixture-спека выборки.** Артефакт: `proofs/02-green.log` (11/11, Start at 17:57:22). Ожидание: 8 selection-кейсов. Факт: все зелёные. Расхождений не было.
-3. **Правило удалений.** Артефакт: end-to-end кейс в том же логе. Ожидание: пакетный scope, обе спеки пакета исполнены. Факт: «deletion package scope: packages/client/demo», a.spec.ts и b.spec.ts в выводе, exit 0. Расхождений не было.
-4. **Честная слепая зона.** Артефакт: end-to-end кейс + живая проба 2. Ожидание: предупреждение со слепыми зонами, exit 0. Факт: предупреждение напечатано в обоих. Расхождение ожидание/факт при разработке: маркер vitest — «No test files found», а не «No related files found» из dist-чтения; регэксп ловит оба сообщения, кейс красный до правки маркера.
-5. **Живая проба.** Артефакт: `proofs/02-green.log`, проба 1. Ожидание: выборка соответствует затронутому пакету. Факт: 2 спеки ui-mermaid, 11 тестов, 7.9s. Расхождений не было.
+1. **Команда существует.** Артефакт: строка `test:gui:changed` в package.json + `scripts/run-gui-changed.ts` + `proofs/02-live-related.log`. Ожидание: сбор tracked + untracked выборки, передача в vitest related. Факт: проба 1 выбрала 2 related-спеки ui-mermaid, 11 тестов. На базе: команды нет (`proofs/02-base-proof.log`, mutation-проба на финальной спеке). Расхождений не было.
+2. **Fixture-спека выборки.** Артефакт: `proofs/02-green-full.log` (18/18, Start at 18:53:51). Ожидание: selection-кейсы включая untracked .spec.tsx/.test.ts, .d.ts-симметрию, смешанный случай. Факт: 12 selection-кейсов зелёные. Расхождений не было.
+3. **Правило удалений.** Артефакт: `proofs/02-deletion-raw.log` (сырой вывод fixture-запуска) + end-to-end кейс. Ожидание: пакетный scope, обе спеки пакета исполнены, exit 0. Факт: «deletion package scope: packages/client/demo», a.spec.ts и b.spec.ts в выводе репортёра, 2 passed. Правило шире буквы критерия и названо явно: пакетный scope покрывает все изменения пакета с удалением (правки этого пакета не идут в related); mixed-кейс пинит сохранение related других пакетов. Расхождений не было.
+4. **Честная слепая зона.** Артефакт: end-to-end кейс с orphan-модулем в `proofs/02-green-full.log` (ассерт полной фразы предупреждения). Ожидание: предупреждение со слепыми зонами, exit 0. Факт: кейс зелёный. Расхождение при разработке: маркер vitest — «No test files found», а не «No related files found» из dist-чтения; регэксп ловит оба, названо в коде.
+5. **Живая проба.** Артефакт: `proofs/02-live-related.log`, `proofs/02-live-entry.log`. Ожидание: выборка соответствует затронутым модулям. Факт: проба 1 — 2 спеки/11 тестов; проба 2 — 1 спека/6 тестов. Расхождений не было.
+6. **Exit-коды и подкаталог (правки панели).** Артефакт: end-to-end кейсы «propagates a failed Vitest run exit code» (status 1) и «launched from a package subdirectory» (root через rev-parse, те же изменения). Факт: зелёные в 02-green-full.log.
 
 ## Расхождения
 
-- Ожидание/факт по критериям: не было (единственное расхождение при разработке — маркер пустой выборки vitest, исправлено до зелёного прогона, названо в критерии 4).
-- Контракт repoRoot: команда работает от process.cwd() (рабочее дерево запуска), vitest-бинарь резолвится рядом со скриптом; первая версия брала корень из расположения скрипта и в fixture-прогонах работала против реального репо — исправлено до зелёного прогона.
+- Ожидание/факт по критериям: не было.
+- Ревью-панель (один прогон, 4 роли; правки одним раундом): P1 тихий no-op при cwd≠корень → root через `git rev-parse --show-toplevel` + `git -C`; P1 typecheck noUncheckedIndexedAccess → checked nextToken-парсер; P1 сырой SHA в proofs → описание базы, гейт verify-repository-references зелёный; P1 proofs аттестовали пред-фикс ревизию → все логи пересняты на финальном дереве; P2 spawn result.error/maxBuffer → hardened git() и runVitest (16 MiB, error named); P2 env изоляция fixture → sanitized childEnv (GIT_*/VITEST*/DSH_COVERAGE_*, GIT_CONFIG_GLOBAL=/dev/null, SIGKILL, child.error); P2 untracked-спека без артефакта исполнения → e2e кейс с выводом репортёра; P2 вывод критерия 3 отсутствовал → сырой fixture-лог; P3 passWithNoTests пакетного scope, симметрия .d.ts, счётчики, depth-guard packageRoot, exit-code и mixed кейсы, coverage-exempt инвентарь, JSDoc wording — внесены.
+- git()-хелперы change-scope.ts приватные; экспорт ради одного потребителя расширил бы чужой API — свой hardened git() по тому же прецеденту (названо, не молча).
+- Прямые запуски отдельных verify-* скриптов не наследуют приоритет агрегатов — граница для дока политики (тикет 03/04).
+- continue.md: регистрация юнита при мерже (работа лида).

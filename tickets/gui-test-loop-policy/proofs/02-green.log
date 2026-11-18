@@ -1,29 +1,49 @@
-# Зелёный прогон носителя тикета 02 (2026-11-18)
+# Зелёный прогон носителя тикета 02 (финальное дерево после правок ревью-панели, 2026-11-18)
 
-Команда: pnpm exec vitest run scripts/run-gui-changed.spec.ts --maxWorkers=2
+Команда: pnpm exec vitest run scripts/run-gui-changed.spec.ts --maxWorkers=2. Полный лог: 02-green-full.log.
 
 ```
  Test Files  1 passed (1)
-      Tests  11 passed (11)
-   Start at  17:57:22
-   Duration  6.12s (transform 475ms, setup 458ms, import 147ms, tests 4.81s, environment 0ms)
+      Tests  18 passed (18)
+   Start at  18:53:51
+   Duration  2.80s
 ```
 
-Кейсы: tracked-правка, untracked src, untracked спека, .d.ts отсечён, пустой diff, правка вне scope, удаление → пакетный scope, staged rename, staged-only правка; end-to-end: «0 tests selected» exit 0, предупреждение слепых зон exit 0, пакетный scope при удалении гоняет обе спеки пакета.
+12 selection-кейсов: tracked-правка; untracked src + спека; untracked .spec.tsx и .test.ts; untracked .d.ts отсечён но учтён; tracked .d.ts отсечён; пустой diff; правка вне scope; untracked non-code учтён; удаление → пакетный scope; staged rename; staged-only правка; смешанный случай (удаление в одном пакете + правка в другом → related другого пакета сохранён).
 
-# Живые пробы (критерий 5)
+6 end-to-end кейсов (настоящий vitest в fixture-репо, sanitized env без GIT_*/VITEST*/DSH_COVERAGE_*): «run-gui-changed: 0 tests selected» exit 0; предупреждение слепых зон (полная фраза) exit 0; пакетный scope при удалении (обе спеки в выводе репортёра); untracked-новая спека исполняется (new.spec.ts + 1 passed в выводе); провал vitest propagates exit 1; запуск из подкаталога пакета выбирает те же изменения (root через git rev-parse).
 
-Проба 1 — листовой модуль с прямыми импортирующими спеками. Правка: дописана строка комментария в packages/client/ui-mermaid/src/client/index.ts, запуск `pnpm run test:gui:changed`:
+# Сырой вывод пакетного scope при удалении (критерий 3)
+
+Fixture-репо, удаление src/unused.ts, запуск враппера: 02-deletion-raw.log.
 
 ```
-run-gui-changed: 1 changed in scope, 3 out of scope, 0 deletion package(s)
- ✓ packages/client/ui-mermaid/tests/config.client.spec.ts (5 tests) 18ms
- ✓ packages/client/ui-mermaid/tests/apply.client.spec.tsx (6 tests) 367ms
+run-gui-changed: 1 changed in scope, 0 out of scope, 1 deletion package(s)
+run-gui-changed: deletion package scope: packages/client/demo
+ ✓ packages/client/demo/tests/b.spec.ts (1 test) 3ms
+ ✓ packages/client/demo/tests/a.spec.ts (1 test) 3ms
+ Test Files  2 passed (2)
+      Tests  2 passed (2)
+```
+
+# Живые пробы на реальном дереве (критерий 5)
+
+Проба 1 — листовой модуль packages/client/ui-mermaid/src/client/index.ts (правка комментария): 02-live-related.log.
+
+```
+run-gui-changed: 1 changed in scope, 6 out of scope, 0 deletion package(s)
  Test Files  2 passed (2)
       Tests  11 passed (11)
-   Duration  7.90s
 ```
 
-Выбраны ровно related-спеки затронутого модуля; правка возвращена git checkout.
+Выбраны ровно related-спеки ui-mermaid (config + apply); правка возвращена.
 
-Проба 2 — входной re-export без импортирующих спек. Правка packages/client/ui-mermaid/src/index.ts: команда честно печатает предупреждение «changed files have no related tests; vitest related cannot see config, dynamic loading, subprocesses, or built artifacts — select the owning tests manually», exit 0. Слепая зона не замаскирована под зелёный прогон.
+Проба 2 — входной re-export packages/client/ui-mermaid/src/index.ts: 02-live-entry.log.
+
+```
+run-gui-changed: 1 changed in scope, 6 out of scope, 0 deletion package(s)
+ Test Files  1 passed (1)
+      Tests  6 passed (6)
+```
+
+Related нашёл одну зависимую спеку; предупреждение слепых зон аттестовано fixture-кейсом с orphan-модулем (02-green-full.log).

@@ -48,6 +48,7 @@ export const coverageExemptHeavySuites: readonly CoverageExemptSuite[] = [
   { filter: 'scripts/install-lefthook.spec.ts', exclude: 'scripts/install-lefthook.spec.ts' },
   { filter: 'scripts/oxlint-contract.spec.ts', exclude: 'scripts/oxlint-contract.spec.ts' },
   { filter: 'scripts/change-scope.spec.ts', exclude: 'scripts/change-scope.spec.ts' },
+  { filter: 'scripts/run-gui-changed.spec.ts', exclude: 'scripts/run-gui-changed.spec.ts' },
   // Repository compiler scans measure scripts/ sources only. The epoch-header
   // suite also calls the v3-to-v4 admission guard, covered by its package tests.
   { filter: 'scripts/persistence-schema.spec.ts', exclude: 'scripts/persistence-schema.spec.ts' },
