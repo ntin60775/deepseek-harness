@@ -253,8 +253,8 @@ export interface Config {
 
 ## `@deepseek-ai/dsh-api-session-controller`
 
-- `inject`: `agentDefaultModel` · `agents` · `attachments` · `fileUploads` · `fs` · `llm` · `remoteAccess` · `sessions` · `sessionProjections` · `sessionQuery` · `typert` · `typertGateway` · `workspaceRegistry`
-- `source`: [`packages/api/session-controller/src/index.ts:83`](../packages/api/session-controller/src/index.ts)
+- `inject`: `agentDefaultModel` · `agents` · `attachments` · `fileUploads` · `fs` · `llm` · `remoteAccess` · `sessions` · `sessionPersistence` · `sessionProjections` · `sessionQuery` · `typert` · `typertGateway` · `workspaceRegistry`
+- `source`: [`packages/api/session-controller/src/index.ts:85`](../packages/api/session-controller/src/index.ts)
 
 ```ts config-catalog
 /** Session Controller deployment policy. */
@@ -3306,7 +3306,7 @@ export type SessionLogCompressionLevel = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
 
 ## `@deepseek-ai/dsh-session-persistence-jsonl`
 
-- `source`: [`packages/session/session-persistence-jsonl/src/index.ts:107`](../packages/session/session-persistence-jsonl/src/index.ts)
+- `source`: [`packages/session/session-persistence-jsonl/src/index.ts:108`](../packages/session/session-persistence-jsonl/src/index.ts)
 
 ```ts config-catalog
 /** Plugin config for the JSONL backend's root, physical encoding, and listing concurrency. */
@@ -5295,6 +5295,54 @@ export interface Config {
 ```
 <!-- END GENERATED config-catalog:@deepseek-ai/dsh-workspace-changes -->
 
+<!-- BEGIN GENERATED config-catalog:@local/dsh-web-search-zai -->
+<a id="localdsh-web-search-zai"></a>
+
+## `@local/dsh-web-search-zai`
+
+- `inject`: `web` · `credentials`
+- `source`: [`packages/fork/web-search-zai/src/index.ts:31`](../packages/fork/web-search-zai/src/index.ts)
+
+```ts config-catalog
+/** Plugin config; every field has a default. */
+export interface Config {
+  /** Credential reference holding the z.ai API key. */
+  apiKeyRef?: string
+  /** Search MCP endpoint. */
+  searchURL?: string
+  /** Reader MCP endpoint. */
+  readerURL?: string
+  /** Per-call deadline in milliseconds. */
+  timeoutMs?: number
+  /** Summary size requested from the search tool. */
+  contentSize?: ZaiContentSize
+  /** Recency window requested from the search tool. */
+  recency?: ZaiRecency
+  /** Region hint sent with every search. */
+  location?: ZaiLocation
+  /** Fall back to the free HTTP(S) fetcher when a z.ai read fails. */
+  fetchFallback?: boolean
+  /** Fallback fetcher response byte cap. */
+  fallbackMaxResponseBytes?: number
+  /** Fallback fetcher decoded character cap. */
+  fallbackMaxBodyChars?: number
+  /** Fallback fetcher deadline in milliseconds. */
+  fallbackTimeoutMs?: number
+  /** Fallback fetcher same-origin redirect cap. */
+  fallbackMaxRedirects?: number
+}
+
+/** Result-summary size the search tool accepts. */
+export type ZaiContentSize = 'medium' | 'high'
+
+/** Recency window the search tool accepts. */
+export type ZaiRecency = 'oneDay' | 'oneWeek' | 'oneMonth' | 'oneYear' | 'noLimit'
+
+/** Region hint the search tool accepts. */
+export type ZaiLocation = 'cn' | 'us'
+```
+<!-- END GENERATED config-catalog:@local/dsh-web-search-zai -->
+
 ## 无配置的可加载插件
 
 这些插件通过 `cordis.yml` 中不含 `config:` 块的条目加载；它们未声明任何配置接口。
@@ -5339,6 +5387,7 @@ export interface Config {
 | `@deepseek-ai/dsh-client-ui-input-trigger` | — | [`packages/client/ui-input-trigger/src/index.ts`](../packages/client/ui-input-trigger/src/index.ts) |
 | `@deepseek-ai/dsh-client-ui-jobs` | — | [`packages/client/ui-jobs/src/index.ts`](../packages/client/ui-jobs/src/index.ts) |
 | `@deepseek-ai/dsh-client-ui-layout` | — | [`packages/client/ui-layout/src/index.ts`](../packages/client/ui-layout/src/index.ts) |
+| `@deepseek-ai/dsh-client-ui-mermaid` | — | [`packages/client/ui-mermaid/src/index.ts`](../packages/client/ui-mermaid/src/index.ts) |
 | `@deepseek-ai/dsh-client-ui-message-feedback` | — | [`packages/client/ui-message-feedback/src/index.ts`](../packages/client/ui-message-feedback/src/index.ts) |
 | `@deepseek-ai/dsh-client-ui-model-selection` | — | [`packages/client/ui-model-selection/src/index.ts`](../packages/client/ui-model-selection/src/index.ts) |
 | `@deepseek-ai/dsh-client-ui-open-in-app` | — | [`packages/client/ui-open-in-app/src/index.ts`](../packages/client/ui-open-in-app/src/index.ts) |
