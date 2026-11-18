@@ -47,6 +47,7 @@ The strict audit is the mechanical gate. The UI check is the part no gate covers
 ## Related documentation
 
 - [Web subsystem](../../docs/subsystems/web.md) — the seam these providers register into.
+- [Fork upgrade runbook](../../docs/ops/fork-upgrade.md) — the operational procedure for a new upstream release, including the theme classifier and the live UI pass.
 - [Fork merge ritual rationale](../../.agents/notes/implemented/process/2026-09-08-fork-merge-ritual.md) — why upstream merges run `scripts/fork-merge-ritual.sh` and what it restores.
 
 ## Dev Note
