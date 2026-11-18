@@ -4,7 +4,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { MermaidFenceLayer } from '../src/client/MermaidFenceLayer.tsx'
 import type { ThemeSnapshot } from '@deepseek-ai/dsh-client-ui-theme/client'
-import { FakeResizeObserver, fenceFixture, t, wideSvg } from './harness.client.ts'
+import { FakeResizeObserver, fenceFixture, measureWidth, t, wideSvg } from './harness.client.ts'
 
 afterEach(() => {
   cleanup()
@@ -15,11 +15,6 @@ afterEach(() => {
 /** Synthetic box with exact decimal fractions: W=1000 makes 850/1000 exactly the 0.85 double. */
 const boxSvg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 100"><text>node</text></svg>'
 const smallBoxSvg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 100"><text>node</text></svg>'
-
-/** Set the measured pixel width every element reports through clientWidth. */
-function measureWidth(value: number): void {
-  vi.spyOn(Element.prototype, 'clientWidth', 'get').mockReturnValue(value)
-}
 
 /** Render one settled card and return its card node, diagram wrapper, and measure container. */
 async function renderedCard(fixture: ReturnType<typeof fenceFixture>, svg: string) {
@@ -39,14 +34,15 @@ describe('mermaid measurement face', () => {
     const { card, wrapper, measure } = await renderedCard(fixture, wideSvg)
     // 1200 / 1432.15625 ≈ 0.838 < 0.85: natural size, explicit W×H from the recorded viewBox.
     expect(card.dataset.fitMode).toBe('natural')
+    expect(card.dataset.fitScale).toBe('1')
     const svg = wrapper.querySelector('svg')!
     expect(svg.getAttribute('width')).toBe('1432.15625')
     expect(svg.getAttribute('height')).toBe('63')
     // The owner is the card node; the measured node is its inner non-scrolling
     // container, and the diagram wrapper scrolls inside it.
     expect(measure.closest('[data-mermaid-card]')).toBe(card)
-    expect(wrapper.parentElement).toBe(measure)
-    expect(measure).not.toBe(wrapper)
+    expect(FakeResizeObserver.made.at(-1)!.observe).not.toHaveBeenCalledWith(card)
+    expect(FakeResizeObserver.made.at(-1)!.observe).not.toHaveBeenCalledWith(wrapper)
     expect(FakeResizeObserver.made.at(-1)!.observe).toHaveBeenCalledWith(measure)
     expect(fixture.attempts).toHaveLength(1)
   })
@@ -72,6 +68,7 @@ describe('mermaid measurement face', () => {
     measureWidth(1300)
     act(() => { observer.fire() })
     expect(card.dataset.fitMode).toBe('fit')
+    expect(card.dataset.fitScale).toBe('0.9077221846429117')
     expect(svg.getAttribute('width')).toBe('100%')
     expect(svg.getAttribute('height')).toBeNull()
     expect(wrapper.querySelector('svg')).toBe(svg)
@@ -87,6 +84,7 @@ describe('mermaid measurement face', () => {
     measureWidth(850)
     const { card } = await renderedCard(fenceFixture(), boxSvg)
     expect(card.dataset.fitMode).toBe('fit')
+    expect(card.dataset.fitScale).toBe('0.85')
   })
 
   it('coalesces repeated callbacks without debounce and without growing render attempts', async () => {
@@ -148,15 +146,67 @@ describe('mermaid measurement face', () => {
     expect(fixture.attempts).toHaveLength(2)
   })
 
-  it('detaches measurement on the source swap and re-attaches on the diagram return', async () => {
+  it('keeps measurement attached across the source swap and publishes the cached scale', async () => {
+    measureWidth(1200)
+    const fixture = fenceFixture()
+    const { card, measure } = await renderedCard(fixture, wideSvg)
+    const observer = FakeResizeObserver.made.at(-1)!
+    fireEvent.click(screen.getByRole('button', { name: t('source.toggle') }))
+    // The container wraps both body modes: no detach, no second observation.
+    expect(observer.disconnect).not.toHaveBeenCalled()
+    expect(measure.querySelector('pre')).toBeTruthy()
+    expect(card.dataset.fitScale).toBe('1')
+    fireEvent.click(screen.getByRole('button', { name: t('source.toggle') }))
+    expect(FakeResizeObserver.made.at(-1)).toBe(observer)
+    expect(card.dataset.fitMode).toBe('natural')
+  })
+
+  it('updates the published scale on resize while the source mode is shown', async () => {
+    measureWidth(850)
+    const fixture = fenceFixture()
+    const { card } = await renderedCard(fixture, boxSvg)
+    expect(card.dataset.fitScale).toBe('0.85')
+    fireEvent.click(screen.getByRole('button', { name: t('source.toggle') }))
+    measureWidth(900)
+    act(() => { FakeResizeObserver.made.at(-1)!.fire() })
+    expect(card.dataset.fitScale).toBe('0.9')
+    fireEvent.click(screen.getByRole('button', { name: t('source.toggle') }))
+    expect(card.dataset.fitScale).toBe('0.9')
+  })
+
+  it('publishes the cached scale after a source-mode remount on a theme revision', async () => {
+    measureWidth(1200)
+    const fixture = fenceFixture()
+    const first = await renderedCard(fixture, wideSvg)
+    fireEvent.click(screen.getByRole('button', { name: t('source.toggle') }))
+    fixture.channel.change({ revision: 2 } as ThemeSnapshot)
+    await vi.waitFor(() => { expect(fixture.attempts).toHaveLength(2) })
+    fixture.attempts[1]!.settle({ kind: 'rendered', svg: wideSvg })
+    await vi.waitFor(() => { expect(first.view.container.querySelector('pre')).toBeTruthy() })
+    const card = first.view.container.querySelector('[data-mermaid-card]') as HTMLElement
+    // Remounted in source mode: no svg in the container, scale served by the ref closure cache.
+    expect(card.dataset.fitScale).toBe('1')
+    expect(first.measure.querySelector('svg')).toBeNull()
+    fireEvent.click(screen.getByRole('button', { name: t('source.toggle') }))
+    expect(card.dataset.fitMode).toBe('natural')
+  })
+
+  it('reads the measure container width, not the card width', async () => {
+    vi.spyOn(Element.prototype, 'clientWidth', 'get').mockImplementation(function (this: Element) {
+      return this.hasAttribute('data-mermaid-card') ? 1200 : 900
+    })
+    const { card, measure } = await renderedCard(fenceFixture(), boxSvg)
+    expect(card.clientWidth).toBeGreaterThan(measure.clientWidth)
+    expect(card.dataset.fitScale).toBe('0.9')
+  })
+
+  it('rewrites svg attributes on the source-to-diagram return', async () => {
     measureWidth(1200)
     const fixture = fenceFixture()
     const { card } = await renderedCard(fixture, wideSvg)
-    const observer = FakeResizeObserver.made.at(-1)!
     fireEvent.click(screen.getByRole('button', { name: t('source.toggle') }))
-    expect(observer.disconnect).toHaveBeenCalledTimes(1)
     fireEvent.click(screen.getByRole('button', { name: t('source.toggle') }))
-    expect(FakeResizeObserver.made.at(-1)).not.toBe(observer)
+    await vi.waitFor(() => { expect(screen.getByRole('img').querySelector('svg')!.getAttribute('width')).toBe('1432.15625') })
     expect(card.dataset.fitMode).toBe('natural')
   })
 

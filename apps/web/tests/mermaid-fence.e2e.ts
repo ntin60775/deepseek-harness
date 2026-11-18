@@ -1,5 +1,5 @@
 /** A settled mermaid fence renders as one named diagram card in the assembled Web surface. */
-import { readFile } from 'node:fs/promises'
+import { mkdir, readFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { chromium, type Browser, type Page } from 'playwright'
@@ -14,6 +14,7 @@ const SNAPSHOT_DIR = fileURLToPath(new URL('../../../snapshots/web/mermaid-fence
 const OVERLAY = fileURLToPath(new URL('./mermaid-fence.overlay.yml', import.meta.url))
 const MODE = webSnapshotMode()
 const DIAGRAM_NAME = 'Mermaid diagram'
+const SHOT_DIR = fileURLToPath(new URL('../../../.artifacts/screenshots/mermaid-viewer', import.meta.url))
 
 describe('web e2e: mermaid fence diagram card', () => {
   let scaffold: WebScaffold
@@ -59,13 +60,55 @@ describe('web e2e: mermaid fence diagram card', () => {
     expect(await toggle.getAttribute('aria-pressed')).toBe('false')
     await card.getByRole('img', { name: DIAGRAM_NAME }).waitFor()
 
+    const originalViewport = page.viewportSize()!
     await card.getByRole('button', { name: 'Open diagram in viewer' }).click()
     const dialog = page.getByRole('dialog', { name: 'Diagram viewer' })
     await dialog.waitFor()
-    const src = await dialog.locator('img').getAttribute('src')
-    expect(src?.startsWith('data:image/svg+xml;base64,')).toBe(true)
+    // The viewer holds live vector SVG at the chat scale, not a raster data URL.
+    expect(await dialog.locator('img').count()).toBe(0)
+    const viewerSvg = dialog.locator('[role="img"] svg')
+    await viewerSvg.waitFor()
+    const chatWidth = await card.locator('[role="img"] svg').evaluate(el => el.getBoundingClientRect().width)
+    expect(await viewerSvg.evaluate(el => el.getBoundingClientRect().width)).toBeCloseTo(chatWidth, 0)
+    // One catalog zoom step snaps to the next 0.25 grid node above the chat scale.
+    const intrinsic = await viewerSvg.evaluate(el => (el as SVGSVGElement).viewBox.baseVal.width)
+    const s0 = Number(await card.getAttribute('data-fit-scale'))
+    const stepped = Math.min(4, (Math.floor(s0 / 0.25) + 1) * 0.25)
+    await dialog.getByRole('button', { name: 'Zoom in', exact: true }).click()
+    expect(await viewerSvg.evaluate(el => el.getBoundingClientRect().width)).toBeCloseTo(intrinsic * stepped, 0)
+    await mkdir(SHOT_DIR, { recursive: true })
+    await page.screenshot({ path: join(SHOT_DIR, `viewer-light-${MODE}-${process.pid}.png`) })
+    await page.setViewportSize({ width: 320, height: 1000 })
+    await page.screenshot({ path: join(SHOT_DIR, `viewer-narrow-${MODE}-${process.pid}.png`) })
+    // Overflow scrolls with a reachable start and end, by pointer and by keyboard.
+    const metrics = await dialog.locator('[role="img"]').evaluate((el) => {
+      const vp = el.parentElement!.parentElement!
+      return { sw: vp.scrollWidth, cw: vp.clientWidth, left: el.getBoundingClientRect().left, vpLeft: vp.getBoundingClientRect().left }
+    })
+    expect(metrics.sw).toBeGreaterThan(metrics.cw)
+    expect(metrics.left).toBeCloseTo(metrics.vpLeft, 0)
+    await dialog.locator('[role="img"]').evaluate((el) => {
+      const vp = el.parentElement!.parentElement!
+      vp.scrollLeft = vp.scrollWidth
+      return { right: el.getBoundingClientRect().right, vpRight: vp.getBoundingClientRect().right }
+    }).then(end => expect(end.right).toBeCloseTo(end.vpRight, 0))
+    await dialog.locator('[aria-label="Diagram scroll region"]').evaluate((el) => { el.scrollLeft = 0 })
+    // The scroller is keyboard-reachable: Tab from the close control lands on it.
+    await dialog.getByRole('button', { name: 'Close', exact: true }).focus()
+    await page.keyboard.press('Tab')
+    expect(await page.evaluate(() => document.activeElement?.getAttribute('aria-label'))).toBe('Diagram scroll region')
+    await page.setViewportSize(originalViewport)
+    // A theme revision closes the open viewer; reopen on dark for the second probe.
+    await page.emulateMedia({ colorScheme: 'dark' })
+    await expect.poll(() => dialog.count()).toBe(0)
+    await card.locator('[role="img"]').waitFor()
+    await card.getByRole('button', { name: 'Open diagram in viewer' }).click()
+    await dialog.waitFor()
+    await page.screenshot({ path: join(SHOT_DIR, `viewer-dark-${MODE}-${process.pid}.png`) })
     await page.keyboard.press('Escape')
     await expect.poll(() => dialog.count()).toBe(0)
+    await page.emulateMedia({ colorScheme: 'light' })
+    await card.locator('[role="img"]').waitFor()
 
     expect(tripwire.pageErrors).toEqual([])
     expect(tripwire.warnings).toEqual([])

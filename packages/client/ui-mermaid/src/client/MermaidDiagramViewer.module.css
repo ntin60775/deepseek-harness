@@ -1,0 +1,23 @@
+/* Scrolling stage content: auto margins center smaller diagrams and collapse
+   to zero on the overflowing sides so the scroll start stays reachable. */
+.viewport {
+  position: relative;
+  display: flex;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+}
+
+.inner {
+  margin: auto;
+}
+
+.diagram svg {
+  display: block;
+}
+
+/* 20px keeps the toolbar clear of the viewport horizontal scrollbar; the
+   catalog default 14px would sit inside it. Centering stays with the primitive. */
+.toolbar {
+  bottom: 20px;
+}
