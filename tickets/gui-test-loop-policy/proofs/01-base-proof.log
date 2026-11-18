@@ -1,0 +1,14 @@
+# Base-proof тикета 01
+
+База: a35a541700 (master до реализации). Краснота снята mutation-пробой 2026-11-18: файлы реализации (scripts/parallelism.ts, scripts/run-gates.ts, vitest.config.ts) временно возвращены к базе, новые спеки сохранены; после снятия возвращены к коммиту правок. Полный лог: 01-base-proof-full.log (243 строки, Start at 17:55:08).
+
+Команда: pnpm exec vitest run scripts/parallelism.spec.ts scripts/run-gates.spec.ts scripts/lane-test-budget.spec.ts -t halves --maxWorkers=2 --reporter=verbose
+
+Факт базы по критериям:
+1. parallelism.spec «halves local Vitest forks under the memory cap»: TypeError: defaultTestParallelism is not a function (формулы на базе нет).
+2. run-gates.spec «halves the local coverage budget below the memory cap»: received DSH_COVERAGE_MAX_WORKERS "16", DSH_COVERAGE_PARTITIONS "11"; ожидание спеки "8"/"6" (16 CPU).
+3. lane-test-budget.spec «halves the reported CPUs under the memory cap outside CI»: runtime-зонд корневого конфига на базе печатает maxWorkers 12 при 12 CPU; ассерт «expected 12 to be less than 12» красный. Зонд: `node --import tsx/esm --input-type=module -e "import('./vitest.config.ts')…"` → base applied maxWorkers: 12.
+
+Инварианты «1→1» и «CI→available» в этом прогоне skipped (-t halves), не показаны зелёными на базе; их зелёность на базе следует из формулы min(available,cap) и подтверждена полным прогоном на дереве тикета (176/176).
+
+Ожидание спеки: max(1, min(floor(available/2), 48)). Все три критерия нового поведения падают на базовом коммите.
