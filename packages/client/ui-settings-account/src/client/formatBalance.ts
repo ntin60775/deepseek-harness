@@ -17,5 +17,9 @@ export function formatBalance(amount: string, symbol: '¥' | '$'): string {
 
 function addCommas(value: string): string {
   const [integer, fraction] = value.split('.')
+  if (integer === undefined || fraction === undefined) {
+    /* v8 ignore next -- toFixed(2) always carries a decimal point; the guard satisfies noUncheckedIndexedAccess. */
+    throw new Error(`formatBalance: expected a two-decimal string, got ${value}`)
+  }
   return `${integer.replace(/\B(?=(\d{3})+(?!\d))/gu, ',')}.${fraction}`
 }
