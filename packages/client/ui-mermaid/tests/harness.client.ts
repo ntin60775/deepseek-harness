@@ -28,6 +28,11 @@ export class FakeResizeObserver implements ResizeObserver {
 }
 vi.stubGlobal('ResizeObserver', FakeResizeObserver)
 
+/** Set the measured pixel width every element reports through clientWidth; jsdom has no layout. */
+export function measureWidth(value: number): void {
+  vi.spyOn(Element.prototype, 'clientWidth', 'get').mockReturnValue(value)
+}
+
 /** Locale seat stub over the package dictionary and the shared common vocabulary. */
 export const t = makeTranslate(en, commonEn)
 

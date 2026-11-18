@@ -1,12 +1,13 @@
-/** Mermaid fence card: diagram by default, source on toggle, lightbox viewer. */
-import { useCallback, useEffect, useMemo, useState } from 'react'
+/** Mermaid fence card: diagram by default, source on toggle, fullscreen viewer. */
+import { useCallback, useEffect, useRef, useState } from 'react'
 import type { KeyboardEvent, ReactNode } from 'react'
 import type {} from '@deepseek-ai/dsh-client-ui-chat/client'
-import { CodeBlock, IconFullscreenOutlineRegular, ImageLightbox, writeClipboard } from '@deepseek-ai/dsh-client-ui-primitives'
+import { CodeBlock, IconFullscreenOutlineRegular, writeClipboard } from '@deepseek-ai/dsh-client-ui-primitives'
 import type { HocShare, HostObservable, InjectFace, PropsLocale, PropsRuntime, SlotMap } from '@deepseek-ai/dsh-client-ui-slots'
 import type { MermaidAttempt } from './render-controller.ts'
 import type { MermaidMeasureFace } from './measure.ts'
-import { prepareDiagramSvg, svgToDataUrl } from './svg.ts'
+import { MermaidDiagramViewer } from './MermaidDiagramViewer.tsx'
+import { prepareDiagramSvg } from './svg.ts'
 import type { MermaidThemeState } from './theme-state.ts'
 import css from './MermaidFenceLayer.module.css'
 
@@ -34,7 +35,7 @@ const COPIED_WINDOW_MS = 1000
  * streams or the library chunk loads, the inner code block stays visible. A
  * parse failure, a rejected import, or a render without visible text degrades
  * to the code block with a compact notice. The card header toggles the source,
- * copies it in both body states, and opens the lightbox viewer; Enter/Space on
+ * copies it in both body states, and opens the fullscreen viewer; Enter/Space on
  * the focused diagram wrapper opens the viewer as well. The apply-owned
  * measurement face publishes the card's fit mode from the measure container's
  * pixel width; the component only attaches its ref.
@@ -47,12 +48,16 @@ export function MermaidFenceLayer(
   const revision = useMermaidTheme(state => state.revision)
   const [body, setBody] = useState<BodyState>({ kind: 'loading' })
   const [showSource, setShowSource] = useState(false)
-  const [viewerOpen, setViewerOpen] = useState(false)
+  const [viewer, setViewer] = useState<{ scale: number } | null>(null)
   const [copied, setCopied] = useState(false)
   const [diagramRef] = useState(createDiagramRef)
+  const cardRef = useRef<HTMLDivElement | null>(null)
 
   useEffect(() => {
     if (streaming) return
+    // A new attempt (theme revision or re-settle) closes the viewer: the card
+    // body returns to the code block and the zoom state must not survive it.
+    setViewer(null)
     setBody({ kind: 'loading' })
     const attempt = renderDiagram(code)
     let active = true
@@ -74,14 +79,18 @@ export function MermaidFenceLayer(
     })
   }, [code, copied])
 
-  const openViewer = useCallback(() => { setViewerOpen(true) }, [])
+  // The open gesture reads the apply-published chat scale; the viewer never
+  // recomputes it, and a missing publication is a broken invariant, not a default.
+  const openViewer = useCallback(() => {
+    const published = cardRef.current?.dataset.fitScale
+    if (published === undefined) throw new Error('mermaid card missing data-fit-scale')
+    setViewer({ scale: Number(published) })
+  }, [])
   const onDiagramKeyDown = useCallback((event: KeyboardEvent<HTMLDivElement>) => {
     if (event.key !== 'Enter' && event.key !== ' ') return
     event.preventDefault()
-    setViewerOpen(true)
-  }, [])
-
-  const viewerSrc = useMemo(() => body.kind === 'rendered' && viewerOpen ? svgToDataUrl(body.svg) : undefined, [body, viewerOpen])
+    openViewer()
+  }, [openViewer])
 
   if (streaming) return children
   if (body.kind === 'loading') return children
@@ -94,7 +103,7 @@ export function MermaidFenceLayer(
     )
   }
   return (
-    <div className={css.card} data-mermaid-card>
+    <div ref={cardRef} className={css.card} data-mermaid-card>
       <div className={css.banner}>
         <span className={css.infostring}>{lang}</span>
         <div className={css.spacer} />
@@ -110,11 +119,15 @@ export function MermaidFenceLayer(
           </button>
         </div>
       </div>
-      {showSource
-        ? <CodeBlock code={code} lang="mermaid" showHeader={false} copyLabel={t('copy')} copiedLabel={t('copied')} />
-        : (
-          <div className={css.body}>
-            <div ref={diagramRef}>
+      <div className={css.body}>
+        <div ref={diagramRef}>
+          {showSource
+            ? (
+              <div className={css.sourceFlush}>
+                <CodeBlock code={code} lang="mermaid" showHeader={false} copyLabel={t('copy')} copiedLabel={t('copied')} />
+              </div>
+            )
+            : (
               <div
                 className={css.diagram}
                 role="img"
@@ -123,15 +136,24 @@ export function MermaidFenceLayer(
                 onKeyDown={onDiagramKeyDown}
                 dangerouslySetInnerHTML={{ __html: prepareDiagramSvg(body.svg) }}
               />
-            </div>
-          </div>
-        )}
-      {viewerSrc !== undefined && (
-        <ImageLightbox
-          src={viewerSrc}
-          alt={t('diagram.label')}
+            )}
+        </div>
+      </div>
+      {viewer !== null && (
+        <MermaidDiagramViewer
+          svg={body.svg}
+          initialScale={viewer.scale}
+          diagramLabel={t('diagram.label')}
+          scrollLabel={t('viewer.scroll')}
           labels={{ dialog: t('viewer.dialog'), close: t('viewer.close') }}
-          onClose={() => { setViewerOpen(false) }}
+          zoomLabels={{
+            controls: t('zoomControls'),
+            menu: t('zoomMenu'),
+            out: t('zoomOut'),
+            into: t('zoomIn'),
+            value: percent => t('zoomValue', { percent }),
+          }}
+          onClose={() => { setViewer(null) }}
         />
       )}
     </div>

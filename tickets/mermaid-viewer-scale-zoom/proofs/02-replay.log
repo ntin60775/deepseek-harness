@@ -1,0 +1,11 @@
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+
+ RUN  v4.1.11 /home/prog7/home/dev/contrib/forks/deepseek-harness/.worktrees/mermaid-viewer-scale-zoom
+
+ ✓ apps/web/tests/mermaid-fence.e2e.ts (2 tests) 6370ms
+     ✓ renders two named diagram cards with source swap and a viewport-fit viewer  1319ms
+
+ Test Files  1 passed (1)
+      Tests  2 passed (2)
+   Start at  18:29:08
+   Duration  8.16s (transform 1.00s, setup 0ms, import 1.67s, tests 6.37s, environment 0ms)

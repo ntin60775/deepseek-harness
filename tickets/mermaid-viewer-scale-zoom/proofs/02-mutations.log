@@ -1,0 +1,24 @@
+== M1 data-fit-scale publication removed (fence-viewer) ==
+     × opens live vector SVG at natural scale from the header button 1282ms
+     × opens at the fitted chat scale, not above it, in a wide column 1074ms
+     × opens with Enter on the focused wrapper at the published scale 1064ms
+     × closes the viewer when a theme revision starts a new attempt 1073ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+      Tests  4 failed | 1 passed (5)
+== M2 viewer ignores initial chat scale (fence-viewer) ==
+     × opens at the fitted chat scale, not above it, in a wide column 78ms
+     × opens with Enter on the focused wrapper at the published scale 72ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+      Tests  2 failed | 3 passed (5)
+== M3 inline max-width kept (svg) ==
+     × removes mermaid inline max-width and width so zoom above 1 grows the diagram 8ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+      Tests  1 failed | 4 passed (5)
+== M4 revision does not close viewer (fence-viewer) ==
+     × closes the viewer when a theme revision starts a new attempt 1165ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+      Tests  1 failed | 4 passed (5)
+== M5 subtree observer removed (measure return-apply) ==
+     × rewrites svg attributes on the source-to-diagram return 1110ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+      Tests  1 failed | 13 passed (14)

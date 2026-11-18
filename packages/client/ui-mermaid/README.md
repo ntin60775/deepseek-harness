@@ -1,5 +1,5 @@
 ---
-description: "Render settled mermaid chat fences as sanitized SVG diagram cards with a source toggle and a lightbox viewer."
+description: "Render settled mermaid chat fences as sanitized SVG diagram cards with a source toggle and a fullscreen viewer at the chat scale."
 kind: "package-reference"
 ---
 
@@ -7,7 +7,7 @@ kind: "package-reference"
 
 ## Summary
 
-A ` ```mermaid ` fence in the chat transcript renders as an SVG diagram card instead of a code block. One card type serves every size and theme: the diagram is the default body, the source is one toggle away, and a lightbox shows the whole diagram fitted to the viewport. Wide diagrams keep their natural size with horizontal scroll inside the card. The package ships disabled; a deployment opts in by overriding the `ui-mermaid` row in its profile patch.
+A ` ```mermaid ` fence in the chat transcript renders as an SVG diagram card instead of a code block. One card type serves every size and theme: the diagram is the default body, the source is one toggle away, and a fullscreen viewer shows the diagram at the chat scale with catalog zoom and scrollbars when it overflows. Wide diagrams keep their natural size with horizontal scroll inside the card. The package ships disabled; a deployment opts in by overriding the `ui-mermaid` row in its profile patch.
 
 ## Table of Contents
 
@@ -29,7 +29,7 @@ Enable the shipped row in a profile patch:
   disabled: false
 ```
 
-While a reply streams, the fence stays a code block. Once it settles, the card loads the mermaid chunk lazily and renders the diagram in the active theme's colors; a theme change re-renders without a reload. The header carries the `mermaid` language label, a **Source** toggle (`aria-pressed`) that swaps the body to the highlighted source and back, a **Copy** action available in both body states, and a viewer button. Enter or Space on the focused diagram opens the viewer as well. The viewer is the shared `ImageLightbox` over a data URL of the serialized SVG with explicit dimensions from its viewBox: viewport-fit, no interactive zoom.
+While a reply streams, the fence stays a code block. Once it settles, the card loads the mermaid chunk lazily and renders the diagram in the active theme's colors; a theme change re-renders without a reload. The header carries the `mermaid` language label, a **Source** toggle (`aria-pressed`) that swaps the body to the highlighted source and back, a **Copy** action available in both body states, and a viewer button. Enter or Space on the focused diagram opens the viewer as well. The viewer is the shared `LightboxShell` chrome around the live sanitized SVG at the scale published by the card (`data-fit-scale`): catalog `ZoomControls` with `DOCUMENT_ZOOM` semantics, a scrolling viewport with reachable start, and closure on theme revision.
 
 A parse failure, a rejected chunk import, or a render without visible text degrades to the code block with a compact notice; the source stays intact. The import is not retried inside a mount; remounting starts a new attempt.
 
@@ -64,7 +64,7 @@ None; diagram rendering happens entirely in the browser and writes nothing to th
 
 - Embedded SVG icons (`<use>`) are unsupported: DOMPurify always cuts `use`, so a diagram with icons renders without them; a render left with no visible text degrades to the source with a notice.
 - Other diagram languages (graphviz, plantuml, d2), export, editing, and rendering outside the chat transcript (session titles, tool cards, `.md` previews) are out of scope.
-- The viewer is viewport-fit with the lightbox caps and has no interactive zoom; the card's natural branch is the only 1:1 presentation.
+- The viewer opens at the chat scale and zooms with the catalog `DOCUMENT_ZOOM` limits; the card's natural branch remains the only 1:1 presentation inside the transcript.
 
 <a id="dev-note"></a>
 ### Dev Note

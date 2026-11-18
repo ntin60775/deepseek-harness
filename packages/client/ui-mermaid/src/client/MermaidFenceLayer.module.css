@@ -68,6 +68,12 @@
   padding: 20px 16px;
 }
 
+/* The source block sits inside the padded measure container but must keep its
+   pre-wrap placement: flush margins cancel the body padding exactly. */
+.sourceFlush {
+  margin: -20px -16px;
+}
+
 .diagram {
   display: flex;
   justify-content: center;

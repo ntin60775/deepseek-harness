@@ -56,13 +56,11 @@ describe('mermaid card header and viewer', () => {
     wrapper.focus()
     fireEvent.click(screen.getByRole('button', { name: t('viewer.open') }))
     const dialog = await screen.findByRole('dialog', { name: t('viewer.dialog') })
-    const img = dialog.querySelector('img')!
-    expect(img.getAttribute('alt')).toBe(t('diagram.label'))
-    expect(img.src.startsWith('data:image/svg+xml;base64,')).toBe(true)
-    const decoded = new TextDecoder().decode(Uint8Array.from(atob(img.src.slice('data:image/svg+xml;base64,'.length)), char => char.charCodeAt(0)))
-    expect(decoded).toContain('Запрос')
-    expect(decoded).toMatch(/width="1432\.15625"/u)
-    expect(decoded).toMatch(/height="63"/u)
+    // The viewer holds live vector SVG at the chat scale, not a raster data URL.
+    expect(dialog.querySelector('img')).toBeNull()
+    const viewerWrapper = dialog.querySelector('[role="img"]') as HTMLElement
+    expect(viewerWrapper.getAttribute('aria-label')).toBe(t('diagram.label'))
+    expect(viewerWrapper.querySelector('svg')).toBeTruthy()
     fireEvent.keyDown(document.activeElement ?? document, { key: 'Escape' })
     await vi.waitFor(() => { expect(screen.queryByRole('dialog')).toBeNull() })
     expect(document.activeElement).toBe(wrapper)
