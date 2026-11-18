@@ -33,8 +33,8 @@ export interface AssistantMarkdownProps extends
   /** Render only the requested business portion, preserving original block indexes. */
   groupPart?: string | undefined
   /**
-   * This response seat is its completed Turn's closing reply: add the
-   * final-answer bar to the reply card. Reasoning seats never carry it.
+   * This response seat is its completed Turn's closing reply: tint the reply
+   * card with the business tertiary surface. Reasoning seats never carry it.
    */
   finalAnswer?: boolean | undefined
   /** Stable Hook forwarded to each independently expandable reasoning block. */
@@ -160,13 +160,13 @@ export const AssistantMarkdown = memo(function AssistantMarkdown({
   )
   // Every response-seat reply reads as a card; the reasoning seat stays a
   // process row inside the group container. An ungrouped seat renders the
-  // whole reply flow and cards it the same way. The final bar is a card
+  // whole reply flow and cards it the same way. The final tint is a card
   // modifier, so it never stands on an uncarded seat.
   const card = groupPart !== 'reasoning'
-  const bar = card && finalAnswer
+  const tint = card && finalAnswer
   return (
-    <div className={card ? `${css.root} ${css.card}${bar ? ` ${css.finalAnswer}` : ''}` : css.root}
-      data-streaming={streaming || undefined} data-reply-card={card || undefined} data-final-answer={bar || undefined}>
+    <div className={card ? `${css.root} ${css.card}${tint ? ` ${css.finalAnswer}` : ''}` : css.root}
+      data-streaming={streaming || undefined} data-reply-card={card || undefined} data-final-answer={tint || undefined}>
       {body}
     </div>
   )
