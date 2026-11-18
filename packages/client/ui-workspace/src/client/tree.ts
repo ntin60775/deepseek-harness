@@ -84,6 +84,8 @@ export interface GroupNode {
   expanded: boolean
   /** The group contains the selected session (active folder tint; supplied here so the renderer never scans). */
   containsCurrent: boolean
+  /** Any visible member is running or owns running subagents (folder activity mark, also while folded). */
+  containsRunning: boolean
   /** Visible session rows (empty while the group is folded). */
   sessions: readonly SessionNode[]
 }
@@ -457,6 +459,8 @@ export function deriveGroups(
       sessionCount: g.sessions.length,
       expanded,
       containsCurrent: g.key === currentGroup,
+      containsRunning: g.sessions.some(s =>
+        (statuses.get(s.id)?.running ?? s.running) || runningChildCount(list, s.id, statuses) > 0),
       sessions: expanded
         ? sectionMembers(g.sessions, pinned, archived)
           .map(session => sessionNode(session, list, statuses, pinned, archived))

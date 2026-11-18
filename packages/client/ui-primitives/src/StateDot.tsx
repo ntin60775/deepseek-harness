@@ -33,21 +33,53 @@ function pinSpinner(element: SVGSVGElement): void {
   for (const animation of spinner.getAnimations?.({ subtree: true }) ?? []) animation.startTime = 0
 }
 
+/** Segmented ongoing ring: twelve arc ticks with a fading trail, stepped rotation. */
+const SEGMENT_COUNT = 12
+const SEGMENT_CIRCUMFERENCE = 2 * Math.PI * 9.5
+const SEGMENT_ARC = (SEGMENT_CIRCUMFERENCE / SEGMENT_COUNT) * 0.62
+
 /**
  * Render a state dot.
  * @param props.state - which of `done`, `warning`, `ongoing`, `error`, or `idle` to show.
  * @param props.size - outer diameter in px; defaults to 14 for ongoing and 10 for solid states.
  * @param props.className - extra class for layout placement.
- * @param props.appearance - compact dot by default; step uses a filled check or hollow pending circle.
+ * @param props.appearance - compact dot by default; step uses a filled check or hollow pending
+ * circle; segments renders ongoing as a twelve-tick segmented circle instead of the smooth ring.
  * @returns the dot element (aria-hidden; pair with text for accessibility).
  */
 export function StateDot({ state, size, className, appearance = 'dot' }: {
   state: StateDotState
   size?: number | undefined
   className?: string | undefined
-  appearance?: 'dot' | 'step'
+  appearance?: 'dot' | 'step' | 'segments'
 }) {
   const edge = size ?? (state === 'ongoing' ? 14 : 10)
+  if (state === 'ongoing' && appearance === 'segments') {
+    return (
+      <svg
+        ref={syncSpinner}
+        className={clsx(css.spinner, className)}
+        data-state="ongoing"
+        width={edge}
+        height={edge}
+        viewBox="0 0 24 24"
+        aria-hidden="true"
+      >
+        <g className={css.segMotion}>
+          {Array.from({ length: SEGMENT_COUNT }, (_, i) => (
+            <circle
+              key={i}
+              className={css.seg}
+              cx="12" cy="12" r="9.5"
+              strokeDasharray={`${SEGMENT_ARC} ${SEGMENT_CIRCUMFERENCE}`}
+              opacity={0.15 + (0.85 * i) / (SEGMENT_COUNT - 1)}
+              transform={`rotate(${(360 / SEGMENT_COUNT) * i} 12 12)`}
+            />
+          ))}
+        </g>
+      </svg>
+    )
+  }
   if (state === 'ongoing') {
     return (
       <svg

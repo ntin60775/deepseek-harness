@@ -21,8 +21,21 @@
   }
 }
 
+/* Selected rows outrank hover: a stronger fill plus the leading accent bar,
+   so the open session never reads as a merely hovered row. */
 .sessionRow.selected {
-  background-color: var(--dsw-alias-interactive-bg-hover);
+  background-color: var(--dsw-alias-interactive-bg-active);
+}
+
+.selectedBar {
+  position: absolute;
+  left: 0;
+  top: 7px;
+  bottom: 7px;
+  width: 3px;
+  border-radius: 2px;
+  background: var(--dsw-alias-state-business-primary);
+  pointer-events: none;
 }
 
 .dragPreview {
@@ -30,6 +43,7 @@
 }
 
 .searchResultRow {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: stretch;
@@ -54,7 +68,7 @@
 }
 
 .searchResultRow.selected {
-  background-color: var(--dsw-alias-interactive-bg-hover);
+  background-color: var(--dsw-alias-interactive-bg-active);
 }
 
 .searchResultHeading {
@@ -121,6 +135,7 @@
 
 /* Session titles share the workspace icon slot and compact label gap. */
 .sessionRow {
+  position: relative;
   height: 32px;
   gap: 0;
 }
@@ -250,6 +265,44 @@
   flex: none;
 }
 
+/* Row status dots carry a full-bleed 12px core (twice the resting 6px) so
+   attention states read at list distance; hover-card dots keep the small core. */
+.slot span[data-state]::after {
+  inset: 0;
+}
+
+/* The shared spinner paints itself tertiary; sidebar activity rides the
+   business accent instead, matching the running label and the folder mark. */
+.slot svg[data-state='ongoing'],
+.folderRun svg[data-state='ongoing'] {
+  color: var(--dsw-alias-state-business-primary);
+}
+
+/* Compact status label: a resting-band sibling that survives themes hiding
+   the time band; same ink and metrics as the resting time. */
+.statusLabel {
+  flex: none;
+  font-size: 10px;
+  line-height: 16px;
+  color: var(--dsw-alias-label-tertiary);
+  margin-left: 8px;
+  margin-inline-end: -1px;
+}
+
+/* Running trailing label rides the business accent, like the segmented spinner. */
+.statusAccent {
+  color: var(--dsw-alias-state-business-primary);
+}
+
+/* Folder activity mark: visible while the group is folded, ahead of hover actions. */
+.folderRun {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  margin-left: 8px;
+  color: var(--dsw-alias-state-business-primary);
+}
+
 /* The trailing strip keeps a shared gap between its fixed-size control boxes. */
 .rowActions {
   flex: none;
@@ -338,7 +391,10 @@
 
   .sessionRow:hover .rowResting,
   .sessionRow.menuOpen .rowResting,
-  :global(html[data-input-modality='keyboard']) .sessionRow:focus-within .rowResting {
+  :global(html[data-input-modality='keyboard']) .sessionRow:focus-within .rowResting,
+  .sessionRow:hover .statusLabel,
+  .sessionRow.menuOpen .statusLabel,
+  :global(html[data-input-modality='keyboard']) .sessionRow:focus-within .statusLabel {
     display: none;
   }
 

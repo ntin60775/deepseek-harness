@@ -589,6 +589,28 @@ describe('deriveGroups', () => {
     )
     expect(looseGroups.find(group => group.key === UNGROUPED_KEY)!.containsCurrent).toBe(true)
   })
+
+  it('flags groups with running members even while folded', () => {
+    const sessions = list(summary('busy', 2), summary('calm', 1))
+    const running: SessionStatusSnapshot = new Map([[sid('busy'), status(undefined, { running: true })]])
+    const groups = deriveGroups(sessions, [workspace('first', ['busy', 'calm'])], noRows, running, view())
+    expect(groups[0]!.containsRunning).toBe(true)
+    expect(groups[0]!.sessions).toEqual([])
+    const idleGroups = deriveGroups(sessions, [workspace('first', ['busy', 'calm'])], noRows, noAttention, view())
+    expect(idleGroups[0]!.containsRunning).toBe(false)
+  })
+
+  it('flags a group whose member only owns running subagents', () => {
+    const parent = summary('parent', 3)
+    const child = { ...summary('child', 1), origin: 'subagent' as const, parentId: parent.id }
+    const sessions: SessionListState = {
+      ...list(parent, child),
+      projectionsBySession: { [parent.id]: catalog('child') },
+    }
+    const statuses: SessionStatusSnapshot = new Map([[sid('child'), status(undefined, { running: true })]])
+    const groups = deriveGroups(sessions, [workspace('first', ['parent'])], noRows, statuses, view())
+    expect(groups[0]!.containsRunning).toBe(true)
+  })
 })
 
 describe('deriveFlat', () => {

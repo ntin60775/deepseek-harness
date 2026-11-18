@@ -227,6 +227,12 @@ function ProjectRow({
       <span className={css.projectText}>
         <span className={css.title}>{label}</span>
       </span>
+      {group.containsRunning && (
+        <span className={css.folderRun}>
+          <StateDot state="ongoing" appearance="segments" size={12} />
+          <span className={css.visuallyHidden}>{t('status.running')}</span>
+        </span>
+      )}
       <span className={css.rowActions}>
         {workspaceMenuTarget !== undefined && (
           renderFactorySlot('contextMenu.button', {
@@ -282,6 +288,8 @@ interface SessionStatus {
   label: string
   /** Compact text that replaces the Session row's update time. */
   trailingLabel?: string
+  /** Accent ink for the trailing label; absent keeps the resting time color. */
+  trailingTone?: 'accent'
 }
 
 /**
@@ -336,7 +344,12 @@ function sessionStatuses(
   const unread: SessionStatus[] = node.completed ? [completion] : []
   if (pending !== undefined) return subagents === undefined ? [pending, ...unread] : [pending, subagents, ...unread]
   if (node.running) {
-    const primary: SessionStatus = { state: 'ongoing', label: t('status.running') }
+    const primary: SessionStatus = {
+      state: 'ongoing',
+      label: t('status.running'),
+      trailingLabel: t('status.compact.running'),
+      trailingTone: 'accent',
+    }
     return subagents === undefined ? [primary, ...unread] : [primary, subagents, ...unread]
   }
   if (subagents !== undefined) return [subagents, ...unread]
@@ -344,11 +357,17 @@ function sessionStatuses(
   return [{ state: 'idle', label: t('status.idle') }]
 }
 
-/** Primary status dot plus every status's screen-reader label, shared by the search and session rows. */
+/** Primary status dot plus every status's screen-reader label, shared by the search and session rows.
+ * Row dots are twice the resting core (12px) and ongoing uses the segmented circle. */
 function SessionStatusDots({ statuses }: { statuses: readonly [SessionStatus, ...SessionStatus[]] }) {
+  const primary = statuses[0]
   return (
     <>
-      <StateDot state={statuses[0].state} />
+      <StateDot
+        state={primary.state}
+        size={primary.state === 'ongoing' ? undefined : 12}
+        appearance={primary.state === 'ongoing' ? 'segments' : 'dot'}
+      />
       {statuses.map(status => (
         <span className={css.visuallyHidden} key={status.label}>{status.label}</span>
       ))}
@@ -441,6 +460,7 @@ export function SearchResultItem({
       aria-description={result.archived ? t('toast.archivedNotOpenable') : undefined}
       onClick={() => { onOpen(result.id) }}
     >
+      {selected && <span className={css.selectedBar} aria-hidden="true" />}
       <span className={css.searchResultHeading}>
         {/* Like session rows, the leading slot owns every row marker; on
             archived rows it stays blank — the grayed row carries the
@@ -479,7 +499,8 @@ export function SearchResultItem({
 /**
  * One top-level 32px session row: leading 16px cell (status dot, or the
  * leading seat while the row's primary state is idle), title, relative time or
- * compact pending label, and the row actions menu. A row that owns a state dot
+ * compact status label, and the row actions menu. The selected row carries a
+ * stronger fill plus a leading accent bar. A row that owns a state dot
  * keeps that cell and renders no seat, so an ambient automation mark never
  * appears beside the row's own state dot. An archived row keeps the cell blank:
  * neither marker renders there, and its live status stays on the hover card.
@@ -606,6 +627,7 @@ export function SessionNodeItem({
           drag.drop(rowHalf(e))
         }}
     >
+      {selected && <span className={css.selectedBar} aria-hidden="true" />}
       {/* Pending interaction and own or descendant activity outrank the
           unread reminder, which returns after activity stops
           and clears after the visible content is acknowledged. Archived rows keep the slot
@@ -638,14 +660,22 @@ export function SessionNodeItem({
       </MarqueeText>
       {/* Blank rows have no first prompt, so neither trailing details nor
           actions for existing content are available. */}
+      {/* The compact status label lives outside rowResting so themes that hide
+          the resting time band still show live status; it yields to the hover
+          actions exactly like the resting band. */}
+      {!row.blank && primaryStatus.trailingLabel !== undefined && (
+        <span
+          className={clsx(css.statusLabel, primaryStatus.trailingTone === 'accent' && css.statusAccent)}
+          aria-hidden="true"
+        >
+          {primaryStatus.trailingLabel}
+        </span>
+      )}
       {!row.blank && (
         <span className={css.rowResting}>
-          <span
-            className={clsx(css.time, primaryStatus.trailingLabel === undefined && css.timestamp)}
-            aria-hidden={primaryStatus.trailingLabel === undefined ? undefined : true}
-          >
-            {primaryStatus.trailingLabel ?? timeLabel(row.updatedAt, now, t)}
-          </span>
+          {primaryStatus.trailingLabel === undefined && (
+            <span className={clsx(css.time, css.timestamp)}>{timeLabel(row.updatedAt, now, t)}</span>
+          )}
           {renderSlot('sidebar.session.row.trailing', { sessionId: node.id })}
           {row.pinned && !row.archived && <PinnedIndicator t={t} />}
         </span>

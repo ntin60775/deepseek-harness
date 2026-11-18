@@ -50,6 +50,19 @@ describe('StateDot', () => {
     expect(spinner.getAttribute('height')).toBe('14')
   })
 
+  it('renders ongoing as a twelve-segment fading circle with the segments appearance', () => {
+    const { container, rerender } = render(<StateDot state="ongoing" appearance="segments" />)
+    const spinner = container.firstElementChild as SVGSVGElement
+    expect(spinner.tagName).toBe('svg')
+    const segments = spinner.querySelectorAll('circle')
+    expect(segments).toHaveLength(12)
+    expect([...segments].map(segment => Number(segment.getAttribute('opacity'))))
+      .toEqual(Array.from({ length: 12 }, (_, i) => 0.15 + (0.85 * i) / 11))
+    // Solid states keep their span shape regardless of the appearance.
+    rerender(<StateDot state="done" appearance="segments" />)
+    expect(container.firstElementChild?.tagName).toBe('SPAN')
+  })
+
   it('rejects unknown states at the type level', () => {
     const bad = (state: StateDotState) => state
     // @ts-expect-error 'paused' is not one of the five states
