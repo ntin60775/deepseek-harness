@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 /**
- * Reply cards and the final-answer tint: every response-seat reply carries the
- * card, the completed closing reply additionally carries the tint, and no
+ * Reply cards and the final-answer lift: every response-seat reply carries the
+ * card, the completed closing reply additionally carries the lift, and no
  * caption renders in any locale. The predicate that selects the final row is
  * covered by the ChatView specs, where a Turn and its tail are projected together.
  */
@@ -58,15 +58,15 @@ function imageBlock(): AssistantBlock {
   }
 }
 
-describe('reply cards and final-answer tint', () => {
-  it('cards an intermediate reply without the final tint', () => {
+describe('reply cards and final-answer lift', () => {
+  it('cards an intermediate reply without the final lift', () => {
     const { view } = mount()
     expect(view.container.querySelector('[data-reply-card]')).not.toBeNull()
     expect(view.container.querySelector('[data-final-answer]')).toBeNull()
     expect(view.getByText('The reply body.')).toBeDefined()
   })
 
-  it('cards the completed closing answer and tints it', () => {
+  it('cards the completed closing answer and lifts it', () => {
     const { view } = mount({ finalAnswer: true })
     const card = view.container.querySelector('[data-final-answer]') as HTMLElement
     expect(card).not.toBeNull()
@@ -74,13 +74,13 @@ describe('reply cards and final-answer tint', () => {
     expect(card.textContent).toBe('The reply body.')
   })
 
-  it('cards a streaming reply without the tint', () => {
+  it('cards a streaming reply without the lift', () => {
     const { view } = mount({ streaming: true })
     expect(view.container.querySelector('[data-reply-card]')).not.toBeNull()
     expect(view.container.querySelector('[data-final-answer]')).toBeNull()
   })
 
-  it('cards an image-only reply without inventing a tint', () => {
+  it('cards an image-only reply without inventing a lift', () => {
     const { view } = mount({ blocks: [imageBlock()], groupPart: 'response' })
     expect(view.container.querySelector('[data-reply-card]')).not.toBeNull()
     expect(view.container.querySelector('[data-final-answer]')).toBeNull()

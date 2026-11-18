@@ -31,9 +31,9 @@ describe('reply card material', () => {
     ]))
   })
 
-  it('marks the final answer with the theme-owned business tertiary tint', () => {
+  it('marks the final answer with a neutral lightness lift, not an accent hue', () => {
     expect(declarations('.finalAnswer')).toEqual(expect.arrayContaining([
-      'background: var(--dsw-alias-state-business-tertiary)',
+      'background: color-mix(in srgb, var(--dsw-alias-label-primary) 12%, var(--dsw-specific-input-major))',
     ]))
   })
 })
