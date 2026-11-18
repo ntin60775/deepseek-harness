@@ -31,10 +31,9 @@ describe('reply card material', () => {
     ]))
   })
 
-  it('marks the final answer with the business-blue left bar on a compensated text axis', () => {
+  it('marks the final answer with the theme-owned business tertiary tint', () => {
     expect(declarations('.finalAnswer')).toEqual(expect.arrayContaining([
-      'border-left: 3.5px solid var(--dsw-alias-state-business-primary)',
-      'padding-left: 12.5px',
+      'background: var(--dsw-alias-state-business-tertiary)',
     ]))
   })
 })

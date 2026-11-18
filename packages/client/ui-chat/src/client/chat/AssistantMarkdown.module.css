@@ -28,13 +28,13 @@
   box-shadow: var(--dsw-elevation-panel);
 }
 
-/* Final-answer bar: the completed closing reply keeps the card and adds the
-   business-blue left edge (deepseek-500 light, deepseek-400 dark). The reduced
-   left padding compensates the border width, so the reply text keeps the same
-   axis as every other card. No caption: the bar alone marks the result. */
+/* Final-answer tint: the completed closing reply keeps the card and dyes its
+   background with the theme's business tertiary surface — the tint density is
+   theme-owned, so no fixed mix lives here. Declared after `.card` so the
+   equal-specificity selector wins. No caption and no bar: the tint alone
+   marks the result. */
 .finalAnswer {
-  border-left: 3.5px solid var(--dsw-alias-state-business-primary);
-  padding-left: 12.5px;
+  background: var(--dsw-alias-state-business-tertiary);
 }
 
 .body {
