@@ -1,0 +1,29 @@
+# Зелёный прогон носителя тикета 02 (2026-11-18)
+
+Команда: pnpm exec vitest run scripts/run-gui-changed.spec.ts --maxWorkers=2
+
+```
+ Test Files  1 passed (1)
+      Tests  11 passed (11)
+   Start at  17:57:22
+   Duration  6.12s (transform 475ms, setup 458ms, import 147ms, tests 4.81s, environment 0ms)
+```
+
+Кейсы: tracked-правка, untracked src, untracked спека, .d.ts отсечён, пустой diff, правка вне scope, удаление → пакетный scope, staged rename, staged-only правка; end-to-end: «0 tests selected» exit 0, предупреждение слепых зон exit 0, пакетный scope при удалении гоняет обе спеки пакета.
+
+# Живые пробы (критерий 5)
+
+Проба 1 — листовой модуль с прямыми импортирующими спеками. Правка: дописана строка комментария в packages/client/ui-mermaid/src/client/index.ts, запуск `pnpm run test:gui:changed`:
+
+```
+run-gui-changed: 1 changed in scope, 3 out of scope, 0 deletion package(s)
+ ✓ packages/client/ui-mermaid/tests/config.client.spec.ts (5 tests) 18ms
+ ✓ packages/client/ui-mermaid/tests/apply.client.spec.tsx (6 tests) 367ms
+ Test Files  2 passed (2)
+      Tests  11 passed (11)
+   Duration  7.90s
+```
+
+Выбраны ровно related-спеки затронутого модуля; правка возвращена git checkout.
+
+Проба 2 — входной re-export без импортирующих спек. Правка packages/client/ui-mermaid/src/index.ts: команда честно печатает предупреждение «changed files have no related tests; vitest related cannot see config, dynamic loading, subprocesses, or built artifacts — select the owning tests manually», exit 0. Слепая зона не замаскирована под зелёный прогон.

@@ -1,0 +1,10 @@
+# Base-proof тикета 02
+
+База: a35a541700. Краснота снята mutation-пробой 2026-11-18 (Start at 17:57:57): scripts/run-gui-changed.ts временно убран, строка test:gui:changed снята с package.json; спека сохранена. Полный лог: 02-base-proof-full.log.
+
+```
+Error: Cannot find module './run-gui-changed.ts' imported from scripts/run-gui-changed.spec.ts
+ Test Files  1 failed (1)
+```
+
+Ожидание спеки: команда и скрипт существуют, выборка классифицирует изменения. Факт базы: скрипта нет, спека падает на импорте; все 11 кейсов (8 selection + 3 end-to-end) не исполняются. Критерии нового поведения падают на базовом коммите.
