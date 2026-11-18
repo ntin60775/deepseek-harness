@@ -8,10 +8,11 @@
  */
 import { spawnSync } from 'node:child_process'
 import { mkdtempSync, rmSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { availableParallelism, tmpdir } from 'node:os'
 import { join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
+import rootConfig from '../vitest.config.ts'
 import { COVERAGE_TEST_TIMEOUT_ENV } from './coverage-partitions.ts'
 
 const root = resolve(import.meta.dirname, '..')
@@ -118,5 +119,17 @@ describe('lane test budget', () => {
     expect(output).toContain(`${COVERAGE_TEST_TIMEOUT_ENV} must be a positive integer, got "90000ms".`)
     expect(fixtureSummaries(output)).toEqual([])
     expect(status).toBe(1)
+  })
+})
+
+describe('local worker budget applied by the root config', () => {
+  it('halves the reported CPUs under the memory cap outside CI', () => {
+    if (process.env.CI === 'true') {
+      expect(rootConfig.test?.maxWorkers).toBeUndefined()
+      return
+    }
+    const available = availableParallelism()
+    expect(rootConfig.test?.maxWorkers).toBe(Math.max(1, Math.min(Math.floor(available / 2), 48)))
+    if (available > 1) expect(rootConfig.test?.maxWorkers).toBeLessThan(available)
   })
 })

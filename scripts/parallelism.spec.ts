@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { LOCAL_PARALLELISM_CAP, LOCAL_TEST_PARALLELISM_CAP, defaultParallelism, describeDefaultParallelism } from './parallelism.ts'
+import { LOCAL_PARALLELISM_CAP, LOCAL_TEST_PARALLELISM_CAP, defaultParallelism, defaultTestParallelism, describeDefaultParallelism } from './parallelism.ts'
 
 describe('default worker budget', () => {
   it('uses every reported CPU in CI', () => {
@@ -15,9 +15,12 @@ describe('default worker budget', () => {
     expect(describeDefaultParallelism({}, 256)).toBe('12 local default worker(s) of 256 CPU(s)')
   })
 
-  it('lets Vitest forks use a larger local cap', () => {
+  it('halves local Vitest forks under the memory cap', () => {
     expect(LOCAL_TEST_PARALLELISM_CAP).toBe(48)
-    expect(defaultParallelism({}, 256, LOCAL_TEST_PARALLELISM_CAP)).toBe(48)
-    expect(defaultParallelism({ CI: 'true' }, 256, LOCAL_TEST_PARALLELISM_CAP)).toBe(256)
+    expect(defaultTestParallelism({}, 12)).toBe(6)
+    expect(defaultTestParallelism({}, 1)).toBe(1)
+    expect(defaultTestParallelism({}, 3)).toBe(1)
+    expect(defaultTestParallelism({}, 256)).toBe(48)
+    expect(defaultTestParallelism({ CI: 'true' }, 256)).toBe(256)
   })
 })

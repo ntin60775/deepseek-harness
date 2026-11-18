@@ -12,7 +12,7 @@ import { performance } from 'node:perf_hooks'
 import { CLIENT_BUILD_PROFILE_SELECTOR } from './client-build-environment.ts'
 import { COVERAGE_EXEMPT_ENV, coverageExemptHeavySuites } from './coverage-exempt.ts'
 import { COVERAGE_PARTITIONS_ENV, parseCoveragePartitionCount } from './coverage-partitions.ts'
-import { LOCAL_TEST_PARALLELISM_CAP, defaultParallelism, describeDefaultParallelism } from './parallelism.ts'
+import { defaultParallelism, defaultTestParallelism, describeDefaultParallelism } from './parallelism.ts'
 import { pnpmInvocation } from './pnpm-invocation.ts'
 
 /** A named aggregate exposed by the gate runner. */
@@ -233,7 +233,7 @@ export function ciWorkerEnvironment(
   // `pnpm run test` finds it.
   if (!mode.startsWith('ci-') || mode === 'ci-unit') return {}
   const budget = defaultParallelism(env, cpus)
-  const testBudget = defaultParallelism(env, cpus, LOCAL_TEST_PARALLELISM_CAP)
+  const testBudget = defaultTestParallelism(env, cpus)
   const additions: Record<string, string> = {}
   const setDefault = (name: string, value: number): void => {
     if (env[name] === undefined || env[name] === '') additions[name] = String(value)

@@ -2,10 +2,11 @@
  * Default worker budget shared by repository gates, builds, linters, and Vitest configurations.
  *
  * In CI (`CI=true`) the budget is the CPU count Node reports for the runner. Elsewhere it is capped at
- * {@link LOCAL_PARALLELISM_CAP}, or {@link LOCAL_TEST_PARALLELISM_CAP} for Vitest forks, because
- * `os.availableParallelism()` reports host CPUs rather than a container's CPU quota and local runs share
- * the workstation. Each tool's explicit override
- * (`DSH_GATE_CONCURRENCY`, `DSH_OXLINT_THREADS`, `DSH_COVERAGE_MAX_WORKERS`, `--maxWorkers`) still wins.
+ * {@link LOCAL_PARALLELISM_CAP}, while Vitest forks follow {@link defaultTestParallelism}: half the
+ * reported CPUs under {@link LOCAL_TEST_PARALLELISM_CAP}, because `os.availableParallelism()` reports
+ * host CPUs rather than a container's CPU quota and local runs share the workstation. Each tool's
+ * explicit override (`DSH_GATE_CONCURRENCY`, `DSH_OXLINT_THREADS`, `DSH_COVERAGE_MAX_WORKERS`,
+ * `--maxWorkers`) still wins.
  */
 
 import { availableParallelism } from 'node:os'
@@ -13,7 +14,7 @@ import { availableParallelism } from 'node:os'
 /** Largest default worker count outside CI. */
 export const LOCAL_PARALLELISM_CAP = 12
 
-/** Largest default Vitest fork count outside CI, for unit and coverage runs. */
+/** Largest default Vitest fork count outside CI, the memory guard over the halved local budget. */
 export const LOCAL_TEST_PARALLELISM_CAP = 48
 
 /**
@@ -29,6 +30,27 @@ export function defaultParallelism(
   cap: number = LOCAL_PARALLELISM_CAP,
 ): number {
   return env.CI === 'true' ? available : Math.min(available, cap)
+}
+
+/**
+ * Resolve the default Vitest fork budget for one process.
+ *
+ * Outside CI the budget is half the reported CPUs, at least one fork, never above
+ * {@link LOCAL_TEST_PARALLELISM_CAP}: interactive runs leave the other half of the
+ * workstation to the operator, and the cap keeps the measured fork-memory guard on
+ * large hosts. Explicit overrides (`--maxWorkers`, `DSH_COVERAGE_MAX_WORKERS`) are
+ * applied by the consumers and win over this default.
+ * @param env - Environment whose `CI` value selects the CI budget.
+ * @param available - CPU count Node reports for this process.
+ * @returns `available` in CI, otherwise `max(1, min(floor(available / 2), LOCAL_TEST_PARALLELISM_CAP))`.
+ */
+export function defaultTestParallelism(
+  env: NodeJS.ProcessEnv = process.env,
+  available: number = availableParallelism(),
+): number {
+  return env.CI === 'true'
+    ? available
+    : Math.max(1, Math.min(Math.floor(available / 2), LOCAL_TEST_PARALLELISM_CAP))
 }
 
 /**

@@ -203,6 +203,13 @@ describe('CI worker allocation', () => {
     expect(defaultConcurrency('ci-static', 60, 8, {}).workers).toBe(8)
   })
 
+  it('halves the local coverage budget below the memory cap', () => {
+    expect(ciWorkerEnvironment('ci-coverage', {}, 16)).toMatchObject({
+      DSH_COVERAGE_MAX_WORKERS: '8',
+      DSH_COVERAGE_PARTITIONS: '6',
+    })
+  })
+
   it('preserves serial reference overrides on large hosts', () => {
     const inherited = {
       DSH_GATE_CONCURRENCY: '1',
