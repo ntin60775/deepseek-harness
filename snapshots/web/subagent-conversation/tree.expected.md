@@ -5,8 +5,8 @@
     - button "Open event-sourcing researcher in sidebar"
   - group:
     - treeitem "example editor recorded-grandchild · continuable · completed 0 tok · {{duration}}" [level=2]:
-      - text: example editor recorded-grandchild 0 tok {{duration}}
+      - text: example editor {{duration}}
       - button "Open example editor in sidebar"
   - treeitem "event-sourcing reviewer recorded-one-shot · one-shot · completed 0 tok · {{duration}}" [level=1]:
-    - text: event-sourcing reviewer recorded-one-shot 0 tok ~6mo 12d
+    - text: event-sourcing reviewer ~6mo 12d
     - button "Open event-sourcing reviewer in sidebar"

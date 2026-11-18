@@ -354,6 +354,7 @@ export class SessionCommandController {
       )
     }
     const seed = buildForkSeed(source.events, boundary)
+    const endSeq = SessionLogOffset(Math.min(boundary + 1, source.persistedEventCount ?? boundary + 1))
     let workspace: Workspace | undefined
     try {
       workspace = await this.forkWorkspace(source.header)
@@ -371,6 +372,7 @@ export class SessionCommandController {
       await this.ctx.agents.create({
         sessionId: childId,
         seed,
+        parentSource: { sessionId: request.sessionId, endSeq },
         inheritedEventCount: SessionLogOffset(boundary + 1),
         meta: {
           ...(source.header.cwd === undefined ? {} : { cwd: source.header.cwd }),

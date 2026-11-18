@@ -4,5 +4,5 @@
     - text: event-sourcing researcher agent-1 deepseek-official deepseek-v4-flash Default 7.9K tok {{duration}}
     - button "Open event-sourcing researcher in sidebar"
   - treeitem "event-sourcing reviewer recorded-one-shot · one-shot · completed 0 tok · {{duration}}" [level=1]:
-    - text: event-sourcing reviewer recorded-one-shot 0 tok ~6mo 12d
+    - text: event-sourcing reviewer ~6mo 12d
     - button "Open event-sourcing reviewer in sidebar"

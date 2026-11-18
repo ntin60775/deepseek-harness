@@ -193,6 +193,7 @@ export function SidebarRoot({
   const animateRail = useRef(!collapsed)
   if (drawer || !collapsed) animateRail.current = !collapsed
 
+
   const column = useRef<HTMLDivElement>(null)
   const sidebarFocus = useRef<Element | null>(null)
   useModalLayer(column, drawer && !collapsed, toggleSidebar)
@@ -206,6 +207,7 @@ export function SidebarRoot({
       : column.current?.querySelector<HTMLElement>('[data-sidebar-toggle]')
     if (opener != null && !isBehindModal(opener)) focusWithoutRing(opener, { preventScroll: true })
   }, [drawer, collapsed])
+
   const buildVersion = localBuildVersion()
   // The local-build fallbacks copy the badge text; the brand button below
   // skips New Session for clicks inside them. The click still bubbles, so
@@ -259,6 +261,7 @@ export function SidebarRoot({
         !drawer && collapsed && wide && css.fading,
       )}
       style={wide ? { width: !drawer && collapsed ? lastWideWidth.current : width } : undefined}
+
     >
       {/* macOS hiddenInset titlebar: the strip shares the row with the
           traffic lights and keeps the toggle at the sidebar's top-right. */}
