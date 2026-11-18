@@ -54,6 +54,12 @@ function untrackedSelected(path: string): boolean {
   return rest.startsWith('tests/') && /\.(spec|test)\.tsx?$/.test(rest)
 }
 
+function nextToken(tokens: string[], context: string): string {
+  const token = tokens.shift()
+  if (token === undefined) throw new Error(`run-gui-changed: malformed git ${context} output`)
+  return token
+}
+
 /**
  * Classify working-tree changes for the GUI test run.
  * @param repoRoot - Repository root whose HEAD and index define the tracked change set.
@@ -62,16 +68,13 @@ function untrackedSelected(path: string): boolean {
 export function collectGuiChanges(repoRoot: string): GuiChangeSelection {
   const deleted: string[] = []
   const changed: string[] = []
-  const status = git(repoRoot, ['diff', 'HEAD', '--name-status', '-z']).split('\0').filter(entry => entry !== '')
-  for (let i = 0; i < status.length; i += 1) {
-    const code = status[i]
-    const path = status[i + 1]
-    i += 1
+  const tokens = git(repoRoot, ['diff', 'HEAD', '--name-status', '-z']).split('\0').filter(entry => entry !== '')
+  while (tokens.length > 0) {
+    const code = nextToken(tokens, 'name-status')
+    const path = nextToken(tokens, 'name-status')
     if (code.startsWith('R') || code.startsWith('C')) {
-      const newPath = status[i + 1]
-      i += 1
       deleted.push(path)
-      changed.push(newPath)
+      changed.push(nextToken(tokens, 'name-status'))
     } else if (code.startsWith('D')) {
       deleted.push(path)
     } else {
