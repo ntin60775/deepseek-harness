@@ -1,6 +1,6 @@
 # Base-proof тикета 01
 
-База: a35a541700 (master до реализации). Краснота снята mutation-пробой 2026-11-18: файлы реализации (scripts/parallelism.ts, scripts/run-gates.ts, vitest.config.ts) временно возвращены к базе, новые спеки сохранены; после снятия возвращены к коммиту правок. Полный лог: 01-base-proof-full.log (243 строки, Start at 17:55:08).
+База: master до коммита реализации. Краснота снята mutation-пробой 2026-11-18: файлы реализации (scripts/parallelism.ts, scripts/run-gates.ts, vitest.config.ts) временно возвращены к базе, новые спеки сохранены; после снятия возвращены к коммиту правок. Полный лог: 01-base-proof-full.log (243 строки, Start at 17:55:08).
 
 Команда: pnpm exec vitest run scripts/parallelism.spec.ts scripts/run-gates.spec.ts scripts/lane-test-budget.spec.ts -t halves --maxWorkers=2 --reporter=verbose
 

@@ -16,7 +16,7 @@
 Зонд: node --import tsx/esm --input-type=module -e "const config = (await import('./vitest.config.ts')).default; console.log(config.test?.maxWorkers)"
 
 ```
-base applied maxWorkers: 12   (mutation-проба на базе a35a541700)
+base applied maxWorkers: 12   (mutation-проба на базе master до реализации)
 fixed applied maxWorkers: 6   (дерево тикета, 12 CPU)
 ```
 
