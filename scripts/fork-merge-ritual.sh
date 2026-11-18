@@ -155,6 +155,12 @@ else
   echo "классификатор темы не найден ($THEME_AUDIT_DIR) — пропускаю, задай DSH_THEME_AUDIT_DIR"
 fi
 
+# The fork's design invariants are plain unit specs, so they run in seconds and
+# fail before the build. A merge resolution that accepts an upstream value over
+# a fork rule stops here instead of shipping.
+log "invariants: fork design gates"
+pnpm run fork:invariants
+
 # ------------------------------------------------------------------- build
 log "build"
 pnpm run build
@@ -181,7 +187,8 @@ pnpm run constraints
 # byte-identical to upstream/master, treat that single finding as noise.
 pnpm run test:docs
 # Client and host units catch a merged UI surface that snapshots do not cover.
-pnpm run test:gui
+# The cap keeps the workstation responsive while the ritual runs beside a session.
+pnpm run test:gui -- --maxWorkers "${FORK_TEST_MAX_WORKERS:-4}"
 pnpm run test:snapshot
 
 # ------------------------------------------------------------------ record

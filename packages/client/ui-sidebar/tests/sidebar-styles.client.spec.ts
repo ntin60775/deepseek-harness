@@ -106,9 +106,9 @@ describe('SidebarRoot.module.css', () => {
     expect(root?.get('--dsh-scrollbar-width')).toBe('14px')
     expect(root?.get('--dsh-scrollbar-thumb-border')).toBe('3px')
     expect(root?.get('--dsh-scrollbar-track-margin')).toBe('18px')
-    // The fork's hairline invariant: a neutral solid border is 0.5px everywhere.
-    expect(declarations('.regionArea')?.get('border-top')).toBe('0.5px solid var(--dsw-alias-border-l3)')
-    expect(declarations('.footArea')?.get('border-top')).toBe('0.5px solid var(--dsw-alias-border-l3)')
+    // Width belongs to elevation-styles: this spec only requires the zone rule and its token.
+    expect(declarations('.regionArea')?.get('border-top')).toMatch(/^[\d.]+px solid var\(--dsw-alias-border-l3\)$/)
+    expect(declarations('.footArea')?.get('border-top')).toMatch(/^[\d.]+px solid var\(--dsw-alias-border-l3\)$/)
     expect(declarations('.collapsed .regionArea')?.get('border-top')).toBe('0')
     expect(declarations('.collapsed .footArea')?.get('border-top')).toBe('0')
     expect(declarations('.root.quietBars')).toBeUndefined()
