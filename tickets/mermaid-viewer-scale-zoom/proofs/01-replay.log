@@ -1,0 +1,101 @@
+$ vitest run --config vitest.web.config.ts apps/web/tests/markdown-images.e2e.ts apps/web/tests/context-menus.e2e.ts apps/web/tests/file-upload-round.e2e.ts apps/web/tests/mermaid-fence.e2e.ts
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+
+ RUN  v4.1.11 /home/prog7/home/dev/contrib/forks/deepseek-harness/.worktrees/mermaid-lightbox-shell
+
+ ❯ apps/web/tests/context-menus.e2e.ts (24 tests | 6 failed) 174544ms
+     × shares Session entries without selecting the background Session, and dismisses at viewport edges 281ms
+     × updates an open Session menu from another window’s shortcut preferences and still renames the captured row 31606ms
+     ✓ shares Workspace menus and keeps folder gestures independent from expansion  2097ms
+     ✓ prepares complete menus, anchors above the frame inset, and treats repeated gestures as separate occurrences  1068ms
+     ✓ preserves file line navigation, URL text, image format, and existing tab close actions  4054ms
+     ✓ keeps context-menu layout size during browser zoom and scrolls overflowing rows  671ms
+     ✓ keeps original preview open when dismissing its menu and fits both themes at the viewport edge  1113ms
+     ✓ offers completed Desktop destinations as toast text actions without enabling remote-image menu reveal  5645ms
+     × shares Session entries without selecting the background Session, and dismisses at viewport edges 365ms
+     × updates an open Session menu from another window’s shortcut preferences and still renames the captured row 33558ms
+     ✓ shares Workspace menus and keeps folder gestures independent from expansion  2699ms
+     ✓ prepares complete menus, anchors above the frame inset, and treats repeated gestures as separate occurrences  2098ms
+     ✓ preserves file line navigation, URL text, image format, and existing tab close actions  6899ms
+     ✓ keeps context-menu layout size during browser zoom and scrolls overflowing rows  1548ms
+     ✓ keeps original preview open when dismissing its menu and fits both themes at the viewport edge  2012ms
+     ✓ offers completed Desktop destinations as toast text actions without enabling remote-image menu reveal  8322ms
+     × shares Session entries without selecting the background Session, and dismisses at viewport edges 403ms
+     × updates an open Session menu from another window’s shortcut preferences and still renames the captured row 32419ms
+     ✓ shares Workspace menus and keeps folder gestures independent from expansion  1309ms
+     ✓ prepares complete menus, anchors above the frame inset, and treats repeated gestures as separate occurrences  804ms
+     ✓ preserves file line navigation, URL text, image format, and existing tab close actions  2758ms
+     ✓ keeps context-menu layout size during browser zoom and scrolls overflowing rows  346ms
+     ✓ keeps original preview open when dismissing its menu and fits both themes at the viewport edge  655ms
+     ✓ offers completed Desktop destinations as toast text actions without enabling remote-image menu reveal  3782ms
+ ✓ apps/web/tests/file-upload-round.e2e.ts (8 tests) 15129ms
+     ✓ uploads on pick, gates send on the staged receipt, and settles the turn (all modes)  2188ms
+     ✓ shows both attachment kinds throughout the Trajectory inspector  1429ms
+     ✓ restores the same Trajectory attachments from persisted history after reload  2390ms
+     ✓ keeps thumbnail loading and retry feedback inside the attachment row  1891ms
+ ✓ apps/web/tests/markdown-images.e2e.ts (2 tests) 20482ms
+     ✓ authenticates file requests and isolates directly opened active content  328ms
+     ✓ loads permitted images and shows authored text for failures  5605ms
+ ✓ apps/web/tests/mermaid-fence.e2e.ts (2 tests) 16617ms
+     ✓ renders two named diagram cards with source swap and a viewport-fit viewer  683ms
+     ✓ fits the small diagram and scrolls the wide one, switching mode on resize without re-render  1105ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 6 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  apps/web/tests/context-menus.e2e.ts > web context menus on MacIntel > shares Session entries without selecting the background Session, and dismisses at viewport edges
+ FAIL  apps/web/tests/context-menus.e2e.ts > web context menus on Win32 > shares Session entries without selecting the background Session, and dismisses at viewport edges
+AssertionError: expected 'Delete session' to be 'Archive session' // Object.is equality
+
+Expected: "Archive session"
+Received: "Delete session"
+
+ ❯ apps/web/tests/context-menus.e2e.ts:82:26
+     80|     ])
+     81|     expect(names).not.toContain('Open in')
+     82|     expect(names.at(-1)).toBe('Archive session')
+       |                          ^
+     83|     expect(await menu.getByRole('menuitem').evaluateAll(rows => rows.e…
+     84|     expect(await menu.getByRole('separator').count()).toBe(2)
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/6]⎯
+
+ FAIL  apps/web/tests/context-menus.e2e.ts > web context menus on MacIntel > updates an open Session menu from another window’s shortcut preferences and still renames the captured row
+ FAIL  apps/web/tests/context-menus.e2e.ts > web context menus on Win32 > updates an open Session menu from another window’s shortcut preferences and still renames the captured row
+ FAIL  apps/web/tests/context-menus.e2e.ts > web context menus on Linux x86_64 > updates an open Session menu from another window’s shortcut preferences and still renames the captured row
+TimeoutError: locator.waitFor: Timeout 30000ms exceeded.
+Call log:
+  - waiting for getByRole('menuitem', { name: 'Rename', exact: true }) to be visible
+
+ ❯ apps/web/tests/context-menus.e2e.ts:131:18
+    129|       await background.click({ button: 'right' })
+    130|       const item = page.getByRole('menuitem', { name: 'Rename', exact:…
+    131|       await item.waitFor()
+       |                  ^
+    132|       const popup = await page.getByRole('menu').elementHandle()
+    133|       const initial = await item.getAttribute('aria-keyshortcuts')
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/6]⎯
+
+ FAIL  apps/web/tests/context-menus.e2e.ts > web context menus on Linux x86_64 > shares Session entries without selecting the background Session, and dismisses at viewport edges
+AssertionError: expected 'Delete session' to be 'Archive session' // Object.is equality
+
+Expected: "Archive session"
+Received: "Delete session"
+
+ ❯ apps/web/tests/context-menus.e2e.ts:82:26
+     80|     ])
+     81|     expect(names).not.toContain('Open in')
+     82|     expect(names.at(-1)).toBe('Archive session')
+       |                          ^
+     83|     expect(await menu.getByRole('menuitem').evaluateAll(rows => rows.e…
+     84|     expect(await menu.getByRole('separator').count()).toBe(2)
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/6]⎯
+
+
+ Test Files  1 failed | 3 passed (4)
+      Tests  6 failed | 30 passed (36)
+   Start at  15:38:48
+   Duration  235.31s (transform 2.08s, setup 0ms, import 7.65s, tests 226.77s, environment 1ms)
+
+[ELIFECYCLE] Command failed with exit code 1.

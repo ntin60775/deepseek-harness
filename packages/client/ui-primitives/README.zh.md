@@ -69,7 +69,8 @@ kind: "package-library"
 | `Tooltip` | 锚定在克隆子元素上的悬停与键盘聚焦提示；可选的 `delayMs` 控制悬停延迟，`focusDelayMs` 控制键盘聚焦延迟，均默认为 0 毫秒。可通过 `portal` 渲染到外层，避免被容器裁剪，或受祖先层叠上下文限制其 z-index。 |
 | `HoverCard`、`HoverCardGroup` | 可阅读、可选带复制按钮的悬停预览；物理列表可选择让卡片共享首次显示等待，并互斥显示。紧凑卡片出现在锚点结束一侧；会超出视口结束边缘、而开始一侧放得下时出现在开始一侧，例如窗口末端面板中的行；两侧都放不下时出现在锚点下方，与锚点的开始边缘对齐，下方放不下则出现在上方，因此不会盖住锚点；高到上下都放不下的卡片留在视口内，位于底部结束一角。它由 CSS 锚点定位放置，卡片跟随锚点时不需要脚本测量；Firefox 解析锚点位置时不计入祖先元素的 transform，锚点位于带 transform 的祖先之内时，紧凑卡片在 Firefox 中的位置会偏移。 |
 | `DraggableImage` | 通过显式传递与反馈回调提供原图拖放。 |
-| `ImageLightbox` | 共享图片浮层，支持焦点恢复与 Esc 关闭。 |
+| `LightboxShell` | 共享模态预览外壳：body portal 背景、避开 Windows 顶栏的 stage 盒、按下即关闭的调光遮罩、带初始焦点的关闭按钮，以及 useModalLayer 键盘所有权（Escape 让位给聚焦菜单，Tab 循环对话框内可聚焦元素，卸载恢复调用前焦点）；stage 内容归调用方。 |
+| `ImageLightbox` | 在 LightboxShell 内围绕限幅 img 渲染，props 为 `src`/`alt`/`labels`/`onClose`/`contextMenuProps`，支持焦点恢复与 Esc 关闭。 |
 | `usePointerGrace` | 可取消的延迟关闭，让指针能够跨越触发控件与卡片间的空隙；卸载时清除待执行定时器。 |
 | `Toast` | 顶部居中的瞬时横幅，保持时长由所有者的 `holdMs` 决定。 |
 | `SettingsForm`、`SettingsValueField`、`SettingsSecretField` | 插件设置页的框架与控件：框架以 `labels` 接收文案，只在按钮点击时保存，卸载即丢弃；值字段显示暂存文本以及已覆盖标签和重置；密文字段每次为空，请求浏览器不要自动填入已保存的密码，只报告是否已配置。 |
@@ -130,7 +131,7 @@ kind: "package-library"
 
 `JsonTree` 把折叠字符串限制为 `collapsedStringLines` 行（默认三行）。展开后显示原始文本、保留同级逗号，并限制在窗口与外层滚动容器内；尺寸变化和祖先滚动事件会更新此限制。行复制反馈独立于 JSON 值渲染更新；尚未完成的剪贴板写入不会更新另一行或已卸载的树。
 
-`ImageLightbox` 是共享原图浮层，支持焦点恢复与 Esc 关闭。与 `Modal` 相同，其遮罩不覆盖 Windows 顶栏，关闭按钮位于顶栏下方 20px。包内缩略图渲染器由调用方提供加载及失败文案。`HoverCard.inline` 使文件链接保持在文本流内，并使用共享菜单材质、键盘可见焦点，并在锚点上方或下方定位而不遮挡锚点。即使焦点位于其他位置，Esc 也会关闭已打开的缩略图；后续 Esc 按键继续传给 owner。`MarkdownDelegateProvider.fileImages` 提供已解码路径解析器与完整图片文案：消息落定后的图片链接支持悬停预览，独立图片支持点击放大。仅包含图片的链接保留单一导航目标。解析器仅恢复完整、未转义、独立成段且带明确图片扩展名的含裸空格本地图片引用；代码与有歧义的目标保持原文。 透明悬停区域连接锚点与弹层之间的视觉空隙，鼠标经过时不会激活下方内容。
+`LightboxShell` 拥有 `ImageLightbox` 使用的模态预览外壳：与 `Modal` 相同，其遮罩不覆盖 Windows 顶栏，关闭按钮位于顶栏下方 20px 并取得初始焦点，`useModalLayer` 让顶层独占 Escape（让位给聚焦菜单）并对对话框内全部可聚焦元素循环 Tab，卸载时恢复调用前焦点。Escape 会带着 `defaultPrevented` 到达其他 bubble 监听器；按 Escape 关闭的所有者需检查该标志。body portal 使固定背景不受调用方 transform/filter 祖先困限。`ImageLightbox` 是该外壳内的原图 stage 内容，支持焦点恢复与 Esc 关闭。包内缩略图渲染器由调用方提供加载及失败文案。`HoverCard.inline` 使文件链接保持在文本流内，并使用共享菜单材质、键盘可见焦点，并在锚点上方或下方定位而不遮挡锚点。即使焦点位于其他位置，Esc 也会关闭已打开的缩略图；后续 Esc 按键继续传给 owner。`MarkdownDelegateProvider.fileImages` 提供已解码路径解析器与完整图片文案：消息落定后的图片链接支持悬停预览，独立图片支持点击放大。仅包含图片的链接保留单一导航目标。解析器仅恢复完整、未转义、独立成段且带明确图片扩展名的含裸空格本地图片引用；代码与有歧义的目标保持原文。 透明悬停区域连接锚点与弹层之间的视觉空隙，鼠标经过时不会激活下方内容。
 
 `DraggableImage` 接收显式的 `fileDrag: FileDragActions`，受管理的 Markdown 图片通过 `MarkdownDelegateProvider.fileImages.fileDrag` 接收同一组回调。[文件拖放插件](../ui-file-drag/README.zh.md) 负责准备、传递与本地化失败提示；图片原语负责手势和取消。带资源引用的图片仅在主指针按下时准备，其他来源也可在悬停时准备。在图片内松开保留准备供下一次手势使用；指针移开释放未使用的准备，平移模式跳过准备。Markdown 导出名取已解码路径的文件名。在准备完成前起拖会静默取消本次手势；实际准备失败才显示重试提示。受管理的 Web 拖放携带应用内令牌和指向插件所持 Blob URL 的 `DownloadURL`，不设置 `text/plain`。
 

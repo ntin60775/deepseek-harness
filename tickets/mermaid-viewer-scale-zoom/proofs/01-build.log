@@ -1,0 +1,11 @@
+== build:artifacts + build:check (first pass) ==
+run-gates: unsuccessful gates:
+  - FAILED client aggregate check (62.88s, exit 2)
+    tsc -p tsconfig.client.json
+[ELIFECYCLE] Command failed with exit code 1.
+== build:check after anchor fix ==
+
+run-gates: 2 passed, 0 failed, 0 skipped in 61.12s.
+== build:artifacts final ==
+run-gates: 8 passed, 0 failed, 0 skipped in 86.32s.
+build: recorded 385 client artifact(s) with 3 public value(s)

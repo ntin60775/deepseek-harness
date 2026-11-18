@@ -133,6 +133,8 @@ export {
   PluginArtworkTerminal, PluginArtworkLoop, PluginArtworkSubagent, PluginArtworkSearch, PluginArtworkDefault,
 } from './plugin-artwork.tsx'
 export { GuideArtworkBrowser, GuideArtworkFiles } from './guide-artwork.tsx'
+export { LightboxShell } from './LightboxShell.tsx'
+export type { LightboxShellLabels } from './LightboxShell.tsx'
 export { ImageLightbox } from './ImageLightbox.tsx'
 export type { ImageLightboxLabels } from './ImageLightbox.tsx'
 
