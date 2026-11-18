@@ -144,6 +144,17 @@ pnpm install
 log "audit: fork surfaces vs upstream"
 pnpm run fork:upgrade-audit --strict --target "$UPSTREAM_REMOTE/$UPSTREAM_BRANCH"
 
+# The OMP theme classifies DSH UI elements; a moved or removed surface makes its
+# stylesheet silently dead. The classifier fails on MISSING carriers and, with
+# --strict, on unclassified NEW ones, so every merge forces a classification pass.
+THEME_AUDIT_DIR="${DSH_THEME_AUDIT_DIR:-$HOME/home/dev/dsh-plugins/theme-omp}"
+if [ -f "$THEME_AUDIT_DIR/verify/classify.mjs" ]; then
+  log "audit: theme UI classifier"
+  node "$THEME_AUDIT_DIR/verify/classify.mjs" --checkout "$PWD" --strict
+else
+  echo "классификатор темы не найден ($THEME_AUDIT_DIR) — пропускаю, задай DSH_THEME_AUDIT_DIR"
+fi
+
 # ------------------------------------------------------------------- build
 log "build"
 pnpm run build
