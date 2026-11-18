@@ -1968,7 +1968,9 @@ describe('prompt images', () => {
     // A portalled image click must not collapse the row that owns the pill.
     expect(stepRows()).toHaveLength(1)
 
-    fireEvent.keyDown(window, { key: 'Escape' })
+    fireEvent.pointerLeave(imagePill(2).parentElement as HTMLElement)
+    act(() => { vi.advanceTimersByTime(200) })
+    fireEvent.keyDown(document.activeElement ?? document, { key: 'Escape' })
     expect(screen.queryByRole('dialog')).toBeNull()
     expect(stepRows()).toHaveLength(1)
   })

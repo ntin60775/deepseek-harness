@@ -1,0 +1,58 @@
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+
+ RUN  v4.1.11 /home/prog7/home/dev/contrib/forks/deepseek-harness/.worktrees/mermaid-lightbox-shell
+
+ ❯ |thread-safe| packages/client/ui-primitives/tests/image-lightbox.client.spec.tsx (5 tests | 1 failed) 169ms
+     ✓ focuses its close control, closes by button and Escape, and restores focus 115ms
+     × cycles Tab between the close control and a focusable image 18ms
+     ✓ tolerates a focus owner it cannot restore (opener detached before close) 3ms
+     ✓ closes on a mask press but not on a press over the image 6ms
+   ✓ leaves Escape to an open context menu before closing the image 25ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |thread-safe| packages/client/ui-primitives/tests/image-lightbox.client.spec.tsx > ImageLightbox > cycles Tab between the close control and a focusable image
+AssertionError: expected <button type="button" …(2)>…(1)</button> to be <img class="_image_ad234d" …(3)></img> // Object.is equality
+
+- Expected
++ Received
+
+- <img
+-   alt="原图"
+-   class="_image_ad234d"
+-   src="blob:original"
+-   tabindex="0"
++ <button
++   aria-label="关闭原图预览"
++   class="_close_ad234d"
++   type="button"
++ >
++   <svg
++     aria-hidden="true"
++     data-icon="dsw-icon-close-outline-regular"
++     height="16"
++     width="16"
++   >
++     <use
++       href="#dsw-icon-close-outline-regular"
+      />
++   </svg>
++ </button>
+
+ ❯ packages/client/ui-primitives/tests/image-lightbox.client.spec.tsx:42:36
+     40|     // jsdom performs no native Tab traversal; the layer owns the edge…
+     41|     fireEvent.keyDown(close, { key: 'Tab', shiftKey: true })
+     42|     expect(document.activeElement).toBe(image)
+       |                                    ^
+     43|     fireEvent.keyDown(image, { key: 'Tab' })
+     44|     expect(document.activeElement).toBe(close)
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 4 passed (5)
+   Start at  15:52:15
+   Duration  1.12s (transform 178ms, setup 68ms, import 235ms, tests 169ms, environment 535ms)

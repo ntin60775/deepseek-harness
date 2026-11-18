@@ -1,0 +1,18 @@
+== M1 autofocus removed + children before close ==
+     × focuses the close control over consumer content and cycles Tab across both 255ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+      Tests  1 failed | 2 passed (3)
+== M2 useModalLayer removed ==
+     × focuses the close control over consumer content and cycles Tab across both 125ms
+     × closes on Escape, close press, and mask press but not on content press 17ms
+     × prevents Escape default without stopping propagation, like the shared modal contract 7ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+      Tests  3 failed (3)
+== M3 mask onMouseDown removed ==
+     × closes on Escape, close press, and mask press but not on content press 13ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+      Tests  1 failed | 2 passed (3)
+== M5 focus restore removed (useModalLayer cleanup) ==
+     × focuses the close control over consumer content and cycles Tab across both 130ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+      Tests  1 failed | 2 passed (3)

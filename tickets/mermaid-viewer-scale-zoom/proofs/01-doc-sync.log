@@ -1,0 +1,90 @@
+$ tsx scripts/run-gates.ts doc-sync
+run-gates: doc-sync running 43 gate(s) with 8 worker(s) from 12 local default worker(s) of 12 CPU(s), doc-sync cap 8.
+run-gates: start doc-typecheck
+run-gates: start documentation build
+run-gates: start doc graphs
+run-gates: start CLI help reference
+run-gates: start markdown links
+run-gates: start type equivalence
+run-gates: start cordis catalog
+run-gates: start Cordis inspect catalog
+run-gates: PASS type equivalence (8.08s)
+run-gates: start workflow guest source
+run-gates: PASS workflow guest source (1.89s)
+run-gates: start verify-mermaid
+run-gates: PASS Cordis inspect catalog (21.75s)
+run-gates: start translation pairing
+run-gates: PASS cordis catalog (37.14s)
+run-gates: start markdown wrap
+run-gates: PASS markdown links (43.12s)
+run-gates: start client catalog
+run-gates: PASS CLI help reference (43.53s)
+run-gates: start export jsdoc
+run-gates: PASS client catalog (14.99s)
+run-gates: start tool catalog
+run-gates: PASS tool catalog (5.90s)
+run-gates: start config catalog
+run-gates: PASS verify-mermaid (55.48s)
+run-gates: start skill plugin package list
+run-gates: PASS export jsdoc (22.51s)
+run-gates: start npm dependency catalog
+run-gates: PASS npm dependency catalog (1.49s)
+run-gates: start persistence catalog
+run-gates: PASS skill plugin package list (4.18s)
+run-gates: start persistence type history
+run-gates: PASS config catalog (6.02s)
+run-gates: start released persistence history
+run-gates: PASS translation pairing (49.64s)
+run-gates: start Session format references
+run-gates: PASS doc-typecheck (74.28s)
+run-gates: start Session format catalog
+run-gates: PASS doc graphs (75.03s)
+run-gates: start public repository links
+run-gates: PASS released persistence history (5.14s)
+run-gates: start repository references
+run-gates: PASS Session format catalog (0.95s)
+run-gates: start concrete terms
+run-gates: PASS markdown wrap (41.37s)
+run-gates: start doc refs
+run-gates: PASS concrete terms (3.79s)
+run-gates: start subsystem pages
+run-gates: PASS Session format references (8.90s)
+run-gates: start package paths
+run-gates: PASS doc refs (1.98s)
+run-gates: start tsconfig paths
+run-gates: PASS subsystem pages (1.61s)
+run-gates: start config source ownership
+run-gates: PASS tsconfig paths (0.99s)
+run-gates: start package README Summaries
+run-gates: PASS config source ownership (0.91s)
+run-gates: start package README model experience
+run-gates: PASS public repository links (7.28s)
+run-gates: start agent note classification
+run-gates: PASS package README Summaries (1.05s)
+run-gates: start agent note format
+run-gates: PASS package paths (2.47s)
+run-gates: start archived agent notes
+run-gates: PASS agent note classification (1.12s)
+run-gates: start skill invocation metadata
+run-gates: PASS agent note format (1.24s)
+run-gates: start translation prompt
+run-gates: PASS archived agent notes (1.31s)
+run-gates: start doc budgets
+run-gates: PASS skill invocation metadata (0.89s)
+run-gates: start upgrade guides
+run-gates: PASS translation prompt (0.93s)
+run-gates: start documentation standard tests
+run-gates: PASS doc budgets (0.84s)
+run-gates: start documentation site checks
+run-gates: PASS upgrade guides (1.58s)
+run-gates: start package README limitations
+run-gates: PASS documentation standard tests (3.06s)
+run-gates: PASS repository references (13.82s)
+run-gates: PASS package README model experience (8.66s)
+run-gates: PASS package README limitations (7.85s)
+run-gates: PASS persistence type history (33.27s)
+run-gates: PASS persistence catalog (36.23s)
+run-gates: PASS documentation site checks (21.58s)
+run-gates: PASS documentation build (118.86s)
+
+run-gates: 43 passed, 0 failed, 0 skipped in 118.86s.
