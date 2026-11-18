@@ -1,0 +1,56 @@
+---
+node_type: plan
+title: Политика тестового контура для разработки плагинов и UI-фич
+service: _platform
+status: active
+updated: 2026-11-18
+tags: [testing, gui, developer-loop, ontoship]
+links:
+  part_of: [README.md]
+  relates_to:
+    - ../testing.md
+    - ../development.md
+---
+
+# Политика тестового контура для разработки плагинов и UI-фич
+
+## Цель
+
+Цикл «правка → проверка» при разработке плагинов и UI-фич занимает секунды-минуты и не занимает все ядра: полный `test:gui` (817 spec-файлов, [package.json:88](../../package.json)) исключён из dev-loop, локальные vitest-прогоны по умолчанию получают половину ядер под сохранённым memory-cap 48, канонический inner loop закреплён политикой, одной новой командой и правкой мандата в [packages/client/AGENTS.md](../../packages/client/AGENTS.md). Решения оператора 2026-11-18 (план-гейт): объём «политика + смена дефолтов репо», бюджет `available / 2`, набор «watch в политике + test:gui:changed», носитель «форк-локальный док + AGENTS.md», полный замер test:gui до/после срезан. Решения оператора 2026-11-18 (триаж проекций): формула `min(available/2, 48)` с сохранением memory-cap, zh-pairing development.md через явный вызов dsh-translate-docs, пакетный scope враппера при удалениях, починка предсуществующей битой ссылки gitmark I4.
+
+## Готово
+
+1. **Бюджет воркеров.** Локальный (не-CI) бюджет vitest = `max(1, min(floor(available / 2), 48))`; CI (`CI=true`) unchanged; явные override (`--maxWorkers`, `DSH_COVERAGE_MAX_WORKERS`, lane-бюджеты) сохраняют приоритет. Реализация: helper в [scripts/parallelism.ts](../../scripts/parallelism.ts), `LOCAL_TEST_PARALLELISM_CAP=48` остаётся memory-cap поверх половинного бюджета; потребители [vitest.config.ts:169](../../vitest.config.ts) и [run-gates.ts:236](../../scripts/run-gates.ts). Носители: [parallelism.spec.ts](../../scripts/parallelism.spec.ts) — кейсы 12→6, 1→1, 3→1, 256→48 (cap), CI=true→available; новый кейс [run-gates.spec.ts](../../scripts/run-gates.spec.ts) (16 CPU без CI и без override: `DSH_COVERAGE_MAX_WORKERS` '8', partitions 6) — существующие кейсы при cap 48 остаются зелёными (256→48, override '6' читается напрямую и перебивает testBudget, [run-gates.ts:248](../../scripts/run-gates.ts)); ассерт applied-бюджета корневого конфига в [lane-test-budget.spec.ts](../../scripts/lane-test-budget.spec.ts) (импорт конфига уже есть). Base-proof: halving-кейсы красны на базе (12 CPU сегодня даёт 12, не 6; 16 CPU даёт 16, не 8); приоритет override запинен существующими зелёными кейсами run-gates.spec.ts и CLI-семантикой vitest, отдельный пустой кейс на helper не пишется.
+2. **Команда `test:gui:changed`.** Скрипт `scripts/run-gui-changed.ts` (tsx) + строка в package.json. Выборка: tracked-изменения `git diff HEAD` (включает staged) + untracked `src/**/*.{ts,tsx}` без `*.d.ts` + untracked `tests/**/*.{spec,test}.{ts,tsx}`, scope `packages/client` + `packages/host`. Правило удалений: есть удалённый путь в пакете → полный spec-scope этого пакета (`vitest run <pkg>`), иначе `vitest related <существующие файлы> --run`; related молча игнорирует несуществующие пути и принудительно ставит passWithNoTests (эмпирика 2026-11-18), поэтому удаления не передаются в related. Изменённые файлы есть, related-тестов ноль → явное предупреждение с перечислением слепых зон related (config, dynamic loading, subprocesses, built artifacts) и выбором owning-тестов вручную; пустой diff → «0 tests selected», exit 0; файлы вне scope печатаются числом. Голый `vitest --changed` не используется: спайк 2026-11-18 показал, что он игнорирует path-фильтр и шумит от untracked build-артефактов. Носители: спека скрипта на fixture git-репозитории (tracked-правка, untracked-новый src, untracked-новая спека, удаление → пакетный scope, пустой diff, правка вне scope, `.d.ts` отсечён, «изменён, related ноль» предупреждение), живая проба на реальной правке client-пакета; base-proof — команды на базе нет.
+3. **Док политики.** `docs/reference/fork-gui-test-loop.md` (English-only, запись в `excluded` [translation-pairing.manifest.json](../../scripts/translation-pairing.manifest.json), ссылка из [docs/reference/README.md](../reference/README.md)): inner loop человека в терминале — явный `pnpm exec vitest watch packages/client/<pkg>` (vitest 4 не включает watch в не-TTY, дефолт `!isCI && stdin.isTTY && !isAgent`); агент/не-TTY — one-shot focused-файл/`-t` или `test:gui:changed`; визуальная проверка через живой dev:web HMR по [dsh-client-ui-ux](../../.agents/skills/dsh-client-ui-ux/SKILL.md); локальные assembled-output лейны обязательны для visible-output правок (focused `DSH_SNAPSHOT=replay test:web`, keyless snapshot по [testing.md](../testing.md)) — «CI owns exhaustive» не отменяет локальную лейну; pre-push — [dsh-pre-push-checks](../../.agents/skills/dsh-pre-push-checks/SKILL.md); полный `test:gui` — только явный запрос (включая критерии ship-тикета/спеки), диагностика CI или необъятный cross-cutting diff. Носители: `doc-sync`, запись exclusion в манифесте (`verify-translation-pairing --list`), `gitmark lint --strict`.
+4. **Ladder в packages/client/AGENTS.md.** Ступень 1 «Every GUI code change — pnpm run test:gui … This is the inner loop» ([client/AGENTS.md:151](../../packages/client/AGENTS.md)) заменяется на focused/watch/changed по доку политики; термин «inner loop» переопределяется; ступени 2 (test:web) и 3 (pre-push) сохраняются; строка про красный test:gui на чужом коде адаптируется. Носители: `doc-sync`, вычитка прозы; бюджетного потолка у файла нет.
+5. **Строка в корневом AGENTS.md.** Ссылка на док политики вшивается в существующую строку «Never default to the full suite…» ([AGENTS.md:120](../../AGENTS.md)) без прироста слов: бюджет 2080/2080, headroom 0, новая строка гарантированно краснит гейт. Носители: `verify-doc-budgets`, `doc-sync`.
+6. **Правдивость development.md и ноты.** Строка «48 for Vitest forks and local coverage» ([development.md:156](../../docs/development.md)) описывает новую формулу; zh-пара обновляется через явный вызов `dsh-translate-docs` (решение оператора 2026-11-18); активная нота [2026-10-12-local-gate-speedups.md](../../.agents/notes/implemented/process/2026-10-12-local-gate-speedups.md) (строки 62, 75, 146) обновляется: 48 остаётся memory-cap поверх половинного бюджета, измеренный guard не отменяется. Носители: `doc-sync` включая `verify-translation-pairing`, `gitmark lint --strict`.
+7. **KB-сопровождение.** После записи доков: `gitmark index`, `gitmark lint --strict`, `gitmark map -o docs-map.html`. Предсуществующий красный I4 (битая ссылка в [tickets/subagent-route-visibility/04](../../tickets/subagent-route-visibility/04-panel-width-two-line-route.md)) починен 2026-11-18: `.module.css` → `SubagentCatalog.module.css` (реальный владелец стилей, импорт в SubagentHeaderLineage.tsx). Носители: вывод команд без ошибок.
+
+## Рамки
+
+- Бюджеты CI и lane-конфигов не меняются: e2e (`DSH_E2E_MAX_WORKERS`), expected (`min(5, available)`), snapshot (env-driven), web (`fileParallelism: false`), bench (2); build/gate `LOCAL_PARALLELISM_CAP=12` остаётся.
+- Новый скилл не создаётся: политику видят все сессии через строку в AGENTS.md и ladder в client/AGENTS.md.
+- Upgrade guide не нужен: локальный бюджет воркеров и dev-команда не входят в публичные поверхности (CLI, профили, settings, persisted data, SDK, wire).
+- `docs/testing.md` (1344/1350 слов, парный) не редактируется; zh-pairing затрагивается только для development.md через явный вызов оператора.
+- Пустая выборка и предупреждение «related ноль» у `test:gui:changed` — сигналы dev-loop, не доказательство для push; правила dsh-pre-push-checks не меняются.
+
+## Ограничения
+
+- Полный замер `test:gui` до/после не выполняется (решение оператора): бюджет доказывается спеками и focused-замерами, полная лейна остаётся за CI.
+- Одно правило выбора на поведение: без fallback-режимов и запасных путей; правило удалений детерминированное (пакетный scope), не деградация.
+- Явные override бюджета обязаны продолжать работать; существующие зелёные кейсы run-gates.spec.ts пинят приоритет.
+- Доказательства не повторяются: зелёный focused-прогон не перезапускается ради коммита.
+- Правки спеки после план-гейта — только решением оператора; настоящий раздел включает решения триажа 2026-11-18.
+
+## Контекст
+
+- `test:gui` = `vitest run packages/client packages/host`, 817 spec-файлов (`vitest list --filesOnly`); локальный дефолт сегодня `min(available, 48)` = 12 форков на 12-ядерной машине ([vitest.config.ts:169](../../vitest.config.ts), [parallelism.ts:17](../../scripts/parallelism.ts)) — все ядра заняты.
+- Корень рефлекса «полный прогон на каждую правку»: [client/AGENTS.md:151](../../packages/client/AGENTS.md) мандатит `test:gui` на каждое GUI-изменение и называет его «inner loop»; файл подгружается при работе в packages/client.
+- Focused-замер 2026-11-18: `vitest run packages/client/ui-mermaid --maxWorkers=2` — 12 файлов, 79 тестов, 12.5s wall; заявленные оператором 3 часа включают смежные лейны/build либо swap при 12 jsdom-форках (полный замер не делался намеренно).
+- Cap 48 — измеренный memory-guard: 255 форков дали 243.7s / 55.3 GiB ([нота:28](../../.agents/notes/implemented/process/2026-10-12-local-gate-speedups.md)); чистый available/2 на 256-CPU хосте дал бы 128 форков, поэтому cap сохранён поверх формулы.
+- Политика минимальных проверок для pre-push уже существует ([dsh-pre-push-checks](../../.agents/skills/dsh-pre-push-checks/SKILL.md), AGENTS.md «Never default to the full suite»); пробел — inner loop, ресурсный потолок и мандат полной лейны в client/AGENTS.md.
+- dev:web с HMR запущен из этого checkout (процесс `apps/cli/src/bin.ts web`, порт 3080): визуальная итерация без тестов доступна.
+- vitest 4.1.11: `related` и `-t` работают; `--changed` path-фильтр игнорирует; watch в не-TTY не включается; related молча пропускает несуществующие пути (эмпирика 2026-11-18).
+- AGENTS.md стоит на потолке 2080/2080 (регион ontoship 180/200 отдельно); development.md — активная zh-пара с i18n-хэшами.

@@ -8,7 +8,7 @@
 
 ## Что делает
 
-В [SubagentHeaderLineage.module.css](../../packages/client/ui-subagent/src/client/SubagentHeaderLineage.module.css) меню получает `width: fit-content` между полом `min(360px, 100vw − 32px)` и потолком `min(560px, 100vw − 32px)`; формула левого clamp использует потолок, поэтому панель никогда не выходит за окно. Блок маршрута в [SubagentHeaderLineage.tsx](../../packages/client/ui-subagent/src/client/SubagentHeaderLineage.tsx) становится двухстрочным: `.routeProvider` (первая строка) и `.routeModelLine` (вторая: `.routeModel` + чип `.routeEffort`); обе строки ellipsis, чип `flex: none`; Tooltip с полным `provider/model` и tap-to-show обёртывает блок (`.routeAnchor`), aria-label ряда не меняется. Канал данных, скрытые состояния, словари и словари-ключи не меняются. README en+zh и спека обновлены тем же изменением.
+В [SubagentCatalog.module.css](../../packages/client/ui-subagent/src/client/SubagentCatalog.module.css) меню получает `width: fit-content` между полом `min(360px, 100vw − 32px)` и потолком `min(560px, 100vw − 32px)`; формула левого clamp использует потолок, поэтому панель никогда не выходит за окно. Блок маршрута в [SubagentHeaderLineage.tsx](../../packages/client/ui-subagent/src/client/SubagentHeaderLineage.tsx) становится двухстрочным: `.routeProvider` (первая строка) и `.routeModelLine` (вторая: `.routeModel` + чип `.routeEffort`); обе строки ellipsis, чип `flex: none`; Tooltip с полным `provider/model` и tap-to-show обёртывает блок (`.routeAnchor`), aria-label ряда не меняется. Канал данных, скрытые состояния, словари и словари-ключи не меняются. README en+zh и спека обновлены тем же изменением.
 
 ## Демо-путь
 
