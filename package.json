@@ -98,6 +98,7 @@
     "check:ci:artifacts": "tsx scripts/run-gates.ts ci-artifacts",
     "check:ci:consumers": "tsx scripts/run-gates.ts ci-consumers",
     "check:windows-wine": "bash scripts/wine-windows-gates.sh",
+    "fork:upgrade-audit": "tsx scripts/fork-upgrade-audit.ts",
     "check:ci:windows-blocking": "tsx scripts/run-gates.ts ci-windows-blocking",
     "check:ci:windows-complete": "tsx scripts/run-gates.ts ci-windows-complete",
     "check:ci:windows-observational-ready": "tsx scripts/run-gates.ts ci-windows-observational-ready",

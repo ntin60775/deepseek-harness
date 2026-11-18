@@ -6,10 +6,12 @@
 # Phases:
 #   1. preflight   — clean tree (or an in-progress merge to finish), upstream remote
 #   2. merge       — git merge upstream/master; auto-resolve generated files
-#   3. install     — pnpm install + full build
-#   4. docs        — regenerate catalogs, re-record pairing
-#   5. verify      — typecheck, doc gates, workspace constraints, snapshots
-#   6. actions     — ensure the fork-disabled workflows stay disabled on GitHub
+#   3. install     — pnpm install
+#   4. audit       — fork surfaces vs the merged upstream tree (strict)
+#   5. build+docs  — full build, regenerate catalogs, re-record pairing
+#   6. verify      — typecheck, doc gates, constraints, GUI units, snapshots
+#   7. actions     — ensure the fork-disabled workflows stay disabled on GitHub
+#   8. record      — write the merged upstream base, commit fork surfaces
 #
 # The script never pushes. An unknown conflict stops the run with the remaining
 # file list and the resolution guide.
@@ -132,8 +134,18 @@ else
 fi
 
 # ----------------------------------------------------------------- install
-log "install + build"
+log "install"
 pnpm install
+
+# ------------------------------------------------------------------- audit
+# Upstream moves the surfaces the fork attaches to. The audit names the new
+# upgrade guides and the files both sides touched, and fails before the build
+# when a fork plugin slot or a profile row no longer fits the merged tree.
+log "audit: fork surfaces vs upstream"
+pnpm run fork:upgrade-audit --strict --target "$UPSTREAM_REMOTE/$UPSTREAM_BRANCH"
+
+# ------------------------------------------------------------------- build
+log "build"
 pnpm run build
 
 # -------------------------------------------------------------------- docs
@@ -150,14 +162,22 @@ pnpm run verify-translation-pairing --write docs/config-catalog.md docs/event-pr
 pnpm run verify-translation-pairing docs/config-catalog.md docs/event-producer-consumer.md
 
 # ------------------------------------------------------------------- verify
-log "verify: typecheck, constraints, doc gates, snapshots"
+log "verify: typecheck, constraints, doc gates, GUI units, snapshots"
 pnpm run typecheck
 pnpm run constraints
 # verify-repository-references can flag a uv.lock size numeral whose 7-hex prefix
 # matches a fork-only commit in the local object database; when the file is still
 # byte-identical to upstream/master, treat that single finding as noise.
 pnpm run test:docs
+# Client and host units catch a merged UI surface that snapshots do not cover.
+pnpm run test:gui
 pnpm run test:snapshot
+
+# ------------------------------------------------------------------ record
+# The base records the shipped upstream commit; a failed run leaves it alone so
+# the next run audits the same range again.
+log "record upstream base"
+pnpm run fork:upgrade-audit --record-base --target "$UPSTREAM_REMOTE/$UPSTREAM_BRANCH"
 
 # ----------------------------------------------------------------- actions
 log "github actions: fork-disabled workflows stay disabled"
