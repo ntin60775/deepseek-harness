@@ -33,8 +33,8 @@ function pinSpinner(element: SVGSVGElement): void {
   for (const animation of spinner.getAnimations?.({ subtree: true }) ?? []) animation.startTime = 0
 }
 
-/** Segmented ongoing sun: eight thick radial spokes with a fading trail, stepped rotation. */
-const SEGMENT_COUNT = 8
+/** Segmented ongoing sun: twelve long rectangular spokes, small hub, stepped rotation. */
+const SEGMENT_COUNT = 12
 
 /**
  * Render a state dot.
@@ -42,7 +42,7 @@ const SEGMENT_COUNT = 8
  * @param props.size - outer diameter in px; defaults to 14 for ongoing and 10 for solid states.
  * @param props.className - extra class for layout placement.
  * @param props.appearance - compact dot by default; step uses a filled check or hollow pending
- * circle; segments renders ongoing as an eight-spoke segmented sun instead of the smooth ring.
+ * circle; segments renders ongoing as a twelve-bar rectangular sun instead of the smooth ring.
  * @returns the dot element (aria-hidden; pair with text for accessibility).
  */
 export function StateDot({ state, size, className, appearance = 'dot' }: {
@@ -68,8 +68,8 @@ export function StateDot({ state, size, className, appearance = 'dot' }: {
             <line
               key={i}
               className={css.seg}
-              x1="12" y1="2.2" x2="12" y2="7.5"
-              opacity={0.25 + (0.75 * i) / (SEGMENT_COUNT - 1)}
+              x1="12" y1="1.8" x2="12" y2="9.5"
+              opacity={0.35 + (0.65 * i) / (SEGMENT_COUNT - 1)}
               transform={`rotate(${(360 / SEGMENT_COUNT) * i} 12 12)`}
             />
           ))}

@@ -86,13 +86,13 @@
  * reads as a segmented sun rather than a smooth ring. */
 .segMotion {
   transform-origin: center;
-  animation: dsh-state-dot-seg 1s steps(8, end) infinite;
+  animation: dsh-state-dot-seg 1s steps(12, end) infinite;
 }
 
 .seg {
   stroke: currentColor;
-  stroke-width: 3.5;
-  stroke-linecap: round;
+  stroke-width: 2;
+  stroke-linecap: butt;
 }
 
 @keyframes dsh-state-dot-seg {
