@@ -1,0 +1,37 @@
+# Зелёные носители тикета 03 (2026-11-19)
+
+## test:docs (doc-quick)
+
+```
+run-gates: 21 passed, 0 failed, 0 skipped in 33.67s
+```
+
+Покрывает: markdown wrap (новый док и правки — один абзац = одна строка), markdown links (ссылки нового дока и ladder резолвятся), doc-budgets (8 budgeted docs within ceiling; корневой AGENTS.md net-zero 39 слов в 39), translation pairing (development.md en+zh и нота en+zh обновлены вместе, хэши перезаписаны verify-translation-pairing --write), repository-references.
+
+## verify-doc-budgets
+
+```
+verify-doc-budgets: 8 budgeted docs within ceiling.
+```
+
+## KB (gitmark)
+
+```
+✓ index: 1624 файлов · 26124 чанков · 8690 ссылок · trigram=on
+✓ чисто (1624 файлов)
+✓ map: docs-map.html · 1624 файлов · 8690 ссылок · 0 вне индекса
+```
+
+Новый док связан из docs/reference/README.md; pairing-exclusion записан в scripts/translation-pairing.manifest.json.
+
+## doc-sync (полный)
+
+Лог: 03-docsync-full.log (приложен после прогона).
+
+## Текстовые критерии (факт дерева тикета)
+
+- ladder packages/client/AGENTS.md ступень 1: focused loop со ссылкой на fork-gui-test-loop.md; полный test:gui назван checkpoint, не inner loop; ступени 2–3 сохранены; хвостовой абзац и checklist п.6 адаптированы.
+- корневой AGENTS.md: ссылка [GUI loop](docs/reference/fork-gui-test-loop.md) в существующей строке «Never default to the full suite…», net-zero по словам.
+- development.md:156: обе половинные формулы (cap 12 gate / cap 48 vitest), nice 19, DSH_LOCAL_PRIORITY 0-19; zh-строка обновлена симметрично.
+- нота 2026-10-12-local-gate-speedups: Change/Trade-off/Consequences обновлены в en и zh (половина под caps, приоритет).
+- docs/plans/README.md: строка юнита упоминает gate-половину и приоритет.

@@ -59,7 +59,7 @@ Status: implemented
 ### 3. 本地默认 worker 预算
 
 - **目的：** 按共享工作站或容器确定默认并行度；在这类环境中 Node 报告的是宿主 CPU 数而不是 CPU 配额。
-- **改动：** [`scripts/parallelism.ts`](../../../../scripts/parallelism.ts) 拥有默认值。`CI=true` 时它是 Node 报告的 CPU 数。否则，run-gates 调度器、`build`、`typecheck`、Oxlint 与 publint 的上限为 12（`LOCAL_PARALLELISM_CAP`），Vitest fork 与本地覆盖率预算的上限为 48（`LOCAL_TEST_PARALLELISM_CAP`）。`doc-sync`、`test:docs`、`hygiene` 与 `check:all` 的每个门禁都构建完整的 `ts.Program`，它们最多并发 8 个门禁，CI 中同样如此。显式的 `DSH_GATE_CONCURRENCY`、`DSH_OXLINT_THREADS`、`DSH_COVERAGE_MAX_WORKERS` 与 Vitest `--maxWorkers` 优先；CI 中，除非 run-gates 的 CI 环境设置了这些变量，Vitest 与 Oxlint 使用各自的默认值。[开发指南](../../../../docs/development.zh.md)向贡献者说明这些默认值。
+- **改动：** [`scripts/parallelism.ts`](../../../../scripts/parallelism.ts) 拥有默认值。`CI=true` 时它是 Node 报告的 CPU 数。否则为所报告 CPU 数的一半，至少 1 个 worker，run-gates 调度器、`build`、`typecheck`、Oxlint 与 publint 的上限为 12（`LOCAL_PARALLELISM_CAP`），Vitest fork 与本地覆盖率预算的上限为 48（`LOCAL_TEST_PARALLELISM_CAP`）；重量级入口（`run-gates`、`build`、根 Vitest 配置）还会把进程优先级降到 nice 19（`lowerLocalPriority`，`DSH_LOCAL_PRIORITY` 选择 0-19），使并行会话把 CPU 让给交互工作。`doc-sync`、`test:docs`、`hygiene` 与 `check:all` 的每个门禁都构建完整的 `ts.Program`，它们最多并发 8 个门禁，CI 中同样如此。显式的 `DSH_GATE_CONCURRENCY`、`DSH_OXLINT_THREADS`、`DSH_COVERAGE_MAX_WORKERS` 与 Vitest `--maxWorkers` 优先；CI 中，除非 run-gates 的 CI 环境设置了这些变量，Vitest 与 Oxlint 使用各自的默认值。[开发指南](../../../../docs/development.zh.md)向贡献者说明这些默认值。
 
 四种 fork 数下的 `pnpm run test`，运行的是第 8 项所替换的落盘版 `type-model.spec.ts`，32 个 worker 那次的 wall 由它决定：
 
@@ -72,7 +72,7 @@ Status: implemented
 
 - **Oxlint：** Oxlint 自身的默认值是 64 线程（读取 cgroup 配额）；12 线程时其 wall 保持约 87–90 s，CPU 少约 15%；8 线程时慢约 4 s。
 - **文档聚合：** 并发 8 个门禁时 `test:docs` 为 50.9 s，并发 4 个时为 74.7 s。不含第 4 项时测得的 `doc-sync` 在并发 4、8、12 个门禁时分别为 341.8、295.0、253.2 s，RSS 峰值分别为 10.0、13.5、16.3 GiB。
-- **取舍：** CPU 配额超过上限的机器，默认并行度也不超过 12 或 48，需要使用覆盖变量；配额低于上限的容器仍会超额订阅，因为 Node 报告的是宿主 CPU 数。并发 8 个门禁时 `doc-sync` 的 RSS 峰值为 13.5 GiB，并发 4 个时为 10.0 GiB；并发 12 个门禁快 41.8 s，但峰值为 16.3 GiB。CI 的文档 workflow 运行 `doc-sync` 时同样最多并发 8 个门禁。
+- **取舍：** CPU 配额超过上限的机器，默认并行度也不超过 12 或 48，低于上限时为所报告 CPU 数的一半，需要使用覆盖变量；配额低于上限的容器仍会超额订阅，因为 Node 报告的是宿主 CPU 数。并发 8 个门禁时 `doc-sync` 的 RSS 峰值为 13.5 GiB，并发 4 个时为 10.0 GiB；并发 12 个门禁快 41.8 s，但峰值为 16.3 GiB。CI 的文档 workflow 运行 `doc-sync` 时同样最多并发 8 个门禁。
 
 ### 4. 仓库引用候选对照一次对象列表解析
 
@@ -143,7 +143,7 @@ Status: implemented
 
 ## 后果
 
-无需重查时 pre-push `typecheck` 约 14–22 s，`lint` 与 `doc-typecheck` 的前置步骤约 12 s，改动 1 个文件的提交的钩子约 4 s。`pnpm run test` 在本地最多启动 48 个 fork，`test:docs` 与 `doc-sync` 最多同时运行 8 个门禁。Typert 输出、生成的页面、文件列表与引用判定都与基线逐字节一致。
+无需重查时 pre-push `typecheck` 约 14–22 s，`lint` 与 `doc-typecheck` 的前置步骤约 12 s，改动 1 个文件的提交的钩子约 4 s。`pnpm run test` 在本地最多启动 48 个 fork，优先级为 nice 19，`test:docs` 与 `doc-sync` 最多同时运行 8 个门禁。Typert 输出、生成的页面、文件列表与引用判定都与基线逐字节一致。
 
 代价：类型检查命令不刷新可运行的 bundle；第三方声明过期时在推送后于测试 lane 失败；本地默认值不使用超过上限的 CPU，而配额低于上限的容器仍会超额订阅；并发 8 个文档门禁抬高 `doc-sync` 的 RSS 峰值；CLI help 峰值约用 3.6 GB 内存；doc graphs 与 markdown links 假定运行期间工作树不变；除 Emitter 用例外，`type-model.spec.ts` 检验的是桩，而不是真实 zod、`@types/node`、DOM lib 与磁盘 I/O；增量 `typecheck` 继承 Issue #6022 跟踪的 Remote 声明缺口。
 
