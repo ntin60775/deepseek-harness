@@ -23,7 +23,7 @@ import {
 import { aggregateBuildArgs, aggregateCheckArgs, contractSteps, libraryBuildSteps } from './compile-referenced-projects.ts'
 import type { LibraryStep } from './compile-referenced-projects.ts'
 import { pnpmCommand } from './release/process.ts'
-import { defaultParallelism, describeDefaultParallelism } from './parallelism.ts'
+import { defaultParallelism, describeDefaultParallelism, lowerLocalPriority } from './parallelism.ts'
 import { runAggregate } from './run-gates.ts'
 import type { Gate } from './run-gates.ts'
 
@@ -160,6 +160,7 @@ function environmentOverlay(parent: NodeJS.ProcessEnv, child: NodeJS.ProcessEnv)
 }
 
 async function main(): Promise<number> {
+  lowerLocalPriority(process.env)
   // tsdown.config.ts loads only through Node type stripping (`--config-loader native`); this names the cause before tsdown fails.
   if (!process.features.typescript) {
     throw new Error('build: Node.js TypeScript type stripping is unavailable in this Node.js process; remove --no-experimental-strip-types from NODE_OPTIONS or use a Node.js build with TypeScript support')
