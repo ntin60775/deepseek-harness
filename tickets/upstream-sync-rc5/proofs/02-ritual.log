@@ -1,0 +1,50 @@
+# Ритуал rc.5: сводка прогона (2026-11-19)
+
+== preflight ==
+== merge upstream/master ==
+база мерджа: <commit>
+== install ==
+== audit: fork surfaces vs upstream ==
+== fork upgrade audit ==
+апстрим влит полностью: новых коммитов нет, проверяю только форк-поверхности
+== upgrade guides в диапазоне (читай до адаптации) ==
+== пересечение: файлы, которые менял и апстрим, и форк ==
+== форк-поверхности ==
+== слоты форк-плагинов в смерженном дереве ==
+== строки профилей на этой машине ==
+== итог ==
+== audit: theme UI classifier ==
+classify: 254 classified element(s) against /home/prog7/home/dev/contrib/forks/deepseek-harness
+classify: OK
+== invariants: fork design gates ==
+      Tests  27 passed (27)
+== build ==
+run-gates: 10 passed, 0 failed, 0 skipped in 143.25s.
+== docs: regenerate catalogs ==
+== docs: re-record pairing ==
+== verify: typecheck, constraints, doc gates, GUI units, snapshots ==
+run-gates: 5 passed, 0 failed, 0 skipped in 28.55s.
+== verify: profile configs against plugin schemas ==
+run-gates: 21 passed, 0 failed, 0 skipped in 65.27s.
+FORK_SKIP_FULL_GUI=1 — полный pnpm run test:gui пропущен; GUI-доказательство несут focused-прогоны и живая проба, пробел назван в отчёте
+      Tests  276 passed | 2 skipped (278)
+== record upstream base ==
+база записана — dsh-v0.2.2-rc.5
+== github actions: fork-disabled workflows stay disabled ==
+workflow 338747924 state (ntin60775/deepseek-harness): disabled_manually
+workflow 339387441 state (ntin60775/deepseek-harness): disabled_manually
+workflow 338747938 state (ntin60775/deepseek-harness): disabled_manually
+== commit ==
+== готово ==
+
+# Разрешение конфликтов
+28:    'sidebar.panel.trailing': {
+1
+
+# Проверка резолвов на текущем дереве
+
+$ grep -n "sidebar.panel.trailing" packages/client/ui-sidebar/src/client/contract/slots.ts | head -1
+28:    'sidebar.panel.trailing': {
+
+$ grep -c onWorkspaceSelected packages/client/ui-conversation/README.md
+1

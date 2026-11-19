@@ -74,6 +74,10 @@ GUIDE
 }
 
 GIT_DIR="$(git rev-parse --git-dir)"
+# The merge base captured before the merge, keyed by the target tip it belongs
+# to: a conflict resolution or a failed verification continues in a later run,
+# and after the merge commit `git merge-base HEAD target` is the target itself.
+BASE_STATE="$GIT_DIR/FORK_MERGE_BASE"
 
 # Resolve the generated files among the current conflicts; print what remains.
 resolve_generated_conflicts() {
@@ -139,11 +143,23 @@ echo "upstream: $(git remote get-url "$UPSTREAM_REMOTE")"
 # ------------------------------------------------------------------- merge
 log "merge $UPSTREAM_REMOTE/$UPSTREAM_BRANCH"
 git fetch "$UPSTREAM_REMOTE" "$UPSTREAM_BRANCH"
-# The base is taken before the merge: after it, merge-base(HEAD, target) is the
-# target itself and the post-merge audit would lose the range it exists to show.
-MERGE_BASE="$(git merge-base HEAD "$UPSTREAM_REMOTE/$UPSTREAM_BRANCH")" \
-  || die "нет общей истории с $UPSTREAM_REMOTE/$UPSTREAM_BRANCH"
+# The base is taken before the merge and kept for later runs: after the merge,
+# merge-base(HEAD, target) is the target itself and the post-merge audit would
+# lose the range it exists to show. A target whose tip moved starts a new range.
+TARGET_TIP="$(git rev-parse "$UPSTREAM_REMOTE/$UPSTREAM_BRANCH")"
+MERGE_BASE=""
+if [ -f "$BASE_STATE" ]; then
+  STORED_BASE="$(sed -n '1p' "$BASE_STATE")"
+  STORED_TIP="$(sed -n '2p' "$BASE_STATE")"
+  if [ "$STORED_TIP" = "$TARGET_TIP" ]; then MERGE_BASE="$STORED_BASE"; fi
+fi
+if [ -z "$MERGE_BASE" ]; then
+  MERGE_BASE="$(git merge-base HEAD "$UPSTREAM_REMOTE/$UPSTREAM_BRANCH")" \
+    || die "нет общей истории с $UPSTREAM_REMOTE/$UPSTREAM_BRANCH"
+  printf '%s\n%s\n' "$MERGE_BASE" "$TARGET_TIP" > "$BASE_STATE"
+fi
 echo "база мерджа: $MERGE_BASE"
+
 if [[ "$MERGE_IN_PROGRESS" == 1 ]]; then
   REMAINING="$(resolve_generated_conflicts)"
   if [[ -n "$REMAINING" ]]; then
