@@ -5273,6 +5273,13 @@ importers:
         version: 18.3.1
 
   packages/client/ui-mermaid:
+    dependencies:
+      '@deepseek-ai/dsh-skill':
+        specifier: workspace:*
+        version: link:../../skill/skill
+      yaml:
+        specifier: ^2.4.2
+        version: 2.9.0
     devDependencies:
       '@deepseek-ai/cordis':
         specifier: workspace:~

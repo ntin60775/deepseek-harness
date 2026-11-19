@@ -68,6 +68,8 @@ const SAFE_HOST_DEPENDENCY_EXPORTS = {
   '@deepseek-ai/dsh-llm': ['BlockAssembler', 'callConfigEquals', 'createUserMessage'],
   '@deepseek-ai/dsh-session-format': ['sessionFormatLogFilename'],
   '@deepseek-ai/dsh-storage-domain': ['defineDomain'],
+  // The mermaid row also serves its packaged authoring skill; the rank and name grammar are plain data.
+  '@deepseek-ai/dsh-skill': ['BUNDLED_SKILL_RANK', 'isSkillName'],
   '@deepseek-ai/dsh-timeout': ['MAX_TIMER_DELAY_MS'],
   // Both operate only on the caller's subprocess service and handle; the module memoizes only the binary path.
   '@deepseek-ai/dsh-util-ripgrep': ['readRipgrepLines', 'spawnRipgrep'],

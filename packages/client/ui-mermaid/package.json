@@ -63,6 +63,7 @@
     "react-dom": "^18.2.0"
   },
   "files": [
+    "assets",
     "locale/*.json",
     "lib/index.js",
     "lib/client.js",
@@ -71,5 +72,9 @@
     "lib/types/**/*.d.ts.map",
     "lib/**/*.js.map",
     "src"
-  ]
+  ],
+  "dependencies": {
+    "yaml": "^2.4.2",
+    "@deepseek-ai/dsh-skill": "workspace:*"
+  }
 }

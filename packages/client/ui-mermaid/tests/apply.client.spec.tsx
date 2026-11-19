@@ -5,7 +5,6 @@ import { cleanup, render, screen } from '@testing-library/react'
 import { Context } from '@deepseek-ai/cordis'
 import { bindSnapshotSelector } from '@deepseek-ai/dsh-client-test-runtime'
 import { apply, Config, inject } from '../src/client/index.ts'
-import { apply as hostApply } from '../src/index.ts'
 import { MermaidFenceLayer, type MermaidFenceInjected, type MermaidFenceLayerProps } from '../src/client/MermaidFenceLayer.tsx'
 import type { ThemeSnapshot } from '@deepseek-ai/dsh-client-ui-theme/client'
 import { t } from './harness.client.ts'
@@ -39,10 +38,6 @@ function mount(initialRevision: number, config?: Config) {
 describe('ui-mermaid apply', () => {
   it('declares the slot, locale, and theme service injections', () => {
     expect(inject).toEqual(['slots', 'locale', 'theme'])
-  })
-
-  it('mounts an empty Host companion', () => {
-    expect(() => { hostApply() }).not.toThrow()
   })
 
   it('registers the exact mermaid fence layer with its locale namespace', () => {

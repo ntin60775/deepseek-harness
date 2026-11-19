@@ -76,7 +76,6 @@ const SENTENCE_MODEL_EXPERIENCE: Readonly<Record<string, SentenceContract>> = {
   'packages/host/authentication-desktop': { kind: 'none', reason: 'Private Desktop credential verification authenticates HTTP callers without contributing model input.' },
   'packages/api/terminal-controller': { kind: 'indirect', reason: 'Working-directory recovery owns directory context; user terminal screens never enter model requests.' },
   'packages/client/ui-sidebar-terminal': { kind: 'none', reason: 'The browser renders user terminal screens without exposing them to the model.' },
-  'packages/client/ui-mermaid': { kind: 'none', reason: 'The browser presents an existing chat fence as a diagram without adding model input or Session events.' },
   'packages/ssh/ssh-helper-runtime': { kind: 'none', reason: 'The private executable carrier registers no model-facing content; its providers and consumers own operation results.' },
   'packages/experimental/forge': { kind: 'none', reason: 'Providers and watchers exchange code host status without contributing model context.' },
   'packages/experimental/forge-github': { kind: 'none', reason: 'The provider reads pull request status for host-side watchers without contributing model context.' },

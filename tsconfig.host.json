@@ -356,6 +356,7 @@
     { "path": "./packages/experimental/cua-windows" },
     { "path": "./packages/client/ui-sidebar-documentpreview/tsconfig.host.json" },
     { "path": "./packages/client/ui-sidebar-browser/tsconfig.host.json" },
+    { "path": "./packages/client/ui-mermaid/tsconfig.host.json" },
     { "path": "./packages/client/ui-settings-general/tsconfig.host.json" },
     { "path": "./packages/document/office-kit" },
     { "path": "./packages/document/tool-office" },
