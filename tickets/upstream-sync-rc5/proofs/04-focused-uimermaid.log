@@ -1,0 +1,68 @@
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+
+ RUN  v4.1.11 /home/prog7/home/dev/contrib/forks/deepseek-harness
+
+ ✓ |thread-safe| packages/client/ui-mermaid/tests/fence-states.client.spec.tsx (9 tests) 672ms
+ ✓ |thread-safe| packages/client/ui-mermaid/tests/fence-viewer.client.spec.tsx (5 tests) 905ms
+     ✓ opens live vector SVG at natural scale from the header button  313ms
+ ✓ |thread-safe| packages/client/ui-mermaid/tests/measure.client.spec.tsx (14 tests) 1451ms
+ ✓ |thread-safe| packages/client/ui-mermaid/tests/sanitize.client.spec.ts (12 tests) 350ms
+stdout | packages/client/ui-mermaid/tests/render-controller.client.spec.ts > mermaid render controller > reports a render failure without retrying inside the attempt
+[ui-mermaid] diagram render failed Error: Parse error on line 2
+    at /home/prog7/home/dev/contrib/forks/deepseek-harness/packages/client/ui-mermaid/tests/render-controller.client.spec.ts:94:41
+    at file:///home/prog7/home/dev/contrib/forks/deepseek-harness/node_modules/.pnpm/@vitest+runner@4.1.11/node_modules/@vitest/runner/dist/chunk-artifact.js:302:11
+    at file:///home/prog7/home/dev/contrib/forks/deepseek-harness/node_modules/.pnpm/@vitest+runner@4.1.11/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:26
+    at file:///home/prog7/home/dev/contrib/forks/deepseek-harness/node_modules/.pnpm/@vitest+runner@4.1.11/node_modules/@vitest/runner/dist/chunk-artifact.js:2326:20
+    at new Promise (<anonymous>)
+    at runWithCancel (file:///home/prog7/home/dev/contrib/forks/deepseek-harness/node_modules/.pnpm/@vitest+runner@4.1.11/node_modules/@vitest/runner/dist/chunk-artifact.js:2323:10)
+    at file:///home/prog7/home/dev/contrib/forks/deepseek-harness/node_modules/.pnpm/@vitest+runner@4.1.11/node_modules/@vitest/runner/dist/chunk-artifact.js:2305:20
+    at new Promise (<anonymous>)
+    at runWithTimeout (file:///home/prog7/home/dev/contrib/forks/deepseek-harness/node_modules/.pnpm/@vitest+runner@4.1.11/node_modules/@vitest/runner/dist/chunk-artifact.js:2272:10)
+    at file:///home/prog7/home/dev/contrib/forks/deepseek-harness/node_modules/.pnpm/@vitest+runner@4.1.11/node_modules/@vitest/runner/dist/chunk-artifact.js:2956:64
+
+stdout | packages/client/ui-mermaid/tests/render-controller.client.spec.ts > mermaid render controller > discards a result whose theme changed while the render was running
+[ui-mermaid] diagram render failed Error: Parse error on line 2
+    at /home/prog7/home/dev/contrib/forks/deepseek-harness/packages/client/ui-mermaid/tests/render-controller.client.spec.ts:119:17
+    at file:///home/prog7/home/dev/contrib/forks/deepseek-harness/node_modules/.pnpm/@vitest+runner@4.1.11/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:20
+
+stdout | packages/client/ui-mermaid/tests/render-controller.client.spec.ts > mermaid chunk import policy > fails the attempt on a rejected import and re-imports on the next attempt
+[ui-mermaid] diagram chunk import failed Error: [vitest] There was an error when mocking a module. If you are using "vi.mock" factory, make sure there are no top level variables inside, since this call is hoisted to top of the file. Read more: https://vitest.dev/api/vi.html#vi-mock
+    at createHelpfulError (file:///home/prog7/home/dev/contrib/forks/deepseek-harness/node_modules/.pnpm/@vitest+mocker@4.1.11_vite@8.2.2_@types+node@22.20.1_esbuild@0.28.2_jiti@2.7.0_tsx@4.23.13_yaml@2.9.0_/node_modules/@vitest/mocker/dist/chunk-registry.js:189:16)
+    at ManualMockedModule.resolve (file:///home/prog7/home/dev/contrib/forks/deepseek-harness/node_modules/.pnpm/@vitest+mocker@4.1.11_vite@8.2.2_@types+node@22.20.1_esbuild@0.28.2_jiti@2.7.0_tsx@4.23.13_yaml@2.9.0_/node_modules/@vitest/mocker/dist/chunk-registry.js:163:10)
+    at VitestMocker.callFunctionMock (file:///home/prog7/home/dev/contrib/forks/deepseek-harness/node_modules/.pnpm/vitest@4.1.11_@opentelemetry+api@1.9.1_@types+node@22.20.1_@vitest+coverage-v8@4.1.11_h_414bc0208e52c7af02d5d6ed839cd439/node_modules/vitest/dist/chunks/startVitestModuleRunner.DB-7oCpn.js:319:32)
+    ... 5 lines matching cause stack trace ...
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at /home/prog7/home/dev/contrib/forks/deepseek-harness/packages/client/ui-mermaid/src/client/render-controller.ts:62:22 {
+  cause: Error: chunk load failed
+      at /home/prog7/home/dev/contrib/forks/deepseek-harness/packages/client/ui-mermaid/tests/render-controller.client.spec.ts:153:36
+      at ManualMockedModule.factory (file:///home/prog7/home/dev/contrib/forks/deepseek-harness/node_modules/.pnpm/vitest@4.1.11_@opentelemetry+api@1.9.1_@types+node@22.20.1_@vitest+coverage-v8@4.1.11_h_414bc0208e52c7af02d5d6ed839cd439/node_modules/vitest/dist/chunks/test.DNmyFkvJ.js:3578:78)
+      at ManualMockedModule.resolve (file:///home/prog7/home/dev/contrib/forks/deepseek-harness/node_modules/.pnpm/@vitest+mocker@4.1.11_vite@8.2.2_@types+node@22.20.1_esbuild@0.28.2_jiti@2.7.0_tsx@4.23.13_yaml@2.9.0_/node_modules/@vitest/mocker/dist/chunk-registry.js:161:21)
+      at VitestMocker.callFunctionMock (file:///home/prog7/home/dev/contrib/forks/deepseek-harness/node_modules/.pnpm/vitest@4.1.11_@opentelemetry+api@1.9.1_@types+node@22.20.1_@vitest+coverage-v8@4.1.11_h_414bc0208e52c7af02d5d6ed839cd439/node_modules/vitest/dist/chunks/startVitestModuleRunner.DB-7oCpn.js:319:32)
+      at file:///home/prog7/home/dev/contrib/forks/deepseek-harness/node_modules/.pnpm/vitest@4.1.11_@opentelemetry+api@1.9.1_@types+node@22.20.1_@vitest+coverage-v8@4.1.11_h_414bc0208e52c7af02d5d6ed839cd439/node_modules/vitest/dist/chunks/startVitestModuleRunner.DB-7oCpn.js:402:23
+      at Traces.$ (file:///home/prog7/home/dev/contrib/forks/deepseek-harness/node_modules/.pnpm/vitest@4.1.11_@opentelemetry+api@1.9.1_@types+node@22.20.1_@vitest+coverage-v8@4.1.11_h_414bc0208e52c7af02d5d6ed839cd439/node_modules/vitest/dist/chunks/traces.DT5aQ62U.js:142:27)
+      at VitestMocker.requestWithMockedModule (file:///home/prog7/home/dev/contrib/forks/deepseek-harness/node_modules/.pnpm/vitest@4.1.11_@opentelemetry+api@1.9.1_@types+node@22.20.1_@vitest+coverage-v8@4.1.11_h_414bc0208e52c7af02d5d6ed839cd439/node_modules/vitest/dist/chunks/startVitestModuleRunner.DB-7oCpn.js:367:21)
+      at VitestModuleRunner.cachedRequest (file:///home/prog7/home/dev/contrib/forks/deepseek-harness/node_modules/.pnpm/vitest@4.1.11_@opentelemetry+api@1.9.1_@types+node@22.20.1_@vitest+coverage-v8@4.1.11_h_414bc0208e52c7af02d5d6ed839cd439/node_modules/vitest/dist/chunks/startVitestModuleRunner.DB-7oCpn.js:568:31)
+      at request (file:///home/prog7/home/dev/contrib/forks/deepseek-harness/node_modules/.pnpm/vite@8.2.2_@types+node@22.20.1_esbuild@0.28.2_jiti@2.7.0_tsx@4.23.13_yaml@2.9.0/node_modules/vite/dist/node/module-runner.js:1231:76)
+      at processTicksAndRejections (node:internal/process/task_queues:104:5)
+}
+
+ ✓ |thread-safe| packages/client/ui-mermaid/tests/render-controller.client.spec.ts (9 tests) 323ms
+ ✓ |thread-safe| packages/client/ui-mermaid/tests/bundle-split.client.spec.ts (2 tests) 145ms
+ ✓ |thread-safe| packages/client/ui-mermaid/tests/fence-header.client.spec.tsx (7 tests) 2869ms
+     ✓ copies the exact source in the diagram state and in the source state  1155ms
+     ✓ copies once per confirmation window and keeps the idle label when the host refuses  1130ms
+ ✓ |thread-safe| packages/client/ui-mermaid/tests/mermaid-viewer.client.spec.tsx (3 tests) 302ms
+ ✓ |thread-safe| packages/client/ui-mermaid/tests/svg.client.spec.ts (5 tests) 125ms
+ ✓ |thread-safe| packages/client/ui-mermaid/tests/theme.client.spec.ts (5 tests) 96ms
+ ✓ |thread-safe| packages/client/ui-mermaid/tests/mermaid-entry.client.spec.ts (3 tests) 31ms
+ ✓ |thread-safe| packages/client/ui-mermaid/tests/apply.client.spec.tsx (6 tests) 303ms
+ ✓ |thread-safe| packages/client/ui-mermaid/tests/fit.client.spec.ts (7 tests) 6ms
+ ✓ |thread-safe| packages/client/ui-mermaid/tests/mermaid-viewer-styles.client.spec.ts (2 tests) 4ms
+ ✓ |thread-safe| packages/client/ui-mermaid/tests/config.client.spec.ts (5 tests) 7ms
+
+ Test Files  15 passed (15)
+      Tests  94 passed (94)
+   Start at  17:34:14
+   Duration  8.37s (transform 6.41s, setup 327ms, import 13.07s, tests 7.59s, environment 7.73s)

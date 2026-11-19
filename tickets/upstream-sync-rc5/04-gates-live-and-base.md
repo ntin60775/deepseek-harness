@@ -6,7 +6,7 @@
 
 ## Демо-путь
 
-Лайт-контур зелёный, второй экземпляр интерфейса на `:3081` открывается с копией профиля: композер держит виджет темы, страница Plugins и Settings работают, страница ревью forge показывает список change request, обе схемы на месте; `packages/fork/upstream-base.json` несёт `dsh-v0.2.2-rc.5`, доки форка и состояние проекта обновлены.
+Лайт-контур зелёный, второй экземпляр интерфейса на `:3081` открывается с копией профиля: композер, страница Plugins и Settings работают, страница ревью forge открывается (список пуст без привязанного workspace), обе схемы сняты; занятость слота `conversation.composer.dock` виджетом темы подтверждает `cordis_inspect` с `:3080` — в пробе `:3081` виджет не материализуется без законченной Conversation; `packages/fork/upstream-base.json` несёт `dsh-v0.2.2-rc.5`, доки форка и состояние проекта обновлены.
 
 ## Критерии приёмки (падают на базовом коммите)
 
@@ -35,11 +35,11 @@
 
 ### Гейты лайт-контура
 
-- **Build.** `pnpm run build` — 10/10 гейтов зелёные в зелёном прогоне ритуала (сводка в [proofs/02-ritual.log](proofs/02-ritual.log)). Перепрогон на финальном HEAD оператор запретил («пересборку не делай, я сам запущу») — пробел назван, не выдан за прогон.
+- **Build.** `pnpm run build` — 10/10 гейтов зелёные в зелёном прогоне ритуала (сводка в [proofs/02-ritual.log](proofs/02-ritual.log)). Перепрогон на финальном HEAD оператор запретил («пересборку не делай, я сам запущу») — пробел назван, не выдан за прогон. Остальные гейты перепроверены на финальном HEAD после `fix(ui-mermaid)` ([proofs/04-gates.log](proofs/04-gates.log)).
 - **Typecheck.** `pnpm run typecheck` — 5/5 зелёные на HEAD после мержа ([proofs/04-gates.log](proofs/04-gates.log)).
 - **Constraints.** `pnpm run constraints` — exit 0 ([proofs/04-gates.log](proofs/04-gates.log)); версия форк-пакета `ui-mermaid` выровнена на `0.2.2-rc.5`.
 - **Доки.** `pnpm run test:docs` — 21/21, `pnpm run doc-sync` — 43/43 ([proofs/04-gates.log](proofs/04-gates.log)).
-- **Снапшоты.** Node `v24.19.0`; `pnpm run test:snapshot` — 276 passed / 2 skipped, падений нет ([proofs/04-gates.log](proofs/04-gates.log)).
+- **Снапшоты.** Node `v24.19.0`; `pnpm run test:snapshot` — 276 passed / 2 skipped на HEAD после `fix(ui-mermaid)`, падений нет ([proofs/04-gates.log](proofs/04-gates.log)). `ui-mermaid` focused — зелёный ([proofs/04-focused-uimermaid.log](proofs/04-focused-uimermaid.log)).
 - **Focused.** GUI-пакеты (`ui-chat`, `ui-conversation`, `ui-sidebar`, `ui-subagent`, `ui-mermaid`, `ui-theme`, `ui-sidebar-documentpreview`, `ui-deliverables`, `ui-account-notifications`, `connection`, `ui-settings-models`, `shortcuts`, `extensions/cordis-client-runner`) — 350 файлов / 5138 тестов зелёные; юнит-пакеты (`fork/web-search-zai`, `bundle/base`, `mcp-client`, `session-persistence-sqlite`, `sandbox-policy`, `worktree`) — 59 файлов / 806 тестов зелёные ([proofs/04-focused-gui.log](proofs/04-focused-gui.log), [proofs/04-focused-unit.log](proofs/04-focused-unit.log)); `pnpm run fork:invariants` — 27/27.
 - **Классификатор темы.** `node ~/home/dev/dsh-plugins/theme-omp/verify/classify.mjs --checkout $PWD --strict` — exit 0, `classify: OK` (254 элемента; два новых слота `forge.review.conversation` и `sidebar.panellist.trailing` классифицированы `inherits-dsh` в тикете 02).
 
@@ -63,3 +63,17 @@
 - Пересборка на финальном HEAD не запускалась — по указанию оператора; build 10/10 зафиксирован в зелёном прогоне ритуала.
 - Push не делался (рамки спеки).
 - Апстримная Agent Note `.agents/notes/implemented/architecture/2026-08-22-single-dsh-application-launcher.md` всё ещё описывает `patchReload` как shipped-механизм; это upstream-запись решения, в юните не правилась — зацепка на следующий sweep, в отчётах юнита механизм назван по коду (`dsh-hmr`).
+
+### Ревью-панель (один прогон)
+
+Роли: reviewer-spec, reviewer-tests, reviewer-code, reviewer-kb — `qwen-token-plan/qwen3.8-flash` @ `xhigh`; модель сессии другая. `rev-code-04` упал без результата, повторная проба `rev-code-04b` отработала.
+
+- **P2 (tests, spec)** — не было носителя `cordis_inspect` по слоту `conversation.composer.dock` и противоречивая фраза о нём. Слот снят client `Slots.listSubTree` с `:3080` (`status-line`, `activity`, `usage`), [proofs/04-cordis-inspect-slot.json](proofs/04-cordis-inspect-slot.json); в отчёте сказано, что на `:3081` снять нельзя, а проба виджет не материализует.
+- **P2 (tests, spec)** — скриншот forge был подписан `-dark`, хотя снят в светлой схеме; переименован в `-light`, поэкранное распределение схем названо.
+- **P2 (spec)** — команда песочницы и `grep` в тикете 03 были нерабочими; форма исправлена, лог получил шапку команды и `exit=0`, `grep -E` переписан, baseline схемы приложен.
+- **P2 (kb, code)** — механизм HMR назван мёртвым `patchReload: live`. Отчёт и спека юнита переписаны на `dsh-hmr` из base (решение оператора 2026-11-19); ключ удалён из живого профиля и копии.
+- **P2 (kb, code)** — `continue.md` не отражал юнит и gates; добавлена строка юнита и ссылка на его спеку/отчёт; `packages/fork/README.md` получил `slot-catalog.ts` и `FORK_SKIP_FULL_GUI`.
+- **P2 (code)** — Agent Note пересказывала фазы reference-документа и неточно ставила запись базы; аудит выделен в отдельную фазу, запись базы — после зелёных гейтов, до actions/commit.
+- **P3** — лог `04-gates.log` назван «финальный HEAD» до последнего `fix(ui-mermaid)`: гейты перепрогнаны на текущем HEAD, заголовок уточнён; demo-путь и README step 6 исправлены; ссылка `continue.md` ведёт на отчёт 04 и спеку.
+
+Открытых зацепок нет; upstream Agent Note про `patchReload` остаётся зацепкой следующего sweep (upstream-запись решения, в юните не правилась).

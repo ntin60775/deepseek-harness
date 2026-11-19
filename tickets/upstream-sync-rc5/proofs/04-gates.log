@@ -1,4 +1,4 @@
-# Гейты финального HEAD (2026-11-19)
+# Гейты HEAD (2026-11-19), после fix(ui-mermaid)
 
 $ pnpm run typecheck
 exit=0
@@ -37,3 +37,9 @@ exit=0, 27 passed (27)
 # test:docs и gitmark перепроверены после него.
 
 # Финальная перепроверка после коммита: test:docs 21/21 exit 0; gitmark index 1641 файл / 26300 чанков / 8800 ссылок; lint --strict чисто; map 0 вне индекса.
+
+# Перепрогон на HEAD после fix(ui-mermaid):
+#   pnpm run typecheck — 5/5 exit 0
+#   pnpm run test:docs — 21/21 exit 0
+#   pnpm run test:snapshot — 276 passed / 2 skipped exit 0
+#   vitest run packages/client/ui-mermaid — exit 0
