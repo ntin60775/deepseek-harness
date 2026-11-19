@@ -12,6 +12,14 @@
   margin: auto;
 }
 
+/* The viewer sits over the dimmed transcript, so the diagram needs its own
+   surface: a transparent SVG would read through the page text behind it. */
+.diagram {
+  padding: 24px;
+  border-radius: var(--dsw-radius-lg);
+  background: var(--dsw-alias-markdown-code-block);
+}
+
 .diagram svg {
   display: block;
 }

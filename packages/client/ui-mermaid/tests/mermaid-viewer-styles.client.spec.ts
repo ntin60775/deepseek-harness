@@ -16,6 +16,12 @@ describe('mermaid viewer stylesheet', () => {
     expect(inner).toContain('margin: auto;')
   })
 
+  it('paints the diagram surface over the dimmed transcript', () => {
+    const diagram = css.slice(css.indexOf('.diagram {'), css.indexOf('.diagram svg {'))
+    expect(diagram).toContain('background: var(--dsw-alias-markdown-code-block);')
+    expect(diagram).toContain('padding: 24px;')
+  })
+
   it('overrides only the toolbar inset, leaving centering to the catalog primitive', () => {
     const toolbar = css.slice(css.indexOf('.toolbar {'))
     expect(toolbar).toContain('bottom: 20px;')

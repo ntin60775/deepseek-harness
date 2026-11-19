@@ -153,6 +153,10 @@ describe('web e2e: mermaid diagram viewer', () => {
     expect(await dialog.locator('img').count()).toBe(0)
     await dialog.getByRole('img', { name: DIAGRAM_NAME, exact: true }).waitFor()
     await dialog.locator(`[aria-label="${SCROLL_LABEL}"]`).waitFor()
+    // The diagram carries its own surface: the dimmed transcript must not read
+    // through the live SVG.
+    expect(await dialog.locator('[role="img"]').evaluate(node => getComputedStyle(node).backgroundColor))
+      .not.toBe('rgba(0, 0, 0, 0)')
     const opened = await viewerFacts(dialog)
     expect(opened.width).toBeCloseTo(medium.rendered, 0)
     expect(opened.width).toBeCloseTo(medium.scale * medium.intrinsic, 0)
@@ -258,6 +262,8 @@ describe('web e2e: mermaid diagram viewer', () => {
     await loopCard.getByRole('button', { name: 'Open diagram in viewer' }).click()
     await dialog.waitFor()
     await expect.poll(async () => (await viewerFacts(dialog)).width).toBeCloseTo(dark.scale * dark.intrinsic, 0)
+    expect(await dialog.locator('[role="img"]').evaluate(node => getComputedStyle(node).backgroundColor))
+      .not.toBe('rgba(0, 0, 0, 0)')
     await mkdir(SHOT_DIR, { recursive: true })
     await page.screenshot({ path: join(SHOT_DIR, `scale-dark-${MODE}-${process.pid}.png`) })
     await page.keyboard.press('Escape')
