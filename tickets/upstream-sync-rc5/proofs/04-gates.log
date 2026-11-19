@@ -36,7 +36,7 @@ exit=0, 27 passed (27)
 # Порядок: typecheck/snapshot сняты до докового реверта mermaid-skill (docs-only);
 # test:docs и gitmark перепроверены после него.
 
-# Финальная перепроверка после коммита: test:docs 21/21 exit 0; gitmark index 1641 файл / 26300 чанков / 8800 ссылок; lint --strict чисто; map 0 вне индекса.
+# Финальная перепроверка после коммита: test:docs 21/21 exit 0; gitmark index 1641 файл / 26302 чанка / 8801 ссылка; lint --strict чисто; map 0 вне индекса.
 
 # Перепрогон на HEAD после fix(ui-mermaid):
 #   pnpm run typecheck — 5/5 exit 0
