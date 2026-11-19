@@ -10,8 +10,9 @@
 #   4. audit       — fork surfaces vs the merged upstream tree (strict)
 #   5. build+docs  — full build, regenerate catalogs, re-record pairing
 #   6. verify      — typecheck, doc gates, constraints, GUI units, snapshots
-#   7. actions     — ensure the fork-disabled workflows stay disabled on GitHub
-#   8. record      — write the merged upstream base, commit fork surfaces
+#   7. record      — write the merged upstream base
+#   8. actions     — ensure the fork-disabled workflows stay disabled on GitHub
+#   9. commit      — commit the restored fork surfaces
 #
 # The script never pushes. An unknown conflict stops the run with the remaining
 # file list and the resolution guide.
@@ -58,6 +59,7 @@ GENERATED_CONFLICTS=(
   docs/tool-execution-pipeline.md
   docs/graph-atlas.md
   tsconfig.base.json
+  packages/extensions/cordis-client-runner/src/client/slot-catalog.ts
 )
 
 log() { printf '\n== %s ==\n' "$*"; }
@@ -71,6 +73,8 @@ resolution_guide() {
 GUIDE
 }
 
+GIT_DIR="$(git rev-parse --git-dir)"
+
 # Resolve the generated files among the current conflicts; print what remains.
 resolve_generated_conflicts() {
   for f in "${GENERATED_CONFLICTS[@]}"; do
@@ -82,13 +86,49 @@ resolve_generated_conflicts() {
   git diff --name-only --diff-filter=U || true
 }
 
+# Re-record the README pairs the merge touched, before the merge commit exists.
+# The pre-commit and pre-merge-commit jobs "translation pairing (staged records)"
+# check each staged *.i18n.yaml against the staged README.md bytes; a resolved
+# conflict, and equally a clean merge that combined sections of one pair, leaves
+# the record stale and the hook refuses the commit. The staged records are the
+# authoritative list, so both paths repair the same way.
+record_touched_pairs() {
+  local metas=() anchors=() path anchor
+  while IFS= read -r path; do
+    case "${path##*/}" in
+      README.i18n.yaml) metas+=("$path") ;;
+    esac
+  done < <(git diff --cached --name-only --diff-filter=AM | grep '/README\.i18n\.yaml$' || true)
+  [ "${#metas[@]}" -eq 0 ] && return 0
+  if pnpm run verify-translation-pairing --cached "${metas[@]}"; then return 0; fi
+  for path in "${metas[@]}"; do anchors+=("${path%.i18n.yaml}.md"); done
+  echo "перезаписываю pairing для ${anchors[*]}"
+  pnpm run verify-translation-pairing --write "${anchors[@]}"
+  for anchor in "${anchors[@]}"; do
+    git add -- "$anchor"
+    [ -f "${anchor%.md}.zh.md" ] && git add -- "${anchor%.md}.zh.md"
+    [ -f "${anchor%.md}.i18n.yaml" ] && git add -- "${anchor%.md}.i18n.yaml"
+  done
+}
+
+# Commit the resolved merge. pnpm install comes first because the pre-commit
+# "pi-ai provider metadata" job compares the staged pnpm-lock.yaml with the
+# installed provider graph; a merge that changed manifests fails it until the
+# graph is installed.
+finish_merge_commit() {
+  record_touched_pairs
+  pnpm install
+  git commit --no-edit
+  echo "merge-коммит создан"
+}
+
 # ---------------------------------------------------------------- preflight
 log "preflight"
 git remote get-url "$UPSTREAM_REMOTE" >/dev/null 2>&1 \
   || git remote add "$UPSTREAM_REMOTE" "$UPSTREAM_URL"
 
 MERGE_IN_PROGRESS=0
-if [[ -e .git/MERGE_HEAD ]]; then
+if [[ -e "$GIT_DIR/MERGE_HEAD" ]]; then
   MERGE_IN_PROGRESS=1
   echo "обнаружен незавершённый merge — продолжаю с фазы разрешения конфликтов"
 elif [[ -n "$(git status --porcelain)" ]]; then
@@ -98,39 +138,36 @@ echo "upstream: $(git remote get-url "$UPSTREAM_REMOTE")"
 
 # ------------------------------------------------------------------- merge
 log "merge $UPSTREAM_REMOTE/$UPSTREAM_BRANCH"
+git fetch "$UPSTREAM_REMOTE" "$UPSTREAM_BRANCH"
+# The base is taken before the merge: after it, merge-base(HEAD, target) is the
+# target itself and the post-merge audit would lose the range it exists to show.
+MERGE_BASE="$(git merge-base HEAD "$UPSTREAM_REMOTE/$UPSTREAM_BRANCH")" \
+  || die "нет общей истории с $UPSTREAM_REMOTE/$UPSTREAM_BRANCH"
+echo "база мерджа: $MERGE_BASE"
 if [[ "$MERGE_IN_PROGRESS" == 1 ]]; then
   REMAINING="$(resolve_generated_conflicts)"
   if [[ -n "$REMAINING" ]]; then
-    printf '  %s\n' $REMAINING >&2
+    printf '%s\n' "$REMAINING" | sed 's/^/  /' >&2
     resolution_guide
     die "остались конфликты, которые скрипт не разрешает — почини и запусти снова"
   fi
-  # The full pre-commit lane regenerates third-party notices from node_modules;
-  # a merge that changed manifests fails that hook until the new graph is installed.
-  pnpm install
-  git commit --no-edit
-  echo "merge-коммит создан"
+  finish_merge_commit
+  MERGED_NOW=1
+elif git merge-base --is-ancestor "$UPSTREAM_REMOTE/$UPSTREAM_BRANCH" HEAD; then
+  echo "апстрим уже влит — фаза мерджа пропущена, идёт проверка форк-поверхностей"
+  MERGED_NOW=0
+elif git merge "$UPSTREAM_REMOTE/$UPSTREAM_BRANCH" --no-edit; then
+  echo "мердж чистый"
   MERGED_NOW=1
 else
-  git fetch "$UPSTREAM_REMOTE" "$UPSTREAM_BRANCH"
-  if git merge-base --is-ancestor "$UPSTREAM_REMOTE/$UPSTREAM_BRANCH" HEAD; then
-    echo "апстрим уже влит — фаза мерджа пропущена, идёт проверка форк-поверхностей"
-    MERGED_NOW=0
-  elif git merge "$UPSTREAM_REMOTE/$UPSTREAM_BRANCH" --no-edit; then
-    echo "мердж чистый"
-    MERGED_NOW=1
-  else
-    REMAINING="$(resolve_generated_conflicts)"
-    if [[ -n "$REMAINING" ]]; then
-      printf '  %s\n' $REMAINING >&2
-      resolution_guide
-      die "остались конфликты, которые скрипт не разрешает — почини и запусти снова"
-    fi
-    pnpm install
-    git commit --no-edit
-    echo "merge-коммит создан"
-    MERGED_NOW=1
+  REMAINING="$(resolve_generated_conflicts)"
+  if [[ -n "$REMAINING" ]]; then
+    printf '%s\n' "$REMAINING" | sed 's/^/  /' >&2
+    resolution_guide
+    die "остались конфликты, которые скрипт не разрешает — почини и запусти снова"
   fi
+  finish_merge_commit
+  MERGED_NOW=1
 fi
 
 # ----------------------------------------------------------------- install
@@ -142,7 +179,7 @@ pnpm install
 # upgrade guides and the files both sides touched, and fails before the build
 # when a fork plugin slot or a profile row no longer fits the merged tree.
 log "audit: fork surfaces vs upstream"
-pnpm run fork:upgrade-audit --strict --target "$UPSTREAM_REMOTE/$UPSTREAM_BRANCH"
+pnpm run fork:upgrade-audit --strict --target "$UPSTREAM_REMOTE/$UPSTREAM_BRANCH" --base "$MERGE_BASE"
 
 # The OMP theme classifies DSH UI elements; a moved or removed surface makes its
 # stylesheet silently dead. The classifier fails on MISSING carriers and, with
@@ -216,7 +253,11 @@ fi
 pnpm run test:docs
 # Client and host units catch a merged UI surface that snapshots do not cover.
 # The cap keeps the workstation responsive while the ritual runs beside a session.
-pnpm run test:gui -- --maxWorkers "${FORK_TEST_MAX_WORKERS:-4}"
+if [[ "${FORK_SKIP_FULL_GUI:-0}" == 1 ]]; then
+  echo "FORK_SKIP_FULL_GUI=1 — полный pnpm run test:gui пропущен; GUI-доказательство несут focused-прогоны и живая проба, пробел назван в отчёте"
+else
+  pnpm run test:gui -- --maxWorkers "${FORK_TEST_MAX_WORKERS:-4}"
+fi
 pnpm run test:snapshot
 
 # ------------------------------------------------------------------ record

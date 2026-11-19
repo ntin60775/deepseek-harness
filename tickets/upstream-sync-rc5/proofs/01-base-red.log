@@ -1,0 +1,333 @@
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+
+ RUN  v4.1.11 /home/prog7/home/dev/contrib/forks/deepseek-harness/.agents/worktrees/rc5-01-audit-ritual
+
+stdout | scripts/fork-upgrade-audit.spec.ts
+
+== fork upgrade audit ==
+диапазон: <commit>..upstream/master (база: dsh-v0.2.2-rc.4 (packages/fork/upstream-base.json))
+коммитов: 1645 (мерджей 560); новые теги: dsh-v0.2.2-rc.5
+
+== upgrade guides в диапазоне (читай до адаптации) ==
+  - изменён: Python PTC applies the shared file sandbox — Python PTC compositions require sandbox services, and direct Python file operations follow the resolved file policy.
+    v0.2.1-alpha.1/python-ptc-sandbox/guide.md
+  - изменён: Native CUA application and window API — Migrate CUA scripts and custom native providers to scoped window input, string element IDs, and platform capabilities.
+    v0.2.2-rc.1/cua-native-platform/guide.md
+  - новый: Replace internal plugin-root imports — Internal helper values are removed from three published plugin-root entries.
+    v0.2.2-rc.1/package-export-cleanup/guide.md
+  - новый: Node PTC bootstrap protocol version 3 and the scoped-repl format — Update custom Node PTC bootstraps to protocol version 3 before running them with the upgraded Host, and handle the new …
+    v0.2.2-rc.1/ptc-bootstrap-protocol/guide.md
+  - новый: Explicit output in TypeScript PTC programs — TypeScript PTC programs display selected values through inspect and return ordered text and image output.
+    v0.2.2-rc.1/ptc-inspect-output/guide.md
+  - новый: Retained Node PTC runs the scoped REPL by default — Node PTC persistent-in-memory execution runs the scoped REPL unless replScoped is false.
+    v0.2.2-rc.1/ptc-scoped-repl-default/guide.md
+  - новый: Local HTTP fetch transport failures use classified codes — Local HTTP fetch transport failures raise classified WEB_FETCH_* codes instead of WEB_PROVIDER_ERROR.
+    v0.2.2-rc.1/web-fetch-transport-error-codes/guide.md
+  - новый: Client module metadata — Client artifact metadata and static library manifests require rebuilding custom browser bundles and updating direct sta…
+    v0.2.2-rc.2/client-module-metadata/guide.md
+  - новый: Token Provider and route admission migration — WebServer routes require authentication by default, and default Token login moves to a Provider plugin.
+    v0.2.2-rc.2/connection-page-peer/guide.md
+  - новый: `ctx[Context.root]` replaces `ctx.root`, and service intercept metadata is renamed — Cordis 4.0.0-rc.12 replaces ctx.root with ctx[Context.root] and renames the service intercept-metadata API.
+    v0.2.2-rc.2/cordis-root-and-intercept-metadata/guide.md
+  - новый: CUA gives Agents without a preset `cua_run_code` — A native CUA provider configured with a preset id now gives Agents without an Agent preset the cua_run_code tool.
+    v0.2.2-rc.2/cua-agents-without-preset/guide.md
+  - новый: macOS Computer Use provider name — Update direct dependencies and configuration overrides for the renamed macOS Computer Use provider.
+    v0.2.2-rc.2/cua-macos-provider/guide.md
+  - новый: macOS CUA isolates unavailable AX branches — macOS CUA returns marked partial AX observations and distinguishes observation failures from stale input snapshots.
+    v0.2.2-rc.2/cua-partial-observations/guide.md
+  - новый: DeepSeek image upload timeout — Keep a longer image upload deadline on slow DeepSeek gateways.
+    v0.2.2-rc.2/deepseek-files-timeout/guide.md
+  - новый: Experimental plugin failures carry error codes — Experimental and hook plugin tool failures record error codes, NativeError, OarFailure, and StagehandDrainError become …
+    v0.2.2-rc.2/experimental-tool-error-codes/guide.md
+  - новый: Update removed package subpath imports — Update removed package subpaths; retained identity constructors remain available.
+    v0.2.2-rc.2/package-export-cleanup/guide.md
+  - новый: Python PTC removal — Python PTC runtime packages, external providers, SDK renderers and Python-specific binding APIs are removed; migrate to…
+    v0.2.2-rc.2/python-ptc-removal/guide.md
+  - новый: Session status moves to `@deepseek-ai/dsh-client-ui-session-status` and completion remind… — Session status types and the useSessionStatus hook move to @deepseek-ai/dsh-client-ui-session-status/client, ctx.uiSess…
+    v0.2.2-rc.2/session-status-package/guide.md
+  - новый: Shared search filter replaces rankByName and searchMode — ui-primitives no longer exports rankByName, and popupSelect commands no longer accept searchMode.
+    v0.2.2-rc.2/shared-search-filter/guide.md
+  - новый: Shell and read_image failures use consolidated error codes — bash and pwsh report unadvertised sandbox_permissions and run_in_background as ToolArgsError, JOB_BACKGROUND_DISABLED i…
+    v0.2.2-rc.2/shell-fs-tool-error-codes/guide.md
+  - новый: Action cards come from blocks in answers — Personalized recommendations cards come from action-card blocks in answers; the propose_action tool, the action-cards q…
+    v0.2.2-rc.3/action-card-blocks/guide.md
+  - новый: Plugin events stream and synced browser configuration — `@deepseek-ai/dsh-client-hmr` removes `GET /plugins/events` and `EVENTS_ENDPOINT` for the authenticated `pluginEvents/f…
+    v0.2.2-rc.3/client-hmr-plugin-events-stream/guide.md
+  - новый: Use one Cordis inspection tool — The cordis_inspect tool replaces cordis_inspect_list and cordis_inspect_query.
+    v0.2.2-rc.3/cordis-inspect-tool/guide.md
+  - новый: Loader validates entry options, and Include parses YAML 1.2 — Cordis Loader 1.0.0-rc.9 and Include 1.2.0 parse YAML 1.2, reject malformed entries, and return PatchResult from applyE…
+    v0.2.2-rc.3/cordis-loader-entry-validation/guide.md
+  - новый: `enter_worktree` replaces `create_worktree` — The `create_worktree` model tool is removed; `enter_worktree` creates a worktree or enters an existing one of the same …
+    v0.2.2-rc.3/create-worktree-tool-merged/guide.md
+  - новый: Resolve the file policy for DeepSeekFileStore — Direct DeepSeekFileStore callers must supply a resolved file upload policy.
+    v0.2.2-rc.3/deepseek-file-policy/guide.md
+  - новый: DeepSeek consumers authenticate through ctx.deepseekAuth — DeepSeek model routes and web providers require the new dsh-deepseek-auth plugin; the llm-deepseek credential helpers, …
+    v0.2.2-rc.3/deepseek-request-auth/guide.md
+  - новый: Forge providers register the commands that bind change requests — forge-session no longer recognizes gh commands by itself; forge providers register the commands that bind change reques…
+    v0.2.2-rc.3/forge-command-rules/guide.md
+  - новый: Forge providers declare hosts, names, sign-in, and review decisions — ForgeProvider must list its hosts and name itself, ForgeReadiness carries a sign-in command, and ForgeReviewData lists …
+    v0.2.2-rc.3/forge-provider-hosts/guide.md
+  - новый: Read command-line overlays from their files — ProfileContext replaces parsed overlays with overlay file paths that every composition rereads.
+    v0.2.2-rc.3/profile-context-overlay-paths/guide.md
+  - новый: Admitted MCP image blocks become PTC `Image` values — Admitted MCP image blocks carry an attachment reference and reach PTC programs as Image values instead of base64 JSON.
+    v0.2.2-rc.3/ptc-mcp-image-values/guide.md
+  - новый: PTC output truncation — PTC display-output overflow truncates output while execution continues.
+    v0.2.2-rc.3/ptc-output-limit/guide.md
+  - новый: PTC tool-result inspection and bootstrap protocol 5 — Direct inspection of unchanged PTC object and array tool results uses tool-rendered text, and custom Node bootstraps re…
+    v0.2.2-rc.3/ptc-tool-result-inspection/guide.md
+  - новый: Fork creation takes a parent source — Agent factory callers create forks by naming the shared parent prefix beside the seed.
+    v0.2.2-rc.3/session-fork-source/guide.md
+  - новый: Session header entries move into the Session panel — Background jobs, subagents, and forge change requests move from the Session header and right sidebar into the Session p…
+    v0.2.2-rc.3/session-panel-entries/guide.md
+  - новый: Request the `conversation` facet when rendering a Session — Client plugins that render a Session's Conversation retain it with the conversation facet.
+    v0.2.2-rc.3/session-retain-conversation-facet/guide.md
+  - новый: Built-in plugins section removal — Settings → Built-in plugins, its two packages, and the `settings.plugins.tab` slot are removed; plugin settings pages a…
+    v0.2.2-rc.3/settings-section-plugins-page/guide.md
+  - новый: Subagent initial tasks are agent messages — In-process continuable subagents record their initial delegated task as an agent-message from the parent agent instead …
+    v0.2.2-rc.3/subagent-initial-task-source/guide.md
+  - новый: Read subagent model selection from the current setting — Subagent model selection reads the current Host setting at each call instead of a policy recorded in each Session.
+    v0.2.2-rc.3/subagent-model-selection-live-setting/guide.md
+  - новый: Upstream skills base row — The base profile bundle gains the `upstream-skills` row, which stays pending and adds a boot warning in a composition t…
+    v0.2.2-rc.3/upstream-skills-base-row/guide.md
+  - новый: The `working_directory` tool and the subagent `cwd` parameter are removed — The `working_directory` model tool, its package, and the `cwd` parameter of the subagent tools are removed; only Host o…
+    v0.2.2-rc.3/working-directory-tool-removed/guide.md
+  - новый: `ForgeFailure.code` gains `rate-limited` — ForgeFailure.code gains rate-limited, which forge-github returns when GitHub refuses a read under its rate limit, so an…
+    v0.2.2-rc.4/forge-rate-limited-failure/guide.md
+  - новый: Search on DeepSeek models defaults to legacy Messages search — The shipped composition no longer fixes a search provider, so web search in a conversation on a DeepSeek model runs leg…
+    v0.2.2-rc.4/web-search-deepseek-model-default/guide.md
+  - новый: The `workspace-write` boundary follows the Session's working directory — The workspace-write boundary follows the Session's working directory instead of its original project, so a Session in a…
+    v0.2.2-rc.4/workspace-write-boundary-follows-root/guide.md
+
+== пересечение: файлы, которые менял и апстрим, и форк ==
+файлов: 5818; полный список: .scratch/fork-upgrade/overlap.txt
+  237  apps/web/tests
+  199  .agents/notes/implemented
+  123  packages/experimental/client-ui-forge
+  108  packages/experimental/timeline
+  103  packages/experimental/cua-windows
+   83  packages/experimental/liveshare
+   66  docs/upgrade-guide/v0.2.2-rc.3
+   66  packages/session/session-persistence-jsonl
+   65  apps/cli/tests
+   64  packages/client/ui-primitives
+   63  packages/api/session-controller
+   62  packages/experimental/cua-macos
+
+== форк-поверхности ==
+пакеты packages/fork: 1
+  - packages/fork/web-search-zai
+внешние плагины: 3
+  - ~/home/dev/dsh-plugins/omp-demo-panel
+  - ~/home/dev/dsh-plugins/theme-omp
+  - ~/home/dev/dsh-plugins/ui-refinement
+патчи профилей: 4
+  - ~/.dsh/cordis.patch.yml
+  - ~/.dsh/profiles/headless/cordis.patch.yml
+  - ~/.dsh/profiles/sdk/cordis.patch.yml
+  - ~/.dsh/profiles/web/cordis.patch.yml
+
+== слоты форк-плагинов в смерженном дереве ==
+  ok   conversation.composer.dock (~/home/dev/dsh-plugins/ui-refinement)
+
+== строки профилей на этой машине ==
+все строки разрешаются
+
+== итог ==
+проблем нет: форк-поверхности ложатся на смерженное дерево
+
+ × |thread-safe| scripts/fork-upgrade-audit.spec.ts > renderAudit base range > measures from the merge base when the recorded tag is an older ancestor 49ms
+   → renderAudit is not a function
+ × |thread-safe| scripts/fork-upgrade-audit.spec.ts > renderAudit base range > measures from the tag when the tag is the merge base 52ms
+   → renderAudit is not a function
+ × |thread-safe| scripts/fork-upgrade-audit.spec.ts > renderAudit base range > names commits and guides hidden behind an unmerged release tag 57ms
+   → renderAudit is not a function
+ × |thread-safe| scripts/fork-upgrade-audit.spec.ts > renderAudit base range > lets --base override the recorded tag and the merge base 82ms
+   → renderAudit is not a function
+ × |thread-safe| scripts/fork-upgrade-audit.spec.ts > renderAudit base range > falls back to the merge base when the recorded tag is absent or unresolvable 59ms
+   → renderAudit is not a function
+ × |thread-safe| scripts/fork-upgrade-audit.spec.ts > renderAudit base range > reports a fully merged upstream and the delta behind a passed --base 81ms
+   → renderAudit is not a function
+ × |thread-safe| scripts/fork-upgrade-audit.spec.ts > renderAudit base range > keeps the recorded base stable without --record-base and warns when the tag is outside HEAD 41ms
+   → renderAudit is not a function
+ × |thread-safe| scripts/fork-upgrade-audit.spec.ts > renderAudit base range > records a null tag when the target carries none 41ms
+   → renderAudit is not a function
+ × |thread-safe| scripts/fork-upgrade-audit.spec.ts > renderAudit base range > keeps the full report on a strict failure 38ms
+   → renderAudit is not a function
+ × |thread-safe| scripts/fork-upgrade-audit.spec.ts > renderAudit base range > rejects a --base that is not an ancestor of HEAD 53ms
+   → expected [Function] to throw error matching /не предок HEAD/ but got '(0 , __vite_ssr_import_5__.renderAudi…'
+ × |thread-safe| scripts/fork-upgrade-audit.spec.ts > renderAudit base range > always reports an ancestor of HEAD as the base 69ms
+   → renderAudit is not a function
+ × |thread-safe| scripts/fork-upgrade-audit.spec.ts > renderAudit base range > counts added and modified guides over the merge-base range 62ms
+   → renderAudit is not a function
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 12 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |thread-safe| scripts/fork-upgrade-audit.spec.ts > renderAudit base range > measures from the merge base when the recorded tag is an older ancestor
+TypeError: renderAudit is not a function
+ ❯ audit scripts/fork-upgrade-audit.spec.ts:71:10
+     69|
+     70| function audit(root: string, ...args: string[]): string {
+     71|   return renderAudit(args, root, home(root))
+       |          ^
+     72| }
+     73|
+ ❯ scripts/fork-upgrade-audit.spec.ts:107:20
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/12]⎯
+
+ FAIL  |thread-safe| scripts/fork-upgrade-audit.spec.ts > renderAudit base range > measures from the tag when the tag is the merge base
+TypeError: renderAudit is not a function
+ ❯ audit scripts/fork-upgrade-audit.spec.ts:71:10
+     69|
+     70| function audit(root: string, ...args: string[]): string {
+     71|   return renderAudit(args, root, home(root))
+       |          ^
+     72| }
+     73|
+ ❯ scripts/fork-upgrade-audit.spec.ts:128:20
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/12]⎯
+
+ FAIL  |thread-safe| scripts/fork-upgrade-audit.spec.ts > renderAudit base range > names commits and guides hidden behind an unmerged release tag
+TypeError: renderAudit is not a function
+ ❯ audit scripts/fork-upgrade-audit.spec.ts:71:10
+     69|
+     70| function audit(root: string, ...args: string[]): string {
+     71|   return renderAudit(args, root, home(root))
+       |          ^
+     72| }
+     73|
+ ❯ scripts/fork-upgrade-audit.spec.ts:148:20
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/12]⎯
+
+ FAIL  |thread-safe| scripts/fork-upgrade-audit.spec.ts > renderAudit base range > lets --base override the recorded tag and the merge base
+TypeError: renderAudit is not a function
+ ❯ audit scripts/fork-upgrade-audit.spec.ts:71:10
+     69|
+     70| function audit(root: string, ...args: string[]): string {
+     71|   return renderAudit(args, root, home(root))
+       |          ^
+     72| }
+     73|
+ ❯ scripts/fork-upgrade-audit.spec.ts:172:25
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/12]⎯
+
+ FAIL  |thread-safe| scripts/fork-upgrade-audit.spec.ts > renderAudit base range > falls back to the merge base when the recorded tag is absent or unresolvable
+TypeError: renderAudit is not a function
+ ❯ audit scripts/fork-upgrade-audit.spec.ts:71:10
+     69|
+     70| function audit(root: string, ...args: string[]): string {
+     71|   return renderAudit(args, root, home(root))
+       |          ^
+     72| }
+     73|
+ ❯ scripts/fork-upgrade-audit.spec.ts:191:25
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/12]⎯
+
+ FAIL  |thread-safe| scripts/fork-upgrade-audit.spec.ts > renderAudit base range > reports a fully merged upstream and the delta behind a passed --base
+TypeError: renderAudit is not a function
+ ❯ audit scripts/fork-upgrade-audit.spec.ts:71:10
+     69|
+     70| function audit(root: string, ...args: string[]): string {
+     71|   return renderAudit(args, root, home(root))
+       |          ^
+     72| }
+     73|
+ ❯ scripts/fork-upgrade-audit.spec.ts:218:20
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/12]⎯
+
+ FAIL  |thread-safe| scripts/fork-upgrade-audit.spec.ts > renderAudit base range > keeps the recorded base stable without --record-base and warns when the tag is outside HEAD
+TypeError: renderAudit is not a function
+ ❯ audit scripts/fork-upgrade-audit.spec.ts:71:10
+     69|
+     70| function audit(root: string, ...args: string[]): string {
+     71|   return renderAudit(args, root, home(root))
+       |          ^
+     72| }
+     73|
+ ❯ scripts/fork-upgrade-audit.spec.ts:239:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/12]⎯
+
+ FAIL  |thread-safe| scripts/fork-upgrade-audit.spec.ts > renderAudit base range > records a null tag when the target carries none
+TypeError: renderAudit is not a function
+ ❯ audit scripts/fork-upgrade-audit.spec.ts:71:10
+     69|
+     70| function audit(root: string, ...args: string[]): string {
+     71|   return renderAudit(args, root, home(root))
+       |          ^
+     72| }
+     73|
+ ❯ scripts/fork-upgrade-audit.spec.ts:263:22
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/12]⎯
+
+ FAIL  |thread-safe| scripts/fork-upgrade-audit.spec.ts > renderAudit base range > keeps the full report on a strict failure
+TypeError: renderAudit is not a function
+ ❯ audit scripts/fork-upgrade-audit.spec.ts:71:10
+     69|
+     70| function audit(root: string, ...args: string[]): string {
+     71|   return renderAudit(args, root, home(root))
+       |          ^
+     72| }
+     73|
+ ❯ scripts/fork-upgrade-audit.spec.ts:277:20
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/12]⎯
+
+ FAIL  |thread-safe| scripts/fork-upgrade-audit.spec.ts > renderAudit base range > rejects a --base that is not an ancestor of HEAD
+AssertionError: expected [Function] to throw error matching /не предок HEAD/ but got '(0 , __vite_ssr_import_5__.renderAudi…'
+
+- Expected:
+/не предок HEAD/
+
++ Received:
+"(0 , __vite_ssr_import_5__.renderAudit) is not a function"
+
+ ❯ scripts/fork-upgrade-audit.spec.ts:298:76
+    296|     commit(root, { 'fork.txt': 'fork\n' }, 'fork work')
+    297|
+    298|     expect(() => audit(root, '--target', 'upstream', '--base', unrelat…
+       |                                                                            ^
+    299|   })
+    300|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/12]⎯
+
+ FAIL  |thread-safe| scripts/fork-upgrade-audit.spec.ts > renderAudit base range > always reports an ancestor of HEAD as the base
+TypeError: renderAudit is not a function
+ ❯ audit scripts/fork-upgrade-audit.spec.ts:71:10
+     69|
+     70| function audit(root: string, ...args: string[]): string {
+     71|   return renderAudit(args, root, home(root))
+       |          ^
+     72| }
+     73|
+ ❯ scripts/fork-upgrade-audit.spec.ts:312:33
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[11/12]⎯
+
+ FAIL  |thread-safe| scripts/fork-upgrade-audit.spec.ts > renderAudit base range > counts added and modified guides over the merge-base range
+TypeError: renderAudit is not a function
+ ❯ audit scripts/fork-upgrade-audit.spec.ts:71:10
+     69|
+     70| function audit(root: string, ...args: string[]): string {
+     71|   return renderAudit(args, root, home(root))
+       |          ^
+     72| }
+     73|
+ ❯ scripts/fork-upgrade-audit.spec.ts:326:20
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[12/12]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  12 failed (12)
+   Start at  14:30:50
+   Duration  2.26s (transform 115ms, setup 90ms, import 1.34s, tests 685ms, environment 0ms)

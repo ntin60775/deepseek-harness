@@ -1,0 +1,5 @@
+# Якоря пар из staged-записей (форма из scripts/fork-merge-ritual.sh:97-101)
+packages/api/session-controller/README.i18n.yaml -> packages/api/session-controller/README.md
+packages/client/ui-conversation/README.i18n.yaml -> packages/client/ui-conversation/README.md
+packages/client/ui-primitives/README.i18n.yaml -> packages/client/ui-primitives/README.md
+packages/client/ui-workspace/README.i18n.yaml -> packages/client/ui-workspace/README.md
