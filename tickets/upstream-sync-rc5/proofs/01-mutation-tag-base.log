@@ -1,0 +1,195 @@
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+
+ RUN  v4.1.11 /home/prog7/home/dev/contrib/forks/deepseek-harness/.agents/worktrees/rc5-01-audit-ritual
+
+ × |thread-safe| scripts/fork-upgrade-audit.spec.ts > renderAudit base range > measures from the merge base when the recorded tag is an older ancestor 114ms
+   → expected '\n== fork upgrade audit ==\nдиапазон:…' to contain 'база: <commit>…'
+ ✓ |thread-safe| scripts/fork-upgrade-audit.spec.ts > renderAudit base range > measures from the tag when the tag is the merge base 87ms
+ × |thread-safe| scripts/fork-upgrade-audit.spec.ts > renderAudit base range > names commits and guides hidden behind an unmerged release tag 73ms
+   → база <commit> не предок HEAD — диапазон посчитан от чужой линии
+ × |thread-safe| scripts/fork-upgrade-audit.spec.ts > renderAudit base range > lets --base override the recorded tag and the merge base 120ms
+   → expected '\n== fork upgrade audit ==\nдиапазон:…' to contain 'база: <commit>…'
+ × |thread-safe| scripts/fork-upgrade-audit.spec.ts > renderAudit base range > falls back to the merge base when the recorded tag is absent or unresolvable 85ms
+   → Command failed: git rev-parse v-gone^{commit}
+fatal: неоднозначный аргумент «v-gone^{commit}»: неизвестная редакция или не путь в рабочем каталоге.
+Используйте «--» для отделения путей от редакций, вот так:
+«git <команда> [<редакция>...] -- [<файл>...]»
+
+ ✓ |thread-safe| scripts/fork-upgrade-audit.spec.ts > renderAudit base range > reports a fully merged upstream and the delta behind a passed --base 133ms
+ × |thread-safe| scripts/fork-upgrade-audit.spec.ts > renderAudit base range > keeps the recorded base stable without --record-base and warns when the tag is outside HEAD 54ms
+   → Command failed: git rev-parse v-kept^{commit}
+fatal: неоднозначный аргумент «v-kept^{commit}»: неизвестная редакция или не путь в рабочем каталоге.
+Используйте «--» для отделения путей от редакций, вот так:
+«git <команда> [<редакция>...] -- [<файл>...]»
+
+ ✓ |thread-safe| scripts/fork-upgrade-audit.spec.ts > renderAudit base range > records a null tag when the target carries none 58ms
+ ✓ |thread-safe| scripts/fork-upgrade-audit.spec.ts > renderAudit base range > keeps the full report on a strict failure 108ms
+ ✓ |thread-safe| scripts/fork-upgrade-audit.spec.ts > renderAudit base range > rejects a --base that is not an ancestor of HEAD 64ms
+ ✓ |thread-safe| scripts/fork-upgrade-audit.spec.ts > renderAudit base range > always reports an ancestor of HEAD as the base 153ms
+ ✓ |thread-safe| scripts/fork-upgrade-audit.spec.ts > renderAudit base range > counts added and modified guides over the merge-base range 89ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |thread-safe| scripts/fork-upgrade-audit.spec.ts > renderAudit base range > measures from the merge base when the recorded tag is an older ancestor
+AssertionError: expected '\n== fork upgrade audit ==\nдиапазон:…' to contain 'база: <commit>…'
+
+- Expected
++ Received
+
+- база: <commit>
++
++ == fork upgrade audit ==
++ диапазон: <commit>..upstream
++ база: <commit>
++ записанный тег: v-old = <commit>
++ влит в HEAD: да
++ новые теги: нет
++ 2 коммита (мерджей 0)
++
++ == upgrade guides в диапазоне (читай до адаптации) ==
++ гайдов нет
++
++ == пересечение: файлы, которые менял и апстрим, и форк ==
++ файлов пересечения 1; апстрим изменил 2; полный список: .scratch/fork-upgrade/overlap.txt
++     1  fork.txt
++
++ == форк-поверхности ==
++ пакеты packages/fork: 0
++ внешние плагины: 0
++ патчи профилей: 0
++
++ == слоты форк-плагинов в смерженном дереве ==
++ форк-плагинов нет
++
++ == строки профилей на этой машине ==
++ патчей профилей нет
++
++ == итог ==
++ проблем нет: форк-поверхности ложатся на смерженное дерево
++
+
+ ❯ scripts/fork-upgrade-audit.spec.ts:109:20
+    107|     const report = audit(root, '--target', 'upstream')
+    108|
+    109|     expect(report).toContain(`база: ${base}`)
+       |                    ^
+    110|     expect(report).toContain(`записанный тег: v-old = ${tagged}`)
+    111|     expect(report).toContain('влит в HEAD: да')
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/5]⎯
+
+ FAIL  |thread-safe| scripts/fork-upgrade-audit.spec.ts > renderAudit base range > names commits and guides hidden behind an unmerged release tag
+Error: база <commit> не предок HEAD — диапазон посчитан от чужой линии
+ ❯ renderAudit scripts/fork-upgrade-audit.ts:363:11
+    361|     : git(root, ['merge-base', 'HEAD', target]))
+    362|   if (!isAncestor(root, base, 'HEAD')) {
+    363|     throw new Error(`база ${base} не предок HEAD — диапазон посчитан о…
+       |           ^
+    364|   }
+    365|
+ ❯ audit scripts/fork-upgrade-audit.spec.ts:71:10
+ ❯ scripts/fork-upgrade-audit.spec.ts:148:20
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/5]⎯
+
+ FAIL  |thread-safe| scripts/fork-upgrade-audit.spec.ts > renderAudit base range > lets --base override the recorded tag and the merge base
+AssertionError: expected '\n== fork upgrade audit ==\nдиапазон:…' to contain 'база: <commit>…'
+
+- Expected
++ Received
+
+- база: <commit>
++
++ == fork upgrade audit ==
++ диапазон: <commit>..release
++ база: <commit>
++ записанный тег: v-old = <commit>
++ влит в HEAD: да
++ новые теги: нет
++ 3 коммита (мерджей 0)
++
++ == upgrade guides в диапазоне (читай до адаптации) ==
++ гайдов 2 новых + 0 изменённых
++   - новый: A — A description
++     v0.2.2-rc.5/a/guide.md
++   - новый: B — B description
++     v0.2.2-rc.5/b/guide.md
++
++ == пересечение: файлы, которые менял и апстрим, и форк ==
++ файлов пересечения 1; апстрим изменил 3; полный список: .scratch/fork-upgrade/overlap.txt
++     1  mid.txt
++
++ == форк-поверхности ==
++ пакеты packages/fork: 0
++ внешние плагины: 0
++ патчи профилей: 0
++
++ == слоты форк-плагинов в смерженном дереве ==
++ форк-плагинов нет
++
++ == строки профилей на этой машине ==
++ патчей профилей нет
++
++ == итог ==
++ проблем нет: форк-поверхности ложатся на смерженное дерево
++
+
+ ❯ scripts/fork-upgrade-audit.spec.ts:173:25
+    171|
+    172|     const byMergeBase = audit(root, '--target', 'release')
+    173|     expect(byMergeBase).toContain(`база: ${base}`)
+       |                         ^
+    174|     expect(byMergeBase).toContain('2 коммита (мерджей 0)')
+    175|     expect(byMergeBase).toContain('записанный тег: v-old')
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/5]⎯
+
+ FAIL  |thread-safe| scripts/fork-upgrade-audit.spec.ts > renderAudit base range > falls back to the merge base when the recorded tag is absent or unresolvable
+Error: Command failed: git rev-parse v-gone^{commit}
+fatal: неоднозначный аргумент «v-gone^{commit}»: неизвестная редакция или не путь в рабочем каталоге.
+Используйте «--» для отделения путей от редакций, вот так:
+«git <команда> [<редакция>...] -- [<файл>...]»
+
+ ❯ git scripts/fork-upgrade-audit.ts:35:10
+     33| /** Run one git command in the repository and return trimmed stdout. */
+     34| function git(root: string, args: string[]): string {
+     35|   return execFileSync('git', args, {
+       |          ^
+     36|     cwd: root,
+     37|     encoding: 'utf8',
+ ❯ renderAudit scripts/fork-upgrade-audit.ts:360:7
+ ❯ audit scripts/fork-upgrade-audit.spec.ts:71:10
+ ❯ scripts/fork-upgrade-audit.spec.ts:196:24
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { status: 128, signal: null, output: [ null, 'v-gone^{commit}\n', 'fatal: неоднозначный аргумент «v-gone^{commit}»: неизвестная редакция или не путь в рабочем каталоге.\nИспользуйте «--» для отделения путей от редакций, вот так:\n«git <команда> [<редакция>...] -- [<файл>...]»\n' ], pid: 381664, stdout: 'v-gone^{commit}\n', stderr: 'fatal: неоднозначный аргумент «v-gone^{commit}»: неизвестная редакция или не путь в рабочем каталоге.\nИспользуйте «--» для отделения путей от редакций, вот так:\n«git <команда> [<редакция>...] -- [<файл>...]»\n' }
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/5]⎯
+
+ FAIL  |thread-safe| scripts/fork-upgrade-audit.spec.ts > renderAudit base range > keeps the recorded base stable without --record-base and warns when the tag is outside HEAD
+Error: Command failed: git rev-parse v-kept^{commit}
+fatal: неоднозначный аргумент «v-kept^{commit}»: неизвестная редакция или не путь в рабочем каталоге.
+Используйте «--» для отделения путей от редакций, вот так:
+«git <команда> [<редакция>...] -- [<файл>...]»
+
+ ❯ git scripts/fork-upgrade-audit.ts:35:10
+     33| /** Run one git command in the repository and return trimmed stdout. */
+     34| function git(root: string, args: string[]): string {
+     35|   return execFileSync('git', args, {
+       |          ^
+     36|     cwd: root,
+     37|     encoding: 'utf8',
+ ❯ renderAudit scripts/fork-upgrade-audit.ts:360:7
+ ❯ audit scripts/fork-upgrade-audit.spec.ts:71:10
+ ❯ scripts/fork-upgrade-audit.spec.ts:239:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { status: 128, signal: null, output: [ null, 'v-kept^{commit}\n', 'fatal: неоднозначный аргумент «v-kept^{commit}»: неизвестная редакция или не путь в рабочем каталоге.\nИспользуйте «--» для отделения путей от редакций, вот так:\n«git <команда> [<редакция>...] -- [<файл>...]»\n' ], pid: 381752, stdout: 'v-kept^{commit}\n', stderr: 'fatal: неоднозначный аргумент «v-kept^{commit}»: неизвестная редакция или не путь в рабочем каталоге.\nИспользуйте «--» для отделения путей от редакций, вот так:\n«git <команда> [<редакция>...] -- [<файл>...]»\n' }
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/5]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  5 failed | 7 passed (12)
+   Start at  14:30:58
+   Duration  1.44s (transform 115ms, setup 94ms, import 59ms, tests 1.14s, environment 0ms)
