@@ -1923,3 +1923,35 @@ describe('catalog route line', () => {
     expect(row.getAttribute('aria-label')).toBe(expected)
   })
 })
+
+describe('catalog route in the Session panel', () => {
+  it('keeps the recorded route out of the dense row and names it in the hover card', async () => {
+    vi.useFakeTimers()
+    const maxEffort = { provider: 'deepseek-account', model: 'deepseek-flash', reasoningEffort: ReasoningEffortId('max') }
+    const input = props(catalog({
+      entries: [{ id: CHILD, mode: 'continuable', label: 'worker', activity: 'running' }],
+    }), {}, {
+      [CHILD]: {
+        ...summary(CHILD, 1),
+        running: true,
+        projectionValues: { subagentCatalog: [], modelSelection: { lastUsed: maxEffort, next: maxEffort } },
+      },
+    })
+    render(<HeaderCatalog {...input} />)
+    const row = screen.getByRole('treeitem', { name: /worker/ })
+    expect(within(row).queryByText('deepseek-account')).toBeNull()
+    const lines = await hoverDetailsOf(row)
+    expect(lines).toContain('模型路由：deepseek-account/deepseek-flash · 推理：max')
+  })
+
+  it('leaves rows without a recorded selection with only the owner line', async () => {
+    vi.useFakeTimers()
+    const input = props(catalog({
+      entries: [{ id: CHILD, mode: 'continuable', label: 'worker', activity: 'inactive' }],
+    }))
+    render(<HeaderCatalog {...input} />)
+    const row = screen.getByRole('treeitem', { name: /worker/ })
+    const lines = await hoverDetailsOf(row)
+    expect(lines?.slice(0, 2)).toEqual(['worker', `负责人：${CHILD}`])
+  })
+})

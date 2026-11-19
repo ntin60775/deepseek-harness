@@ -438,9 +438,13 @@ function CatalogRows({
             </div>
           </div>
         )
+        // The dense Session-panel row hides the inline route; its hover card
+        // carries the same recorded provider, model, and effort.
+        const detailLines = secondaryLabel === undefined ? [] : [t('hover.owner', { name: secondaryLabel })]
+        if (route !== undefined) detailLines.push(t('route.hover', { route: routeText, effort: effortLabel }))
         const details = panelDetails?.({
           title: primaryLabel,
-          lines: secondaryLabel === undefined ? [] : [t('hover.owner', { name: secondaryLabel })],
+          lines: detailLines,
           status: { state: dotState, label: [activity, mode].filter(value => value !== undefined).join(' · ') },
           facts: [
             ...tokenMetric === undefined ? [] : [{ kind: 'tokens' as const, label: tokenMetric }],
