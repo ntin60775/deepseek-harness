@@ -17,9 +17,9 @@ verify-doc-budgets: 8 budgeted docs within ceiling.
 ## KB (gitmark)
 
 ```
-✓ index: 1624 файлов · 26124 чанков · 8690 ссылок · trigram=on
-✓ чисто (1624 файлов)
-✓ map: docs-map.html · 1624 файлов · 8690 ссылок · 0 вне индекса
+✓ index: 1625 файлов · 26129 чанков · 8694 ссылок · trigram=on
+✓ чисто (1625 файлов)
+✓ map: docs-map.html · 1625 файлов · 8694 ссылок · 0 вне индекса
 ```
 
 Новый док связан из docs/reference/README.md; pairing-exclusion записан в scripts/translation-pairing.manifest.json.

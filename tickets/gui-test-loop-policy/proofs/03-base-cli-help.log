@@ -1,0 +1,5 @@
+$ tsx scripts/gen-cli-help.ts --check
+gen-cli-help: stale — docs/cli-help.md, docs/cli-help.zh.md. Run pnpm run gen-cli-help.
+[ELIFECYCLE] Command failed with exit code 1.
+
+Прогон в main checkout на чистом master (без коммитов тикета 03): красный предсуществующий, не внесён юнитом.

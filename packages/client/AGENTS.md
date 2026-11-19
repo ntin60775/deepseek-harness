@@ -137,7 +137,7 @@ The rule covers lists filtered in memory, including a Host search that supplies 
 
 ## Testing and coverage
 
-The GUI test structure (three tiers, lane map) is settled in the [GUI testing system reference](../../docs/testing.md); repo-wide policy in [docs/testing.md](../../docs/testing.md).
+The GUI edit-verify loop and its resource sharing live in the [GUI development test loop](../../docs/reference/fork-gui-test-loop.md); repo-wide testing policy in [testing.md](../../docs/testing.md).
 
 - Client source packages are inside the per-file 100% coverage gate (`pnpm run test:coverage`). Genuinely unreachable defensive arms take a `/* v8 ignore -- <reason> */` comment with a real reason, never a bare ignore.
 - Component specs render with realistic props or a driven fixture runtime and assert user-visible behavior, not class names, hook internals, or render counts.
@@ -148,7 +148,7 @@ The GUI test structure (three tiers, lane map) is settled in the [GUI testing sy
 
 Run the narrowest rung that covers what you touched; escalate only when the change surface demands it.
 
-1. **Every GUI code change** — the focused loop in the [GUI development test loop](../../docs/reference/fork-gui-test-loop.md): scoped watch in a terminal, `pnpm run test:gui:changed` or a focused spec run otherwise. The full `pnpm run test:gui` lane is a checkpoint for explicit requests, CI diagnosis, or repository-wide diffs, not the inner loop.
+1. **Every GUI code change** — the focused loop in the [GUI development test loop](../../docs/reference/fork-gui-test-loop.md): scoped watch in a terminal, `pnpm run test:gui:changed` or a focused spec run otherwise; the full `pnpm run test:gui` lane is a checkpoint, not the inner loop.
 2. **Any change that can alter the assembled browser or visible conversation/UI output** (client components or copy, `apps/web`, Vite, `dsh-host-webserver`, connection/handler/SSE) — additionally `DSH_SNAPSHOT=replay pnpm run test:web`: rebuilds the frontend dist, then runs the browser smoke pair (the real-host case self-skips without `DEEPSEEK_API_KEY`) plus the keyless replayed e2e scenarios. Linux PR CI uses the same read-only replay mode. Use `DSH_SNAPSHOT=refresh` only after confirming an intentional output change, or `DSH_SNAPSHOT=record` with a key to re-record fixtures.
 3. **Before a PR** — use [dsh-pre-push-checks](../../.agents/skills/dsh-pre-push-checks/SKILL.md) to select the narrow checks for the outgoing diff; there is no repo-wide pre-push aggregate.
 
