@@ -1,7 +1,9 @@
 # Гайды rc.4, не касающиеся форка (2026-11-19)
 
-$ grep -rEn "ForgeFailure\[.code.\]|/plugins/events|EVENTS_ENDPOINT" /home/prog7/home/dev/dsh-plugins packages/fork
+$ grep -rEn "ForgeFailure\[['\"](code)['\"]\]|/plugins/events|EVENTS_ENDPOINT" /home/prog7/home/dev/dsh-plugins packages/fork
 matches: 0
+$ grep -rEn "failure\.code|assertNever\(" /home/prog7/home/dev/dsh-plugins packages/fork  # широкий второй проход
+matches failure.code/assertNever: 0
 
 # Выбор провайдера поиска в апстриме
 58:const DEEPSEEK_MODEL_ROUTES: ReadonlySet<string> = new Set(['deepseek-official', 'deepseek-account'])

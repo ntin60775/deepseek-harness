@@ -1,10 +1,13 @@
-# Доказательства тикета 03 (2026-11-19)
+# Песочница тикета 03 (2026-11-19)
 
 $ LANG=C LC_ALL=C node_modules/.bin/vitest run packages/experimental/worktree/tests/sandbox.spec.ts packages/sandbox/sandbox-policy/tests/workspace-root.spec.ts --maxWorkers 1
 exit=0
  Test Files  2 passed (2)
       Tests  9 passed (9)
+      (skipIf(!sandboxUsable) не сработал: все 9 строк с ✓)
 
-# Тот же набор с --testTimeout=20000 — 9 passed (9), лог сохранялся в предыдущем прогоне;
-# на дефолтных 5 с четыре теста worktree падали по таймауту, когда параллельно шёл build ритуала;
-# на разгруженной машине дефолтный таймаут держит.
+# Форма без `--`: `pnpm run test -- <пути>` у pnpm 11 отдаёт `vitest run -- <пути>` и гоняет весь набор.
+# Язык: при LANG=ru_RU git отвечает «Файловая система доступна только для чтения», и regex теста
+# (/permission denied|operation not permitted|read-only file system/i) не совпадает — нужен LANG=C.
+# Пока параллельно шёл build ритуала, четыре теста worktree падали по 5-секундному таймауту;
+# на разгруженной машине тот же набор зелёный на дефолтном таймауте, без --testTimeout.

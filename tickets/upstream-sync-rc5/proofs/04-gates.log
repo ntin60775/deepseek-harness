@@ -28,4 +28,10 @@ exit=0
 classify: OK
 
 $ pnpm run fork:invariants
-27 passed (27)
+exit=0, 27 passed (27)
+
+# Перепроверка после докового реверта mermaid-skill (другой сессией поверх HEAD):
+# pnpm run test:docs — 21/21 exit 0; gitmark index/lint --strict — чисто, 1641 файл.
+
+# Порядок: typecheck/snapshot сняты до докового реверта mermaid-skill (docs-only);
+# test:docs и gitmark перепроверены после него.

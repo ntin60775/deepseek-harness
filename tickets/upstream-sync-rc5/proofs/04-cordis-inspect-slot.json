@@ -1,0 +1,19 @@
+{
+  "platform": "client",
+  "provider": "Slots",
+  "method": "listSubTree",
+  "input": { "root": "conversation.composer.dock" },
+  "selected": {
+    "type": "slot",
+    "name": "conversation.composer.dock",
+    "kind": "list",
+    "scope": "session",
+    "declaredBy": "an entry in \"conversation.composer.bar\" (zE)",
+    "occupants": [
+      { "registrant": "zE", "id": "status-line", "order": -1, "priority": 0, "active": true },
+      { "registrant": "zE", "id": "activity", "order": 0, "priority": 0, "active": true },
+      { "registrant": "zE", "id": "usage", "order": 1, "priority": 0, "active": true }
+    ]
+  },
+  "note": "Снято с живого клиента :3080 (текущий хост сессии). Проба :3081 без законченной Conversation виджет не материализует; здесь слот занят записями темы."
+}

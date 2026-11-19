@@ -7,4 +7,6 @@ HTTP с launch-токеном: 303 (303 — обмен на cookie)
 HTTP по cookie: 200
 строк 'skipping profile bundle' и 'patch: ... not found' в логе старта: 0
 
-Экраны: 04-probe-session-dark.png (шапка/композер), 04-probe-session-panel-dark.png (тоггл панели сеанса), 04-probe-plugins-dark.png, 04-probe-settings-websearch-dark.png (DeepSeek Search API выбран), 04-probe-settings-general-light.png (светлая схема), 04-probe-omp-demo-panel-light.png (карточка плагина), 04-probe-forge-review-dark.png (страница ревью forge), 04-probe-forge-card-light.png (карточка change request: поверхность отрисована, список пуст — у пробы нет workspace и доступа к PR).
+Экраны: 04-probe-session-dark.png (шапка/композер), 04-probe-session-panel-dark.png (тоггл панели сеанса), 04-probe-plugins-dark.png, 04-probe-settings-websearch-dark.png (DeepSeek Search API выбран), 04-probe-settings-general-light.png (светлая схема), 04-probe-omp-demo-panel-light.png (карточка плагина), 04-probe-forge-review-light.png (страница ревью forge, светлая схема), 04-probe-forge-card-light.png (карточка change request: поверхность отрисована, список пуст — у пробы нет workspace, привязанного к репозиторию).
+
+# Лог старта: 04-probe-start.log (launch-токен вырезан).
