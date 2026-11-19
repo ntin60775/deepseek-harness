@@ -1,11 +1,11 @@
-# Зелёный прогон носителей тикета 04 (финальное дерево после правок rev04-tests, 2026-11-19)
+# Зелёный прогон носителей тикета 04 (финальное дерево после правок панели и merge-forward master, 2026-11-19)
 
 Команда: pnpm exec vitest run scripts/parallelism.spec.ts scripts/run-gates.spec.ts scripts/lane-test-budget.spec.ts scripts/build.spec.ts --maxWorkers=2
 
 ```
  Test Files  4 passed (4)
       Tests  202 passed (202)
-   Start at  11:14:54
+   Start at  11:51:01
 ```
 
 parallelism.spec: gate-бюджет 12→6, 3→1, 1→1, 256→12, CI 256→256, ко-обновлённый 4→2; vitest-бюджет тикета 01 без изменений; приоритет: дефолт 19 (литерал), DSH_LOCAL_PRIORITY 0/7, невалидные ('abc','20','-1','1.5') громкий отказ до setPriority, пустая строка = дефолт, CI no-op; реальная child-проба: readback против os.constants.priority.PRIORITY_LOW (кроссплатформенно), причинность изолирована — из нормального родителя виден before/after-дельта, из уже lowered родителя POSIX-негативный контроль (opt-out пытается поднять nice → отказ EPERM/EACCES, no-op реализация прошла бы с exit 0); wiring-охранник: все три entrypoint содержат вызов lowerLocalPriority(process.env). run-gates.spec: ко-обновлённый ci-static 8→4, остальные кейсы (CI-ветка, 256→48/32, override, doc-sync cap 8) без правок. lane-test-budget.spec и build.spec зелёные.
