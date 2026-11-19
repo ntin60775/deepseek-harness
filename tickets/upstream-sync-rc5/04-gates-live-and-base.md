@@ -55,7 +55,7 @@
 
 - `packages/fork/upstream-base.json` — `{ "tag": "dsh-v0.2.2-rc.5", "mergedAt": "2026-11-19" }`; запись сделана терминальной фазой ритуала в тикете 02, здесь проверена.
 - Обновлены [docs/ops/fork-upgrade.md](../../docs/ops/fork-upgrade.md), [docs/reference/fork-merge-ritual.md](../../docs/reference/fork-merge-ritual.md), [packages/fork/README.md](../../packages/fork/README.md), [.agents/notes/implemented/process/2026-09-08-fork-merge-ritual.md](../../.agents/notes/implemented/process/2026-09-08-fork-merge-ritual.md) и [docs/ops/continue.md](../../docs/ops/continue.md): диапазон от merge-base, персистентность базы, staged-пары, `FORK_SKIP_FULL_GUI`, новые фазы и состояние rc.5.
-- KB: `gitmark index` — 1641 файл / 26295 чанков; `gitmark lint --strict` — чисто; `gitmark map` — 1641 файл, 0 вне индекса.
+- KB (после финального коммита): `gitmark index` — 1641 файл / 26300 чанков / 8800 ссылок; `gitmark lint --strict` — чисто; `gitmark map` — 1641 файл, 0 вне индекса.
 
 ### Пробелы контура
 
