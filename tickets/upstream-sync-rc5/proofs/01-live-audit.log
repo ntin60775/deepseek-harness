@@ -1,0 +1,56 @@
+
+== fork upgrade audit ==
+диапазон: <commit>..upstream/master
+база: <commit>
+записанный тег: dsh-v0.2.2-rc.4 = <commit>
+влит в HEAD: да
+новые теги: dsh-v0.2.2-rc.5
+238 коммитов (мерджей 99)
+
+== upgrade guides в диапазоне (читай до адаптации) ==
+гайдов 3 новых + 1 изменённый
+  - изменён: Plugin events stream and synced browser configuration — `@deepseek-ai/dsh-client-hmr` removes `GET /plugins/events` and `EVENTS_ENDPOINT` for the authenticated `pluginEvents/f…
+    v0.2.2-rc.3/client-hmr-plugin-events-stream/guide.md
+  - новый: `ForgeFailure.code` gains `rate-limited` — ForgeFailure.code gains rate-limited, which forge-github returns when GitHub refuses a read under its rate limit, so an…
+    v0.2.2-rc.4/forge-rate-limited-failure/guide.md
+  - новый: Search on DeepSeek models defaults to legacy Messages search — The shipped composition no longer fixes a search provider, so web search in a conversation on a DeepSeek model runs leg…
+    v0.2.2-rc.4/web-search-deepseek-model-default/guide.md
+  - новый: The `workspace-write` boundary follows the Session's working directory — The workspace-write boundary follows the Session's working directory instead of its original project, so a Session in a…
+    v0.2.2-rc.4/workspace-write-boundary-follows-root/guide.md
+
+== пересечение: файлы, которые менял и апстрим, и форк ==
+файлов пересечения 61; апстрим изменил 960; полный список: .scratch/fork-upgrade/overlap.txt
+    8  packages/client/ui-sidebar
+    8  packages/client/ui-workspace
+    4  packages/client/ui-conversation
+    4  packages/client/ui-primitives
+    4  packages/client/ui-subagent
+    3  packages/api/session-controller
+    2  packages/bundle/base
+    2  snapshots/session/mcp-tool-loading
+    1  .gitignore
+    1  apps/web/tsconfig.json
+    1  docs/config-catalog.md
+    1  docs/config-catalog.zh.md
+
+== форк-поверхности ==
+пакеты packages/fork: 1
+  - packages/fork/web-search-zai
+внешние плагины: 3
+  - ~/home/dev/dsh-plugins/omp-demo-panel
+  - ~/home/dev/dsh-plugins/theme-omp
+  - ~/home/dev/dsh-plugins/ui-refinement
+патчи профилей: 4
+  - ~/.dsh/cordis.patch.yml
+  - ~/.dsh/profiles/headless/cordis.patch.yml
+  - ~/.dsh/profiles/sdk/cordis.patch.yml
+  - ~/.dsh/profiles/web/cordis.patch.yml
+
+== слоты форк-плагинов в смерженном дереве ==
+  ok   conversation.composer.dock (~/home/dev/dsh-plugins/ui-refinement)
+
+== строки профилей на этой машине ==
+все строки разрешаются
+
+== итог ==
+проблем нет: форк-поверхности ложатся на смерженное дерево
