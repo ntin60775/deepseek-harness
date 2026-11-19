@@ -1,0 +1,15 @@
+# Base-proof тикета 03 (текстовые критерии, master до коммита тикета)
+
+## Ступень 1 ladder на базе мандатит полный test:gui:
+151:1. **Every GUI code change** — `pnpm run test:gui` (seconds; no browser, no server): the client suites plus the host-side GUI packages. This is the inner loop; run it as freely as a typecheck.
+
+## Док политики на базе отсутствует:
+fatal: path 'docs/reference/fork-gui-test-loop.md' exists on disk, but not in 'master'
+
+## development.md на базе утверждает старые числа:
+12 for gate schedulers, `build`, `typecheck`, Oxlint, and publint, and 48 for Vitest forks and local coverage
+
+## Корневой AGENTS.md на базе без ссылки на GUI loop:
+0
+
+Гейты pairing/budgets/md-wrap/links зелёные и на базе (инварианты): они верификационные носители, red→green несут текстовые критерии выше.

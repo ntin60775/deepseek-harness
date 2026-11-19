@@ -1,0 +1,100 @@
+$ tsx scripts/run-gates.ts doc-sync
+run-gates: doc-sync running 43 gate(s) with 6 worker(s) from 6 local default worker(s) of 12 CPU(s), doc-sync cap 8.
+run-gates: start doc-typecheck
+run-gates: start documentation build
+run-gates: start doc graphs
+run-gates: start CLI help reference
+run-gates: start markdown links
+run-gates: start type equivalence
+run-gates: PASS type equivalence (7.54s)
+run-gates: start cordis catalog
+run-gates: PASS markdown links (38.08s)
+run-gates: start Cordis inspect catalog
+run-gates: PASS cordis catalog (32.44s)
+run-gates: start workflow guest source
+run-gates: PASS workflow guest source (1.55s)
+run-gates: start verify-mermaid
+
+== FAILED CLI help reference (48.76s) ==
+command: pnpm run verify-cli-help
+outcome: exit 1
+$ tsx scripts/gen-cli-help.ts --check
+gen-cli-help: stale — docs/cli-help.md, docs/cli-help.zh.md. Run pnpm run gen-cli-help.
+[ELIFECYCLE] Command failed with exit code 1.
+run-gates: start translation pairing
+run-gates: PASS Cordis inspect catalog (24.17s)
+run-gates: start markdown wrap
+run-gates: PASS doc graphs (68.93s)
+run-gates: start client catalog
+run-gates: PASS client catalog (10.99s)
+run-gates: start export jsdoc
+run-gates: PASS verify-mermaid (44.48s)
+run-gates: start tool catalog
+run-gates: PASS translation pairing (39.84s)
+run-gates: start config catalog
+run-gates: PASS tool catalog (3.37s)
+run-gates: start skill plugin package list
+run-gates: PASS markdown wrap (27.53s)
+run-gates: start npm dependency catalog
+run-gates: PASS npm dependency catalog (0.92s)
+run-gates: start persistence catalog
+run-gates: PASS skill plugin package list (3.20s)
+run-gates: start persistence type history
+run-gates: PASS config catalog (4.11s)
+run-gates: start released persistence history
+run-gates: PASS export jsdoc (13.09s)
+run-gates: start Session format references
+run-gates: PASS released persistence history (5.62s)
+run-gates: start Session format catalog
+run-gates: PASS Session format catalog (1.22s)
+run-gates: start public repository links
+run-gates: PASS Session format references (9.69s)
+run-gates: start repository references
+run-gates: PASS documentation build (108.59s)
+run-gates: start concrete terms
+run-gates: PASS public repository links (9.05s)
+run-gates: start doc refs
+run-gates: PASS doc refs (2.00s)
+run-gates: start subsystem pages
+run-gates: PASS concrete terms (3.60s)
+run-gates: start package paths
+run-gates: PASS subsystem pages (1.82s)
+run-gates: start tsconfig paths
+run-gates: PASS tsconfig paths (1.03s)
+run-gates: start config source ownership
+run-gates: PASS package paths (2.14s)
+run-gates: start package README Summaries
+run-gates: PASS config source ownership (0.94s)
+run-gates: start package README model experience
+run-gates: PASS package README Summaries (0.94s)
+run-gates: start agent note classification
+run-gates: PASS agent note classification (0.95s)
+run-gates: start agent note format
+run-gates: PASS agent note format (0.94s)
+run-gates: start archived agent notes
+run-gates: PASS repository references (15.30s)
+run-gates: start skill invocation metadata
+run-gates: PASS archived agent notes (0.92s)
+run-gates: start translation prompt
+run-gates: PASS skill invocation metadata (0.78s)
+run-gates: start doc budgets
+run-gates: PASS translation prompt (0.76s)
+run-gates: start upgrade guides
+run-gates: PASS doc budgets (0.73s)
+run-gates: start documentation standard tests
+run-gates: PASS upgrade guides (1.33s)
+run-gates: start documentation site checks
+run-gates: PASS package README model experience (6.55s)
+run-gates: start package README limitations
+run-gates: PASS documentation standard tests (2.34s)
+run-gates: PASS persistence catalog (34.61s)
+run-gates: PASS persistence type history (33.26s)
+run-gates: PASS package README limitations (7.02s)
+run-gates: PASS documentation site checks (13.90s)
+run-gates: PASS doc-typecheck (162.07s)
+
+run-gates: 42 passed, 1 failed, 0 skipped in 162.07s.
+run-gates: unsuccessful gates:
+  - FAILED CLI help reference (48.76s, exit 1)
+    pnpm run verify-cli-help
+[ELIFECYCLE] Command failed with exit code 1.
