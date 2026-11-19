@@ -26,7 +26,12 @@ verify-doc-budgets: 8 budgeted docs within ceiling.
 
 ## doc-sync (полный)
 
-Лог: 03-docsync-full.log (приложен после прогона).
+```
+run-gates: 42 passed, 1 failed, 0 skipped in 162.07s
+FAILED CLI help reference: gen-cli-help: stale — docs/cli-help.md, docs/cli-help.zh.md
+```
+
+Единственный красный — предсуществующий на чистом master (воспроизведён в main checkout с построенными артефактами до merge тикета 03): дрейф сгенерированных CLI-help страниц другой сессии. Назван в hooks.md, молча не правится. Остальные 42 гейта зелёные, включая translation pairing, doc-budgets, markdown wrap/links, agent-note-format.
 
 ## Текстовые критерии (факт дерева тикета)
 
