@@ -200,7 +200,7 @@ describe('CI worker allocation', () => {
       workers: 12,
       source: '12 local default worker(s) of 256 CPU(s)',
     })
-    // Co-updated with the halved gate budget: 8 CPUs now yield 4 workers, not 8.
+    // Halved gate budget: ci-static on 8 CPUs yields 4 workers.
     expect(defaultConcurrency('ci-static', 60, 8, {}).workers).toBe(4)
   })
 

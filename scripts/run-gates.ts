@@ -239,6 +239,8 @@ export function ciWorkerEnvironment(
   const setDefault = (name: string, value: number): void => {
     if (env[name] === undefined || env[name] === '') additions[name] = String(value)
   }
+  // Local ci-* rehearsals halve twice (budget, then shared): a quarter of the host CPUs for the
+  // overlapping readers is intentional; CI keeps the full runner budget.
   const shared = Math.max(1, Math.floor(budget / 2))
   setDefault('DSH_OXLINT_THREADS', shared)
   setDefault('DSH_PUBLINT_CONCURRENCY', shared)
