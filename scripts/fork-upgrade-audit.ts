@@ -120,9 +120,13 @@ function hiddenGuides(root: string, tag: string): string[] {
     .filter(row => row.split('\t')[1]?.endsWith('/guide.md') === true)
 }
 
-/** Files the fork's own commits changed inside the range. */
-function forkTouchedFiles(root: string, base: string): Set<string> {
-  return new Set(gitLines(root, ['log', '--no-merges', '--name-only', '--format=', `${base}..HEAD`]))
+/**
+ * Files the fork's own commits changed inside the range. Commits reachable from
+ * the target are excluded: after the merge they are history of HEAD too, and
+ * counting them would turn the overlap into "files upstream changed".
+ */
+function forkTouchedFiles(root: string, base: string, target: string): Set<string> {
+  return new Set(gitLines(root, ['log', '--no-merges', '--name-only', '--format=', `${base}..HEAD`, '--not', target]))
 }
 
 /** Files upstream changed inside the range. */
@@ -406,7 +410,7 @@ export function renderAudit(args: string[], root: string, home = homedir()): str
   for (const guide of guides) lines.push(`  - ${guide}`)
 
   lines.push(section('пересечение: файлы, которые менял и апстрим, и форк'))
-  const forkFiles = forkTouchedFiles(root, base)
+  const forkFiles = forkTouchedFiles(root, base, target)
   const upstreamFiles = upstreamTouchedFiles(root, base, target)
   const changed = upstreamChangedFiles(root, base, target)
   const overlap = [...forkFiles].filter(path => upstreamFiles.has(path)).sort()

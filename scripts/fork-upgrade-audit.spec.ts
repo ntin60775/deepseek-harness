@@ -207,12 +207,12 @@ describe('renderAudit base range', () => {
 
   it('reports a fully merged upstream and the delta behind a passed --base', () => {
     const root = repository()
-    const preMerge = git(root, ['rev-parse', 'HEAD'])
+    const preMerge = commit(root, { 'shared.txt': 'one\ntwo\nthree\n' }, 'shared file')
     git(root, ['checkout', '-b', 'upstream'])
-    commit(root, { 'upstream.txt': 'upstream\n' }, 'upstream one')
+    commit(root, { 'shared.txt': 'upstream\ntwo\nthree\n', 'upstream.txt': 'upstream\n' }, 'upstream one')
     commit(root, { 'docs/upgrade-guide/v0.2.2-rc.5/c/guide.md': guide('C') }, 'upstream guide')
     git(root, ['checkout', 'master'])
-    commit(root, { 'fork.txt': 'fork\n' }, 'fork work')
+    commit(root, { 'shared.txt': 'one\ntwo\nfork\n', 'fork.txt': 'fork\n' }, 'fork work')
     git(root, ['merge', 'upstream', '--no-edit'])
 
     const merged = audit(root, '--target', 'upstream')
@@ -225,6 +225,7 @@ describe('renderAudit base range', () => {
     expect(delta).toContain(`база: ${preMerge}`)
     expect(delta).toContain('2 коммита (мерджей 0)')
     expect(delta).toContain('гайдов 1 новый + 0 изменённых')
+    expect(delta).toContain('файлов пересечения 1; апстрим изменил 3')
   })
 
   it('keeps the recorded base stable without --record-base and warns when the tag is outside HEAD', () => {
