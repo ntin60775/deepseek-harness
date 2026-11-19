@@ -1,0 +1,5 @@
+$ git branch --show-current   # mermaid-viewer-replay-docs (tree под тикетом 03, 2026-11-19)
+$ pnpm exec vitest run packages/client/ui-mermaid packages/client/ui-primitives packages/client/ui-attachment
+ ✓ |thread-safe| packages/client/ui-mermaid/tests/fence-header.client.spec.tsx (7 tests) 3023ms
+ Test Files  112 passed (112)
+      Tests  2242 passed (2242)

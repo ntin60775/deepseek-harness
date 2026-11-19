@@ -1,0 +1,8 @@
+$ git diff --stat -- packages/client/ui-mermaid/src packages/client/ui-primitives/src
+(пусто = src не тронут: критерий «per-file coverage тронутого src» вне объёма тикета, baseline держит тикет 02)
+
+$ pnpm exec vitest run packages/client/ui-mermaid --coverage
+ Test Files  15 passed (15)
+      Tests  94 passed (94)
+uncovered-записей по ui-mermaid/src: 0
+threshold-ошибок по ui-mermaid: 0

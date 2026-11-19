@@ -11,5 +11,7 @@
 - P3 (стек): общие зум-копии живут в feature-плагине documentpreview (`zoom/locales.ts`); ui-mermaid несёт дословную копию строк (симметрия значений), общего статического владельца копий нет — кандидат на вынос в ui-primitives/locale отдельным юнитом.
 
 - P3 (среда): headless Chromium не резолвит `--dsw-mask-blur` (computed backdrop-filter: none) и не скроллит стрелкой сфокусированный flex-скроллер; dim маски и геометрия пинятся e2e, клавиатурная досягаемость скроллера — Tab-циклом. Условие возврата — ручная проба в живом GUI окна PR.
+- P3 (среда, тикет 03): в полном `test:gui` под параллельной нагрузкой таймаутит `packages/client/ui-sidebar-documentpreview/tests/document-preview-license-bundle.client.spec.ts` (5.48 с при лимите 5 с, пакетный `npm pack`); изолированно зелёный за 2.37 с. Код юнита не при чём; условие возврата — окно PR или снятие дефолтного таймаута теста.
+- P3 (вне объёма, воспроизведено на master): `apps/web/tests/mermaid-fence.e2e.ts` держит 2 ошибки oxlint `typescript(no-confusing-void-expression)` (строки 94 и 139, `evaluate().then(...)` и `.then(end => expect(...))`); в тикете 03 в файле переименован только тест. Условие возврата — sweep окна PR или тронутая строка.
 
 Открытых ишью нет.

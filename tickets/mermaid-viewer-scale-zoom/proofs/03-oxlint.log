@@ -1,0 +1,5 @@
+$ tsx scripts/run-oxlint.ts apps/web/tests/mermaid-viewer.e2e.ts packages/client/ui-mermaid packages/client/ui-primitives
+Found 0 warnings and 0 errors.
+Finished in 9.4s on 237 files with 90 rules using 6 threads.
+
+Зацепка вне объёма (базовый красный, воспроизведён на master): apps/web/tests/mermaid-fence.e2e.ts — 2 ошибки oxlint typescript(no-confusing-void-expression), строки 94 и 139, к тикету 03 не относятся (в файле изменено только имя теста).

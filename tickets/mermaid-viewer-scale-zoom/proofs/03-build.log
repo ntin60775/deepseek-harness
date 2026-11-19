@@ -1,0 +1,24 @@
+$ pnpm run build:artifacts
+run-gates: PASS host compiler (36.56s)
+run-gates: start Host bundle
+run-gates: PASS Host bundle (6.62s)
+run-gates: start Desktop bundle
+run-gates: PASS Desktop bundle (2.09s)
+run-gates: start client compiler
+run-gates: PASS client compiler (58.94s)
+run-gates: start Client bundle
+run-gates: PASS Client bundle (10.42s)
+run-gates: start Web build
+run-gates: PASS Web build (10.24s)
+
+run-gates: 8 passed, 0 failed, 0 skipped in 133.76s.
+build: recorded 385 client artifact(s) with 2 public value(s)
+
+$ pnpm run build:check
+run-gates: build:check running 2 gate(s) with 2 worker(s) from 6 local default worker(s) of 12 CPU(s).
+run-gates: start host aggregate check
+run-gates: start client aggregate check
+run-gates: PASS client aggregate check (111.12s)
+run-gates: PASS host aggregate check (152.10s)
+
+run-gates: 2 passed, 0 failed, 0 skipped in 152.10s.

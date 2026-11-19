@@ -1,0 +1,5 @@
+$ pnpm run test:docs
+run-gates: PASS markdown wrap (36.29s)
+run-gates: PASS translation pairing (41.30s)
+
+run-gates: 21 passed, 0 failed, 0 skipped in 41.31s.
