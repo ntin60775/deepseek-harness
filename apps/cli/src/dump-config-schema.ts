@@ -13,7 +13,8 @@ import { INSTALL_ANCHOR, prepareProfile } from './profile-boot.ts'
 const NAME = 'dsh'
 
 /**
- * Print one JSON Schema document; incomplete collection or projection sets exitCode to 1.
+ * Print one JSON Schema document; a config that fails its plugin schema, or an
+ * incomplete collection or projection set, sets exitCode to 1.
  * Profile initialization writes match the YAML dump. Plugin imports may execute
  * top-level code, but collection never applies plugins or evaluates `!!js`.
  * During schema generation, ordinary stdout writes are redirected to stderr.
@@ -35,7 +36,7 @@ export async function runDumpConfigSchema(
   // Trusted module diagnostics must not precede the JSON document on stdout.
   process.stdout.write = process.stderr.write.bind(process.stderr)
   try {
-    dump = await generateConfigSchema(loaded, layers.map(layer => layer.patches), INSTALL_ANCHOR)
+    dump = await generateConfigSchema(loaded, layers.map(layer => layer.patches), INSTALL_ANCHOR, { validateConfigs: true })
   } finally {
     process.stdout.write = stdoutWrite
   }

@@ -169,7 +169,7 @@ export function parseDshArgs(argv: readonly string[], version: string, manageDes
     .option('--from-default-profile <name>', 'replace a custom profile with a fresh copy of a shipped profile template')
     .option('--patch <path>', 'extra patch-list overlay applied after the profile layer (repeatable)', collect)
     .option('--dump-config', 'print the composed profile tree and exit')
-    .option('--dump-config-schema', 'print JSON Schema for profile entries and patches without mounting')
+    .option('--dump-config-schema', 'print JSON Schema for profile entries and patches without mounting; literal configs are validated, so a broken overlay exits 1')
     .option('--dump-default-config', 'print the profile tree without its user layer or --patch overlays and exit')
     .action((args: string[], options: BootOptions & { profile?: string }) => {
       // With the app owning -h, the launcher's own help is what a bare

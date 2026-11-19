@@ -219,6 +219,6 @@ This Dev Note is working context for maintainers: open design questions and dire
 
 #### Open: YAML config dump stability
 
-`renderConfigDump` output is a loadable YAML document whose `# ==` source comments and `!!js`-verbatim rendering serve the `--dump-config` diagnostic. Nothing promises byte stability across package versions; decide whether the dump becomes a serialization contract before anything consumes it programmatically. JSON Schema output follows the separate [pre-stable compatibility policy](../../../apps/cli/reference/README.md#config-schema-dump).
+`renderConfigDump` output is a loadable YAML document whose `# ==` source comments and `!!js`-verbatim rendering serve the `--dump-config` diagnostic. Nothing promises byte stability across package versions; decide whether the dump becomes a serialization contract before anything consumes it programmatically. JSON Schema output follows the separate [pre-stable compatibility policy](../../../apps/cli/reference/README.md#config-schema-dump). `collectConfigSchemas` validates nothing unless `validateConfigs` is set; the CLI dump sets it, so a literal `config` that fails its plugin schema becomes an `invalid config:` diagnostic and exit 1.
 
 </details>

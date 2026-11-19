@@ -2,9 +2,10 @@
 
 import type { PatchOptions } from '@deepseek-ai/cordis-plugin-include'
 import { composeEntries, createRuntimeResolution, type Profile } from '../profile.ts'
-import { collectConfigSchemas } from './collect.ts'
+import { collectConfigSchemas, type CollectConfigSchemasOptions } from './collect.ts'
 import type { ConfigSchemaDiagnostic, ConfigSchemaDump } from './types.ts'
 export type { ConfigSchemaDump, NativeConfigSchema } from './types.ts'
+export type { CollectConfigSchemasOptions } from './collect.ts'
 
 /**
  * Generate JSON Schema for a prepared profile's ordered patch layers without mounting plugins or evaluating expressions.
@@ -15,6 +16,7 @@ export type { ConfigSchemaDump, NativeConfigSchema } from './types.ts'
  * @param profile - prepared on-disk profile whose directory anchors root module and include resolution.
  * @param layers - already parsed patch lists in application order, including caller-selected home and argv overlays.
  * @param installAnchor - package manifest anchoring the installation's runtime dependencies.
+ * @param options - `validateConfigs` also validates literal configs against their plugin schemas.
  * @returns a JSON Schema document with declaration references, partial results, and diagnostics under `x-cordis`.
  * @throws when composition or runtime resolution cannot be prepared.
  */
@@ -22,6 +24,7 @@ export async function generateConfigSchema(
   profile: Profile,
   layers: readonly PatchOptions[][],
   installAnchor: string,
+  options: CollectConfigSchemasOptions = {},
 ): Promise<ConfigSchemaDump> {
   const diagnostics: ConfigSchemaDiagnostic[] = []
   for (const { packageName } of profile.skippedBundles) {
@@ -32,5 +35,5 @@ export async function generateConfigSchema(
   }
   const entries = composeEntries(layers, message => diagnostics.push({ level: 'warning', message }))
   const resolution = await createRuntimeResolution({ installAnchor, profile })
-  return collectConfigSchemas(profile, entries, resolution, diagnostics)
+  return collectConfigSchemas(profile, entries, resolution, diagnostics, options)
 }

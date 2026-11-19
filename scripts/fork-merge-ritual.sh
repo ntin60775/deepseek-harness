@@ -182,6 +182,34 @@ pnpm run verify-translation-pairing docs/config-catalog.md docs/event-producer-c
 log "verify: typecheck, constraints, doc gates, GUI units, snapshots"
 pnpm run typecheck
 pnpm run constraints
+
+# Profiles live outside this repository, so a merge can invalidate a row the
+# repository never sees: an upstream Config schema may gain a required field
+# while a profile patch keeps replacing that entry's whole config. The schema
+# dump composes every layer and validates each literal config against its
+# plugin schema without mounting anything; only config failures fail the run.
+log "verify: profile configs against plugin schemas"
+PROFILES_DIR="${DSH_HOME:-$HOME/.dsh}/profiles"
+if [[ -d "$PROFILES_DIR" ]]; then
+  for dir in "$PROFILES_DIR"/*/; do
+    profile="$(basename "$dir")"
+    [[ -f "$dir/package.json" ]] || continue
+    status=0
+    output="$(pnpm dsh --profile "$profile" --dump-config-schema 2>&1 >/dev/null)" || status=$?
+    invalid="$(printf '%s\n' "$output" | grep -F 'invalid config:' || true)"
+    if [[ -n "$invalid" ]]; then
+      printf '%s\n' "$invalid" >&2
+      die "профиль $profile: конфиг не проходит схему плагина — почини строку в $dir/cordis.patch.yml"
+    fi
+    if [[ "$status" -ne 0 ]]; then
+      echo "  $profile: конфиги проходят схемы; dump сообщает о других находках"
+    else
+      echo "  $profile: конфиги проходят схемы"
+    fi
+  done
+else
+  echo "  каталог профилей не найден: $PROFILES_DIR — проверка пропущена"
+fi
 # verify-repository-references can flag a uv.lock size numeral whose 7-hex prefix
 # matches a fork-only commit in the local object database; when the file is still
 # byte-identical to upstream/master, treat that single finding as noise.
