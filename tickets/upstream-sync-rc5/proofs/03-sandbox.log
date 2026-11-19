@@ -1,20 +1,10 @@
-The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
-The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
-The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+# Доказательства тикета 03 (2026-11-19)
 
- RUN  v4.1.11 /home/prog7/home/dev/contrib/forks/deepseek-harness
-
- ✓ |thread-safe| packages/experimental/worktree/tests/sandbox.spec.ts > worktree standing sandbox policy > refuses creation under read-only policy without changing the Session directory 1807ms
- ✓ |thread-safe| packages/experimental/worktree/tests/sandbox.spec.ts > worktree standing sandbox policy > creates an unfiltered checkout in the default pool under the source workspace-write grant 2747ms
- ✓ |thread-safe| packages/experimental/worktree/tests/sandbox.spec.ts > worktree standing sandbox policy > enters an existing worktree under read-only policy with confined read commands, and the boundary follows 786ms
- ✓ |thread-safe| packages/experimental/worktree/tests/sandbox.spec.ts > worktree standing sandbox policy > does not widen a linked-checkout grant to the shared Git administration directory 2121ms
- ✓ |thread-safe| packages/experimental/worktree/tests/sandbox.spec.ts > worktree standing sandbox policy > creates and restores from a linked checkout once a registered grant covers its shared Git administration directory 6164ms
- ✓ |thread-safe| packages/experimental/worktree/tests/sandbox.spec.ts > worktree standing sandbox policy > denies a commit inside the Session's worktree under workspace-write until a grant covers the repository's Git directory 3267ms
- ✓ |thread-safe| packages/experimental/worktree/tests/sandbox.spec.ts > worktree standing sandbox policy > restores a removed worktree under the source checkout boundary while the Session root is the removed directory 6721ms
- ✓ |thread-safe| packages/sandbox/sandbox-policy/tests/workspace-root.spec.ts > workspace root as the write boundary > follows the Session into a linked worktree and back, granting only what is configured or registered 68ms
- ✓ |thread-safe| packages/sandbox/sandbox-policy/tests/workspace-root.spec.ts > workspace root as the write boundary > bounds a Session without a recorded directory by the directory service's default directory 28ms
-
+$ LANG=C LC_ALL=C node_modules/.bin/vitest run packages/experimental/worktree/tests/sandbox.spec.ts packages/sandbox/sandbox-policy/tests/workspace-root.spec.ts --maxWorkers 1
+exit=0
  Test Files  2 passed (2)
       Tests  9 passed (9)
-   Start at  15:29:39
-   Duration  26.09s (transform 1.43s, setup 102ms, import 1.95s, tests 23.71s, environment 0ms)
+
+# Тот же набор с --testTimeout=20000 — 9 passed (9), лог сохранялся в предыдущем прогоне;
+# на дефолтных 5 с четыре теста worktree падали по таймауту, когда параллельно шёл build ритуала;
+# на разгруженной машине дефолтный таймаут держит.

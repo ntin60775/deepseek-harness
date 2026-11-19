@@ -1,0 +1,568 @@
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+
+ RUN  v4.1.11 /home/prog7/home/dev/contrib/forks/deepseek-harness
+
+stderr | packages/client/ui-sidebar-right/tests/seat.client.spec.tsx > RightbarSeat presentation > keeps a background retained body through standard-source registration and removal
+Sidebar Session opening failed: Error: Session reference "s-other" is released
+    at TestSessionReference.release (/home/prog7/home/dev/contrib/forks/deepseek-harness/packages/test-support/client-runtime/src/sessions.ts:280:20)
+    at SidebarSessionView.dispose (/home/prog7/home/dev/contrib/forks/deepseek-harness/packages/client/ui-sidebar-right/src/client/session-view.ts:89:20)
+    at /home/prog7/home/dev/contrib/forks/deepseek-harness/packages/client/ui-sidebar-right/src/client/session-view.ts:50:51
+    at safelyCallDestroy (/home/prog7/home/dev/contrib/forks/deepseek-harness/node_modules/.pnpm/react-dom@18.3.1_react@18.3.1/node_modules/react-dom/cjs/react-dom.development.js:22971:5)
+    at commitDeletionEffectsOnFiber (/home/prog7/home/dev/contrib/forks/deepseek-harness/node_modules/.pnpm/react-dom@18.3.1_react@18.3.1/node_modules/react-dom/cjs/react-dom.development.js:24142:23)
+    at commitDeletionEffects (/home/prog7/home/dev/contrib/forks/deepseek-harness/node_modules/.pnpm/react-dom@18.3.1_react@18.3.1/node_modules/react-dom/cjs/react-dom.development.js:24015:5)
+    at recursivelyTraverseMutationEffects (/home/prog7/home/dev/contrib/forks/deepseek-harness/node_modules/.pnpm/react-dom@18.3.1_react@18.3.1/node_modules/react-dom/cjs/react-dom.development.js:24298:9)
+    at commitMutationEffectsOnFiber (/home/prog7/home/dev/contrib/forks/deepseek-harness/node_modules/.pnpm/react-dom@18.3.1_react@18.3.1/node_modules/react-dom/cjs/react-dom.development.js:24332:9)
+    at recursivelyTraverseMutationEffects (/home/prog7/home/dev/contrib/forks/deepseek-harness/node_modules/.pnpm/react-dom@18.3.1_react@18.3.1/node_modules/react-dom/cjs/react-dom.development.js:24312:7)
+    at commitMutationEffectsOnFiber (/home/prog7/home/dev/contrib/forks/deepseek-harness/node_modules/.pnpm/react-dom@18.3.1_react@18.3.1/node_modules/react-dom/cjs/react-dom.development.js:24332:9)
+
+ ✓ |thread-safe| packages/client/ui-mermaid/tests/fence-header.client.spec.tsx (7 tests) 3032ms
+     ✓ swaps the body to the headerless source block and back, tracking aria-pressed  313ms
+     ✓ copies the exact source in the diagram state and in the source state  1151ms
+     ✓ copies once per confirmation window and keeps the idle label when the host refuses  1145ms
+ ✓ |thread-safe| packages/client/ui-conversation/tests/input-bar.client.spec.tsx (143 tests) 3259ms
+stderr | packages/client/ui-sidebar-right/tests/seat.client.spec.tsx > slot-owned useTabInfo > keeps session records and navigation while unmounted, aborting only removal and plugin unload
+Sidebar Session opening failed: Error: Session reference "s-other" is released
+    at TestSessionReference.release (/home/prog7/home/dev/contrib/forks/deepseek-harness/packages/test-support/client-runtime/src/sessions.ts:280:20)
+    at SidebarSessionView.dispose (/home/prog7/home/dev/contrib/forks/deepseek-harness/packages/client/ui-sidebar-right/src/client/session-view.ts:89:20)
+    at SidebarSessionViews.dispose (/home/prog7/home/dev/contrib/forks/deepseek-harness/packages/client/ui-sidebar-right/src/client/session-views.ts:64:61)
+    at /home/prog7/home/dev/contrib/forks/deepseek-harness/packages/client/ui-sidebar-right/src/client/index.ts:123:41
+    at runDisposable (/home/prog7/home/dev/contrib/forks/deepseek-harness/vendor/cordis/src/fiber.ts:145:18)
+    at dispose (/home/prog7/home/dev/contrib/forks/deepseek-harness/vendor/cordis/src/fiber.ts:463:26)
+    at /home/prog7/home/dev/contrib/forks/deepseek-harness/vendor/cordis/src/fiber.ts:540:44
+    at finalizeDisposal (/home/prog7/home/dev/contrib/forks/deepseek-harness/vendor/cordis/src/fiber.ts:516:18)
+    at /home/prog7/home/dev/contrib/forks/deepseek-harness/vendor/cordis/src/fiber.ts:538:14
+    at runDisposable (/home/prog7/home/dev/contrib/forks/deepseek-harness/vendor/cordis/src/fiber.ts:145:18)
+
+ ✓ |thread-safe| packages/client/ui-settings-models/tests/components.client.spec.tsx (167 tests) 4250ms
+ ✓ |thread-safe| packages/client/ui-sidebar-right/tests/seat.client.spec.tsx (50 tests) 3827ms
+   ✓ keeps duplicate Session Tabs independent and preserves a body through docking and float focus  521ms
+ ✓ |thread-safe| packages/client/ui-theme/tests/menu-surfaces.client.spec.ts (5 tests) 2537ms
+     ✓ requires shared material outside the schedule-owned menu and clock picker  1386ms
+     ✓ keeps menu consumer classes from replacing the material  1045ms
+ ✓ |thread-safe| packages/client/ui-chat/tests/chat-view.client.spec.tsx (198 tests) 6482ms
+stderr | packages/client/ui-account-notifications/tests/apply.client.spec.ts > keeps the notice absent when the bonus read is refused, then shows the next read
+[deepseek-account] notification read failed; retaining cards and retrying on the next poll
+
+ ✓ |thread-safe| packages/client/ui-settings-models/tests/provider-form.client.spec.tsx (111 tests) 3532ms
+     ✓ changes image input without rewriting a neighboring model declaration  348ms
+ ✓ |thread-safe| packages/client/ui-sidebar-documentpreview/tests/excel-xml.client.spec.ts (39 tests) 2428ms
+Error: ui-deliverables: not a review address "dsh-resource://file/session/viewed/a.ts"
+    at ReviewTab (/home/prog7/home/dev/contrib/forks/deepseek-harness/packages/client/ui-deliverables/src/client/ReviewTab.tsx:76:40)
+    at renderWithHooks (/home/prog7/home/dev/contrib/forks/deepseek-harness/node_modules/.pnpm/react-dom@18.3.1_react@18.3.1/node_modules/react-dom/cjs/react-dom.development.js:15486:18)
+    at mountIndeterminateComponent (/home/prog7/home/dev/contrib/forks/deepseek-harness/node_modules/.pnpm/react-dom@18.3.1_react@18.3.1/node_modules/react-dom/cjs/react-dom.development.js:20103:13)
+    at beginWork (/home/prog7/home/dev/contrib/forks/deepseek-harness/node_modules/.pnpm/react-dom@18.3.1_react@18.3.1/node_modules/react-dom/cjs/react-dom.development.js:21626:16)
+    at HTMLUnknownElement.callCallback (/home/prog7/home/dev/contrib/forks/deepseek-harness/node_modules/.pnpm/react-dom@18.3.1_react@18.3.1/node_modules/react-dom/cjs/react-dom.development.js:4164:14)
+    at HTMLUnknownElement.callTheUserObjectsOperation (/home/prog7/home/dev/contrib/forks/deepseek-harness/node_modules/.pnpm/jsdom@29.1.1_@noble+hashes@2.4.0/node_modules/jsdom/lib/generated/idl/EventListener.js:26:30)
+    at innerInvokeEventListeners (/home/prog7/home/dev/contrib/forks/deepseek-harness/node_modules/.pnpm/jsdom@29.1.1_@noble+hashes@2.4.0/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:360:16)
+    at invokeEventListeners (/home/prog7/home/dev/contrib/forks/deepseek-harness/node_modules/.pnpm/jsdom@29.1.1_@noble+hashes@2.4.0/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:296:3)
+    at HTMLUnknownElementImpl._dispatch (/home/prog7/home/dev/contrib/forks/deepseek-harness/node_modules/.pnpm/jsdom@29.1.1_@noble+hashes@2.4.0/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:243:9)
+    at HTMLUnknownElementImpl.dispatchEvent (/home/prog7/home/dev/contrib/forks/deepseek-harness/node_modules/.pnpm/jsdom@29.1.1_@noble+hashes@2.4.0/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:114:17)
+Error: ui-deliverables: not a review address "dsh-resource://file/session/viewed/a.ts"
+    at ReviewTab (/home/prog7/home/dev/contrib/forks/deepseek-harness/packages/client/ui-deliverables/src/client/ReviewTab.tsx:76:40)
+    at renderWithHooks (/home/prog7/home/dev/contrib/forks/deepseek-harness/node_modules/.pnpm/react-dom@18.3.1_react@18.3.1/node_modules/react-dom/cjs/react-dom.development.js:15486:18)
+    at mountIndeterminateComponent (/home/prog7/home/dev/contrib/forks/deepseek-harness/node_modules/.pnpm/react-dom@18.3.1_react@18.3.1/node_modules/react-dom/cjs/react-dom.development.js:20103:13)
+    at beginWork (/home/prog7/home/dev/contrib/forks/deepseek-harness/node_modules/.pnpm/react-dom@18.3.1_react@18.3.1/node_modules/react-dom/cjs/react-dom.development.js:21626:16)
+    at HTMLUnknownElement.callCallback (/home/prog7/home/dev/contrib/forks/deepseek-harness/node_modules/.pnpm/react-dom@18.3.1_react@18.3.1/node_modules/react-dom/cjs/react-dom.development.js:4164:14)
+    at HTMLUnknownElement.callTheUserObjectsOperation (/home/prog7/home/dev/contrib/forks/deepseek-harness/node_modules/.pnpm/jsdom@29.1.1_@noble+hashes@2.4.0/node_modules/jsdom/lib/generated/idl/EventListener.js:26:30)
+    at innerInvokeEventListeners (/home/prog7/home/dev/contrib/forks/deepseek-harness/node_modules/.pnpm/jsdom@29.1.1_@noble+hashes@2.4.0/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:360:16)
+    at invokeEventListeners (/home/prog7/home/dev/contrib/forks/deepseek-harness/node_modules/.pnpm/jsdom@29.1.1_@noble+hashes@2.4.0/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:296:3)
+    at HTMLUnknownElementImpl._dispatch (/home/prog7/home/dev/contrib/forks/deepseek-harness/node_modules/.pnpm/jsdom@29.1.1_@noble+hashes@2.4.0/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:243:9)
+    at HTMLUnknownElementImpl.dispatchEvent (/home/prog7/home/dev/contrib/forks/deepseek-harness/node_modules/.pnpm/jsdom@29.1.1_@noble+hashes@2.4.0/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:114:17)
+ ✓ |thread-safe| packages/client/ui-deliverables/tests/review-tab.client.spec.tsx (13 tests) 2794ms
+     ✓ reads the summary, opens on the navigated file, and switches files through the selector  304ms
+     ✓ states the summary and comparison that stand in for hunks, and retries a failed read  2189ms
+ ✓ |thread-safe| packages/client/ui-sidebar-documentpreview/tests/document-preview-license-bundle.client.spec.ts (1 test) 3431ms
+     ✓ keeps bundled licenses in the packed lazy chunks  3427ms
+ ✓ |thread-safe| packages/client/ui-sidebar-files/tests/search.client.spec.tsx (28 tests) 3629ms
+     ✓ searches as the reader types and draws the matches as a highlighted tree with its count  327ms
+     ✓ opens from the magnifier with the add field focused, and saves on its close control, on Escape, and when focus leaves it  479ms
+     ✓ shows the restore control whenever the list differs from the defaults, and replaces the list with the defaults  365ms
+     ✓ saves the draft when the eye is clicked without losing the hidden-entry change  328ms
+stderr | packages/client/ui-account-notifications/tests/apply.client.spec.ts > publishes a failed balance from a Settings entry without dropping the bonus read
+[deepseek-account] account read failed { field: 'balance' }
+
+ ✓ |thread-safe| packages/client/ui-settings-models/tests/retry-policy.client.spec.tsx (33 tests) 2227ms
+     ✓ inherits by default and writes an explicitly chosen normal policy  455ms
+     ✓ adds a custom code, ignores blanks and duplicates, keeps it after unchecking, and saves it  531ms
+ ✓ |thread-safe| packages/client/ui-account-notifications/tests/apply.client.spec.ts (16 tests) 13679ms
+   ✓ reads the unnotified bonus in the active locale and acknowledges only after the card renders  6489ms
+   ✓ starts one notification poll across the credential commit and login-success frames  415ms
+   ✓ queries a replacement credential without adopting the old null reply  418ms
+   ✓ queries a replacement credential without adopting the old failure reply  446ms
+   ✓ clears notification cards and ignores old event failures when credentials change despite a failed replacement list  386ms
+   ✓ keeps the notice without retrying its event across repeated signed-in frames  462ms
+   ✓ keeps the notice absent when the bonus read is refused, then shows the next read  494ms
+   ✓ drops the previous account notice and stops reading after sign-out  567ms
+   ✓ refreshes balances and notifications immediately on Settings entry  611ms
+   ✓ replaces polling on startup, sign-in and Settings entry and stops on sign-out or unload  541ms
+   ✓ publishes a failed balance from a Settings entry without dropping the bonus read  475ms
+   ✓ refreshes consumed notification content on a locale change without reading the unconsumed list again  554ms
+   ✓ retains notification content when the localization RPC is refused  467ms
+   ✓ clears notifications and stops polling when the account carrier fails  455ms
+   ✓ reloads notifications without opening another account stream  455ms
+   ✓ publishes notification changes through one stable source and releases its subscribers  440ms
+ ✓ |thread-safe| packages/client/ui-conversation/tests/service-orchestration.client.spec.ts (47 tests) 1948ms
+ ✓ |thread-safe| packages/client/ui-sidebar/tests/panel-list.client.spec.tsx (23 tests) 2226ms
+     ✓ adds late registrations, removes each plugin contribution, and leaves no empty panel-list DOM  318ms
+ ✓ |thread-safe| packages/client/ui-theme/tests/icon-sprite.client.spec.ts (6 tests) 1738ms
+     ✓ keeps every default root presentation attribute on its symbol  1060ms
+ ✓ |thread-safe| packages/client/ui-sidebar-files/tests/files-navigator.client.spec.tsx (45 tests) 2057ms
+stderr | packages/client/connection/tests/connection.client.spec.ts > connection lifecycle > replaces an active generation immediately when reconnect is requested
+[connection] connection lost, retry #1
+
+ ✓ |thread-safe| packages/client/connection/tests/connection.client.spec.ts (35 tests) 1420ms
+ ✓ |thread-safe| packages/client/ui-mermaid/tests/measure.client.spec.tsx (14 tests) 1483ms
+ ✓ |thread-safe| packages/client/ui-conversation/tests/input-scenarios.client.spec.tsx (24 tests) 1751ms
+     ✓ runs the whole claim chain through the real pipeline  391ms
+ ✓ |thread-safe| packages/client/ui-chat/tests/chat-viewport.client.spec.ts (52 tests) 1227ms
+   ✓ locates the reading Turn with logarithmic outer-row measurements (4096 rows, slot=false)  517ms
+   ✓ locates the reading Turn with logarithmic outer-row measurements (4096 rows, slot=true)  368ms
+ ✓ |thread-safe| packages/client/ui-conversation/tests/apply-inject.client.spec.tsx (30 tests) 1460ms
+ ✓ |thread-safe| packages/client/ui-conversation/tests/skeleton.client.spec.tsx (40 tests) 1569ms
+ ✓ |thread-safe| packages/client/ui-subagent/tests/conversation-ui.client.spec.tsx (99 tests) 2073ms
+stderr | packages/client/ui-account-notifications/tests/notification-controller.client.spec.ts > does not adopt the replaced credential's in-flight read when it answers aborted
+[deepseek-account] notification event report failed; keeping local state without retry { event: 'displayed' }
+
+stderr | packages/client/ui-account-notifications/tests/notification-controller.client.spec.ts > does not adopt the replaced credential's in-flight read when it answers null
+[deepseek-account] notification event report failed; keeping local state without retry { event: 'displayed' }
+
+ ✓ |thread-safe| packages/client/ui-sidebar-documentpreview/tests/excel-opening.client.spec.ts (19 tests) 1181ms
+ ✓ |thread-safe| packages/client/ui-conversation/tests/draft-document.client.spec.ts (71 tests) 1100ms
+ ✓ |thread-safe| packages/client/ui-settings-models/tests/model-order.client.spec.tsx (21 tests) 1132ms
+ ✓ |thread-safe| packages/client/ui-conversation/tests/input-matrix.client.spec.tsx (16 tests) 1093ms
+ ✓ |thread-safe| packages/client/ui-account-notifications/tests/notification-controller.client.spec.ts (62 tests) 992ms
+ ✓ |thread-safe| packages/client/ui-conversation/tests/quote-composer.client.spec.tsx (10 tests) 950ms
+     ✓ treats insert, close removal, Backspace, undo, and redo as whole-node operations  516ms
+stderr | packages/client/connection/tests/client-apply.client.spec.ts > connection client apply > publishes connection state directly on the service and isolates subscribers
+[connection] connection lost, retry #1
+
+ ✓ |thread-safe| packages/client/connection/tests/client-apply.client.spec.ts (22 tests) 800ms
+ ✓ |thread-safe| packages/client/ui-sidebar-right/tests/persistence-validation.client.spec.ts (29 tests) 973ms
+   ✓ keeps persisted bytes independent of focus history and preserves undo only in the live store  939ms
+ ✓ |thread-safe| packages/client/ui-mermaid/tests/fence-viewer.client.spec.tsx (5 tests) 916ms
+     ✓ opens live vector SVG at natural scale from the header button  350ms
+     ✓ closes the viewer when a theme revision starts a new attempt  342ms
+ ✓ |thread-safe| packages/client/ui-sidebar-browser/tests/browser-body.client.spec.tsx (11 tests) 883ms
+ ✓ |thread-safe| packages/client/ui-chat/tests/apply-inject.client.spec.tsx (16 tests) 949ms
+ ✓ |thread-safe| packages/client/ui-chat/tests/chat-branch-tails.client.spec.tsx (48 tests) 1074ms
+ ✓ |thread-safe| packages/client/ui-conversation/tests/input-reference-submit.client.spec.ts (17 tests) 833ms
+ ✓ |thread-safe| packages/client/ui-theme/tests/apply.client.spec.ts (19 tests) 877ms
+ ✓ |thread-safe| packages/client/ui-settings-models/tests/model-reasoning-efforts.client.spec.tsx (43 tests) 963ms
+ ✓ |thread-safe| packages/client/ui-sidebar-files/tests/files-body.client.spec.tsx (24 tests) 1101ms
+ ✓ |thread-safe| packages/client/ui-sidebar-documentpreview/tests/text-preview.client.spec.tsx (48 tests) 871ms
+ ✓ |thread-safe| packages/client/ui-chat/tests/text-interaction.client.spec.tsx (17 tests) 807ms
+ ✓ |thread-safe| packages/client/ui-deliverables/tests/deliverables.client.spec.tsx (70 tests) 837ms
+ ✓ |thread-safe| packages/client/ui-sidebar/tests/sidebar-root.client.spec.tsx (46 tests) 952ms
+ ✓ |thread-safe| packages/client/ui-chat/tests/fence-slot.client.spec.tsx (4 tests) 817ms
+     ✓ typesets a settled math fence through the math layer  462ms
+ ✓ |thread-safe| packages/client/ui-chat/tests/transcript-view-row.client.spec.tsx (17 tests) 882ms
+ ✓ |thread-safe| packages/client/ui-sidebar-documentpreview/tests/excel-opc.client.spec.ts (24 tests) 743ms
+ ✓ |thread-safe| packages/client/ui-chat/tests/chat-scroll.client.spec.tsx (75 tests) 934ms
+ ✓ |thread-safe| packages/client/ui-sidebar-documentpreview/tests/document-seat.client.spec.tsx (8 tests) 911ms
+ ✓ |thread-safe| packages/client/ui-conversation/tests/queue-dock.client.spec.tsx (36 tests) 949ms
+ ✓ |thread-safe| packages/client/ui-sidebar-documentpreview/tests/document-toolbar.client.spec.tsx (22 tests) 803ms
+ ✓ |thread-safe| packages/client/ui-sidebar-right/tests/expand-button.client.spec.tsx (5 tests) 691ms
+     ✓ advertises the configured expand binding  664ms
+ ✓ |thread-safe| packages/client/ui-conversation/tests/assembly-surfaces.client.spec.tsx (5 tests) 769ms
+     ✓ renders the locked view state while no session exists at all  376ms
+ ✓ |thread-safe| packages/client/ui-chat/tests/chat-apply.client.spec.tsx (15 tests) 846ms
+ ✓ |thread-safe| packages/client/ui-sidebar-terminal/tests/terminal-body.client.spec.tsx (27 tests) 629ms
+ ✓ |thread-safe| packages/client/ui-sidebar-documentpreview/tests/image-body.client.spec.tsx (14 tests) 466ms
+ ✓ |thread-safe| packages/client/ui-theme/tests/hover-styles.client.spec.ts (2 tests) 715ms
+   ✓ limits every client hover selector to hover-capable primary input  708ms
+ ✓ |thread-safe| packages/client/ui-chat/tests/turn-navigator.client.spec.tsx (5 tests) 751ms
+ ✓ |thread-safe| packages/client/ui-mermaid/tests/fence-states.client.spec.tsx (9 tests) 637ms
+ ✓ |thread-safe| packages/client/ui-sidebar-documentpreview/tests/excel-worker.client.spec.ts (2 tests) 708ms
+   ✓ returns parsed sheets and bounded failure categories  645ms
+ ✓ |thread-safe| packages/client/ui-sidebar-documentpreview/tests/excel-drawings.client.spec.ts (11 tests) 689ms
+ ✓ |thread-safe| packages/client/ui-settings-models/tests/model-input-types.client.spec.tsx (24 tests) 534ms
+ ✓ |thread-safe| packages/client/ui-sidebar-documentpreview/tests/pdf-body.client.spec.tsx (18 tests) 707ms
+ ✓ |thread-safe| packages/client/ui-sidebar-documentpreview/tests/renderer-loading.client.spec.tsx (16 tests) 525ms
+ ✓ |thread-safe| packages/client/ui-sidebar-documentpreview/tests/markdown-body.client.spec.tsx (16 tests) 535ms
+ ✓ |thread-safe| packages/client/ui-sidebar-documentpreview/tests/html-body.client.spec.tsx (11 tests) 504ms
+ ✓ |thread-safe| packages/client/ui-sidebar/tests/sidebar-snapshot.client.spec.tsx (6 tests) 554ms
+ ✓ |thread-safe| packages/client/ui-sidebar-documentpreview/tests/code-body.client.spec.tsx (10 tests) 535ms
+ ✓ |thread-safe| packages/client/ui-chat/tests/reasoning-row.client.spec.tsx (36 tests) 508ms
+ ✓ |thread-safe| packages/client/ui-theme/tests/elevation-styles.client.spec.ts (14 tests) 429ms
+ ✓ |thread-safe| packages/client/ui-chat/tests/user-content.client.spec.tsx (12 tests) 519ms
+ ✓ |thread-safe| packages/client/ui-sidebar-browser/tests/electron-lifecycle.client.spec.ts (6 tests) 483ms
+ ✓ |thread-safe| packages/client/ui-sidebar-terminal/tests/terminal-guide.client.spec.tsx (9 tests) 451ms
+ ✓ |thread-safe| packages/client/ui-settings-models/tests/onboarding-dialog.client.spec.tsx (14 tests) 376ms
+ ✓ |thread-safe| packages/client/ui-conversation/tests/draft-attachment-retention.client.spec.ts (11 tests) 488ms
+ ✓ |thread-safe| packages/client/ui-conversation/tests/apply-wiring.client.spec.tsx (7 tests) 394ms
+ ✓ |thread-safe| packages/client/ui-chat/tests/flow-motion.client.spec.tsx (44 tests) 382ms
+ ✓ |thread-safe| packages/client/ui-chat/tests/chat-stats.client.spec.tsx (44 tests) 439ms
+ ✓ |thread-safe| packages/client/ui-theme/tests/app-region-styles.client.spec.ts (5 tests) 512ms
+ ✓ |thread-safe| packages/client/ui-settings-models/tests/model-list-catalog.client.spec.tsx (4 tests) 411ms
+ ✓ |thread-safe| packages/client/ui-mermaid/tests/mermaid-viewer.client.spec.tsx (3 tests) 415ms
+ ✓ |thread-safe| packages/client/ui-mermaid/tests/sanitize.client.spec.ts (12 tests) 439ms
+ ✓ |thread-safe| packages/client/ui-chat/tests/quota-notice.client.spec.tsx (9 tests) 415ms
+ ✓ |thread-safe| packages/client/connection/tests/node-half.host.spec.ts (33 tests) 371ms
+ ✓ |thread-safe| packages/client/ui-chat/tests/reasoning-content.client.spec.tsx (4 tests) 309ms
+ ✓ |thread-safe| packages/client/ui-sidebar-documentpreview/tests/zoom-viewport.client.spec.tsx (6 tests) 455ms
+   ✓ fits without upscaling, follows resize, and leaves fixed zoom unchanged  330ms
+ ✓ |thread-safe| packages/client/shortcuts/tests/service.client.spec.ts (14 tests) 410ms
+ ✓ |thread-safe| packages/client/ui-sidebar-documentpreview/tests/excel-body.client.spec.tsx (18 tests) 401ms
+ ✓ |thread-safe| packages/client/ui-sidebar-documentpreview/tests/excel-convert.client.spec.ts (12 tests) 345ms
+ ✓ |thread-safe| packages/client/ui-sidebar-files/tests/file-tree.client.spec.tsx (22 tests) 364ms
+ ✓ |thread-safe| packages/client/ui-chat/tests/turn-trigger.client.spec.tsx (37 tests) 392ms
+ ✓ |thread-safe| packages/client/ui-conversation/tests/todo-panel.client.spec.tsx (14 tests) 393ms
+ ✓ |thread-safe| packages/client/ui-sidebar-right/tests/service.client.spec.ts (61 tests) 210ms
+stdout | packages/client/ui-mermaid/tests/render-controller.client.spec.ts > mermaid render controller > reports a render failure without retrying inside the attempt
+[ui-mermaid] diagram render failed Error: Parse error on line 2
+    at /home/prog7/home/dev/contrib/forks/deepseek-harness/packages/client/ui-mermaid/tests/render-controller.client.spec.ts:94:41
+    at file:///home/prog7/home/dev/contrib/forks/deepseek-harness/node_modules/.pnpm/@vitest+runner@4.1.11/node_modules/@vitest/runner/dist/chunk-artifact.js:302:11
+    at file:///home/prog7/home/dev/contrib/forks/deepseek-harness/node_modules/.pnpm/@vitest+runner@4.1.11/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:26
+    at file:///home/prog7/home/dev/contrib/forks/deepseek-harness/node_modules/.pnpm/@vitest+runner@4.1.11/node_modules/@vitest/runner/dist/chunk-artifact.js:2326:20
+    at new Promise (<anonymous>)
+    at runWithCancel (file:///home/prog7/home/dev/contrib/forks/deepseek-harness/node_modules/.pnpm/@vitest+runner@4.1.11/node_modules/@vitest/runner/dist/chunk-artifact.js:2323:10)
+    at file:///home/prog7/home/dev/contrib/forks/deepseek-harness/node_modules/.pnpm/@vitest+runner@4.1.11/node_modules/@vitest/runner/dist/chunk-artifact.js:2305:20
+    at new Promise (<anonymous>)
+    at runWithTimeout (file:///home/prog7/home/dev/contrib/forks/deepseek-harness/node_modules/.pnpm/@vitest+runner@4.1.11/node_modules/@vitest/runner/dist/chunk-artifact.js:2272:10)
+    at file:///home/prog7/home/dev/contrib/forks/deepseek-harness/node_modules/.pnpm/@vitest+runner@4.1.11/node_modules/@vitest/runner/dist/chunk-artifact.js:2956:64
+
+ ✓ |thread-safe| packages/client/ui-conversation/tests/draft-hub.client.spec.ts (7 tests) 346ms
+stdout | packages/client/ui-mermaid/tests/render-controller.client.spec.ts > mermaid render controller > discards a result whose theme changed while the render was running
+[ui-mermaid] diagram render failed Error: Parse error on line 2
+    at /home/prog7/home/dev/contrib/forks/deepseek-harness/packages/client/ui-mermaid/tests/render-controller.client.spec.ts:119:17
+    at file:///home/prog7/home/dev/contrib/forks/deepseek-harness/node_modules/.pnpm/@vitest+runner@4.1.11/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:20
+
+stdout | packages/client/ui-mermaid/tests/render-controller.client.spec.ts > mermaid chunk import policy > fails the attempt on a rejected import and re-imports on the next attempt
+[ui-mermaid] diagram chunk import failed Error: [vitest] There was an error when mocking a module. If you are using "vi.mock" factory, make sure there are no top level variables inside, since this call is hoisted to top of the file. Read more: https://vitest.dev/api/vi.html#vi-mock
+    at createHelpfulError (file:///home/prog7/home/dev/contrib/forks/deepseek-harness/node_modules/.pnpm/@vitest+mocker@4.1.11_vite@8.2.2_@types+node@22.20.1_esbuild@0.28.2_jiti@2.7.0_tsx@4.23.13_yaml@2.9.0_/node_modules/@vitest/mocker/dist/chunk-registry.js:189:16)
+    at ManualMockedModule.resolve (file:///home/prog7/home/dev/contrib/forks/deepseek-harness/node_modules/.pnpm/@vitest+mocker@4.1.11_vite@8.2.2_@types+node@22.20.1_esbuild@0.28.2_jiti@2.7.0_tsx@4.23.13_yaml@2.9.0_/node_modules/@vitest/mocker/dist/chunk-registry.js:163:10)
+    at VitestMocker.callFunctionMock (file:///home/prog7/home/dev/contrib/forks/deepseek-harness/node_modules/.pnpm/vitest@4.1.11_@opentelemetry+api@1.9.1_@types+node@22.20.1_@vitest+coverage-v8@4.1.11_h_414bc0208e52c7af02d5d6ed839cd439/node_modules/vitest/dist/chunks/startVitestModuleRunner.DB-7oCpn.js:319:32)
+    ... 5 lines matching cause stack trace ...
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at /home/prog7/home/dev/contrib/forks/deepseek-harness/packages/client/ui-mermaid/src/client/render-controller.ts:62:22 {
+  cause: Error: chunk load failed
+      at /home/prog7/home/dev/contrib/forks/deepseek-harness/packages/client/ui-mermaid/tests/render-controller.client.spec.ts:153:36
+      at ManualMockedModule.factory (file:///home/prog7/home/dev/contrib/forks/deepseek-harness/node_modules/.pnpm/vitest@4.1.11_@opentelemetry+api@1.9.1_@types+node@22.20.1_@vitest+coverage-v8@4.1.11_h_414bc0208e52c7af02d5d6ed839cd439/node_modules/vitest/dist/chunks/test.DNmyFkvJ.js:3578:78)
+      at ManualMockedModule.resolve (file:///home/prog7/home/dev/contrib/forks/deepseek-harness/node_modules/.pnpm/@vitest+mocker@4.1.11_vite@8.2.2_@types+node@22.20.1_esbuild@0.28.2_jiti@2.7.0_tsx@4.23.13_yaml@2.9.0_/node_modules/@vitest/mocker/dist/chunk-registry.js:161:21)
+      at VitestMocker.callFunctionMock (file:///home/prog7/home/dev/contrib/forks/deepseek-harness/node_modules/.pnpm/vitest@4.1.11_@opentelemetry+api@1.9.1_@types+node@22.20.1_@vitest+coverage-v8@4.1.11_h_414bc0208e52c7af02d5d6ed839cd439/node_modules/vitest/dist/chunks/startVitestModuleRunner.DB-7oCpn.js:319:32)
+      at file:///home/prog7/home/dev/contrib/forks/deepseek-harness/node_modules/.pnpm/vitest@4.1.11_@opentelemetry+api@1.9.1_@types+node@22.20.1_@vitest+coverage-v8@4.1.11_h_414bc0208e52c7af02d5d6ed839cd439/node_modules/vitest/dist/chunks/startVitestModuleRunner.DB-7oCpn.js:402:23
+      at Traces.$ (file:///home/prog7/home/dev/contrib/forks/deepseek-harness/node_modules/.pnpm/vitest@4.1.11_@opentelemetry+api@1.9.1_@types+node@22.20.1_@vitest+coverage-v8@4.1.11_h_414bc0208e52c7af02d5d6ed839cd439/node_modules/vitest/dist/chunks/traces.DT5aQ62U.js:142:27)
+      at VitestMocker.requestWithMockedModule (file:///home/prog7/home/dev/contrib/forks/deepseek-harness/node_modules/.pnpm/vitest@4.1.11_@opentelemetry+api@1.9.1_@types+node@22.20.1_@vitest+coverage-v8@4.1.11_h_414bc0208e52c7af02d5d6ed839cd439/node_modules/vitest/dist/chunks/startVitestModuleRunner.DB-7oCpn.js:367:21)
+      at VitestModuleRunner.cachedRequest (file:///home/prog7/home/dev/contrib/forks/deepseek-harness/node_modules/.pnpm/vitest@4.1.11_@opentelemetry+api@1.9.1_@types+node@22.20.1_@vitest+coverage-v8@4.1.11_h_414bc0208e52c7af02d5d6ed839cd439/node_modules/vitest/dist/chunks/startVitestModuleRunner.DB-7oCpn.js:568:31)
+      at request (file:///home/prog7/home/dev/contrib/forks/deepseek-harness/node_modules/.pnpm/vite@8.2.2_@types+node@22.20.1_esbuild@0.28.2_jiti@2.7.0_tsx@4.23.13_yaml@2.9.0/node_modules/vite/dist/node/module-runner.js:1231:76)
+      at processTicksAndRejections (node:internal/process/task_queues:104:5)
+}
+
+ ✓ |thread-safe| packages/client/ui-mermaid/tests/render-controller.client.spec.ts (9 tests) 323ms
+ ✓ |thread-safe| packages/client/ui-sidebar-right/tests/focus.client.spec.ts (47 tests) 307ms
+ ✓ |thread-safe| packages/client/ui-deliverables/tests/present-open.host.spec.ts (31 tests) 270ms
+ ✓ |thread-safe| packages/client/ui-account-notifications/tests/notice.client.spec.tsx (17 tests) 313ms
+ ✓ |thread-safe| packages/client/ui-conversation/tests/context-meter.client.spec.tsx (10 tests) 324ms
+ ✓ |thread-safe| packages/client/ui-deliverables/tests/changed-files-hover.client.spec.tsx (5 tests) 340ms
+ ✓ |thread-safe| packages/client/ui-conversation/tests/user-text.client.spec.tsx (15 tests) 328ms
+ ✓ |thread-safe| packages/client/ui-sidebar-documentpreview/tests/office-cache.client.spec.ts (25 tests) 287ms
+ ✓ |thread-safe| packages/client/ui-mermaid/tests/apply.client.spec.tsx (6 tests) 278ms
+ ✓ |thread-safe| packages/client/ui-sidebar-documentpreview/tests/markdown-registration.client.spec.tsx (2 tests) 321ms
+     ✓ waits for the document slot, renders with its locale, and releases every contribution on unload  312ms
+ ✓ |thread-safe| packages/client/ui-sidebar-right/tests/guide-body.client.spec.tsx (10 tests) 349ms
+ ✓ |thread-safe| packages/client/ui-sidebar-files/tests/navigation.client.spec.tsx (20 tests) 257ms
+ ✓ |thread-safe| packages/client/ui-sidebar-browser/tests/browser-controller.client.spec.ts (8 tests) 198ms
+ ✓ |thread-safe| packages/client/ui-deliverables/tests/present-row.client.spec.tsx (12 tests) 220ms
+ ✓ |thread-safe| packages/client/ui-theme/tests/font-settings-group.client.spec.tsx (2 tests) 253ms
+ ✓ |thread-safe| packages/client/ui-chat/tests/fold-follow.client.spec.ts (15 tests) 210ms
+ ✓ |thread-safe| packages/client/ui-settings-models/tests/welcome-notice.client.spec.tsx (5 tests) 256ms
+ ✓ |thread-safe| packages/client/ui-sidebar-files/tests/file-tree-factory.client.spec.tsx (1 test) 286ms
+ ✓ |thread-safe| packages/client/ui-settings-models/tests/apply.client.spec.ts (16 tests) 222ms
+ ✓ |thread-safe| packages/client/ui-theme/tests/color-tokens.client.spec.ts (4 tests) 183ms
+ ✓ |thread-safe| packages/client/ui-conversation/tests/enter-behavior-row.client.spec.tsx (2 tests) 229ms
+ ✓ |thread-safe| packages/client/ui-sidebar-documentpreview/tests/office-font-notice.client.spec.tsx (4 tests) 304ms
+ ✓ |thread-safe| packages/client/ui-theme/tests/font-size-row.client.spec.tsx (4 tests) 220ms
+ ✓ |thread-safe| packages/client/ui-chat/tests/flow-motion-scope.client.spec.tsx (2 tests) 176ms
+ ✓ |thread-safe| packages/client/ui-theme/tests/font-family-row.client.spec.tsx (6 tests) 215ms
+ ✓ |thread-safe| packages/client/ui-chat/tests/text-selection.client.spec.tsx (13 tests) 277ms
+ ✓ |thread-safe| packages/client/ui-deliverables/tests/presented-file-card.client.spec.tsx (7 tests) 200ms
+ ✓ |thread-safe| packages/client/ui-conversation/tests/stop-shortcut.client.spec.ts (18 tests) 271ms
+ ✓ |thread-safe| packages/client/ui-theme/tests/appearance-row.client.spec.tsx (2 tests) 171ms
+ ✓ |thread-safe| packages/client/ui-conversation/tests/keymap-routing.client.spec.tsx (22 tests) 215ms
+ ✓ |thread-safe| packages/client/ui-theme/tests/focus-styles.client.spec.ts (4 tests) 181ms
+ ✓ |thread-safe| packages/client/ui-sidebar-files/tests/file-tree-interactions.client.spec.tsx (4 tests) 183ms
+ ✓ |thread-safe| packages/client/ui-chat/tests/turn-usage-panel.client.spec.tsx (4 tests) 223ms
+ ✓ |thread-safe| packages/client/ui-deliverables/tests/changes-open.host.spec.ts (16 tests) 153ms
+ ✓ |thread-safe| packages/client/ui-chat/tests/conversation-node-definitions.client.spec.ts (102 tests) 192ms
+ ✓ |thread-safe| packages/client/ui-sidebar-terminal/tests/recovery.client.spec.tsx (5 tests) 174ms
+ ✓ |thread-safe| packages/client/ui-chat/tests/user-origin-slot.client.spec.tsx (3 tests) 201ms
+ ✓ |thread-safe| packages/client/ui-sidebar-documentpreview/tests/office-registration.client.spec.ts (28 tests) 157ms
+ ✓ |thread-safe| packages/client/ui-conversation/tests/editor-viewport.client.spec.ts (4 tests) 192ms
+ ✓ |thread-safe| packages/client/ui-chat/tests/tool-updates.client.spec.tsx (4 tests) 214ms
+ ✓ |thread-safe| packages/client/ui-chat/tests/use-disclosure.client.spec.tsx (3 tests) 168ms
+ ✓ |thread-safe| packages/client/ui-chat/tests/system-prompt-row.client.spec.tsx (2 tests) 159ms
+Warning: UnknownErrorException: Ensure that the `standardFontDataUrl` API parameter is provided.
+ ✓ |thread-safe| packages/client/ui-sidebar-documentpreview/tests/pdf-smoke.client.spec.ts (1 test) 234ms
+ ✓ |thread-safe| packages/client/connection/tests/binary-rpc.host.spec.ts (43 tests) 160ms
+ ✓ |thread-safe| packages/client/ui-chat/tests/running-status.client.spec.tsx (4 tests) 211ms
+ ✓ |thread-safe| packages/client/ui-sidebar-terminal/tests/cleanup.client.spec.tsx (2 tests) 177ms
+ ✓ |thread-safe| packages/client/ui-sidebar-documentpreview/tests/pdf-registration.client.spec.ts (2 tests) 177ms
+ ✓ |thread-safe| packages/client/ui-chat/tests/chat-node-bottom.client.spec.ts (5 tests) 206ms
+ ✓ |thread-safe| packages/client/ui-mermaid/tests/bundle-split.client.spec.ts (2 tests) 212ms
+ ✓ |thread-safe| packages/client/ui-conversation/tests/editor-focus.client.spec.ts (7 tests) 256ms
+ ✓ |thread-safe| packages/client/ui-sidebar-right/tests/apply.client.spec.ts (11 tests) 160ms
+ ✓ |thread-safe| packages/client/ui-sidebar-browser/tests/apply.client.spec.ts (7 tests) 160ms
+ ✓ |thread-safe| packages/client/connection/tests/http-bridge.host.spec.ts (7 tests) 165ms
+ ✓ |thread-safe| packages/client/ui-conversation/tests/control-row-layout.client.spec.ts (4 tests) 156ms
+ ✓ |thread-safe| packages/client/ui-chat/tests/context-menu.client.spec.tsx (1 test) 177ms
+ ✓ |thread-safe| packages/client/ui-account-notifications/tests/view.client.spec.tsx (1 test) 199ms
+ ✓ |thread-safe| packages/client/ui-sidebar-documentpreview/tests/markdown-frontmatter-fallback.client.spec.tsx (1 test) 180ms
+ ✓ |thread-safe| packages/client/ui-sidebar-terminal/tests/terminal-cursor.client.spec.ts (1 test) 175ms
+ ✓ |thread-safe| packages/extensions/cordis-client-runner/tests/runner.client.spec.ts (32 tests) 115ms
+ ✓ |thread-safe| packages/client/ui-mermaid/tests/theme.client.spec.ts (5 tests) 133ms
+ ✓ |thread-safe| packages/client/ui-chat/tests/image-labels.client.spec.tsx (4 tests) 118ms
+ ✓ |thread-safe| packages/client/ui-account-notifications/tests/notice-transition.client.spec.ts (3 tests) 158ms
+ ✓ |thread-safe| packages/client/ui-subagent/tests/browser-plugin.client.spec.ts (4 tests) 153ms
+ ✓ |thread-safe| packages/client/ui-sidebar-documentpreview/tests/loading-indicator.client.spec.tsx (2 tests) 165ms
+ ✓ |thread-safe| packages/client/ui-chat/tests/chat-group-container.client.spec.tsx (10 tests) 182ms
+ ✓ |thread-safe| packages/client/ui-theme/tests/scrollbar-styles.client.spec.ts (22 tests) 116ms
+ ✓ |thread-safe| packages/client/ui-theme/tests/theme.client.spec.ts (31 tests) 143ms
+ ✓ |thread-safe| packages/client/ui-sidebar-documentpreview/tests/apply.client.spec.ts (5 tests) 157ms
+stderr | packages/extensions/cordis-client-runner/tests/orchestrator.client.spec.ts > approve > reports a source fetch that failed as the browser half failing
+[cordis-client-runner] Client activation dyn-1/pkg-1 (run-1) failed: Error: definition vanished
+    at Object.clientCode (/home/prog7/home/dev/contrib/forks/deepseek-harness/packages/extensions/cordis-client-runner/tests/orchestrator.client.spec.ts:277:59)
+    at Object.Mock [as getClientCode] (file:///home/prog7/home/dev/contrib/forks/deepseek-harness/node_modules/.pnpm/@vitest+spy@4.1.11/node_modules/@vitest/spy/dist/index.js:332:34)
+    at CordisRunOrchestrator.drive (/home/prog7/home/dev/contrib/forks/deepseek-harness/packages/extensions/cordis-client-runner/src/client/orchestrator.ts:346:36)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at /home/prog7/home/dev/contrib/forks/deepseek-harness/packages/extensions/cordis-client-runner/tests/orchestrator.client.spec.ts:279:5
+    at file:///home/prog7/home/dev/contrib/forks/deepseek-harness/node_modules/.pnpm/@vitest+runner@4.1.11/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:20
+
+stderr | packages/extensions/cordis-client-runner/tests/orchestrator.client.spec.ts > approve > carries the failing load stage into the answer
+[cordis-client-runner] Client activation dyn-1/pkg-1 (run-1) failed: { message: 'activate: apply threw' }
+
+stderr | packages/extensions/cordis-client-runner/tests/orchestrator.client.spec.ts > approve > treats a load that rejects outright as a browser-half failure
+[cordis-client-runner] Client activation dyn-1/pkg-1 (run-1) failed: Error: module table missing
+    at Object.loaded (/home/prog7/home/dev/contrib/forks/deepseek-harness/packages/extensions/cordis-client-runner/tests/orchestrator.client.spec.ts:299:55)
+    at Object.Mock (file:///home/prog7/home/dev/contrib/forks/deepseek-harness/node_modules/.pnpm/@vitest+spy@4.1.11/node_modules/@vitest/spy/dist/index.js:332:34)
+    at CordisRunOrchestrator.drive (/home/prog7/home/dev/contrib/forks/deepseek-harness/packages/extensions/cordis-client-runner/src/client/orchestrator.ts:351:42)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at /home/prog7/home/dev/contrib/forks/deepseek-harness/packages/extensions/cordis-client-runner/tests/orchestrator.client.spec.ts:301:5
+    at file:///home/prog7/home/dev/contrib/forks/deepseek-harness/node_modules/.pnpm/@vitest+runner@4.1.11/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:20
+
+stderr | packages/extensions/cordis-client-runner/tests/orchestrator.client.spec.ts > approve > clears a previous failure when the same definition is tried again
+[cordis-client-runner] Client activation dyn-1/pkg-1 (run-1) failed: { message: 'activate: first try' }
+
+stderr | packages/extensions/cordis-client-runner/tests/orchestrator.client.spec.ts > startUserRun > records a source fetch failure with nothing to answer
+[cordis-client-runner] Client activation dyn-1/pkg-1 (run-1) failed: Error: gone
+    at Object.clientCode (/home/prog7/home/dev/contrib/forks/deepseek-harness/packages/extensions/cordis-client-runner/tests/orchestrator.client.spec.ts:397:59)
+    at Object.Mock [as getClientCode] (file:///home/prog7/home/dev/contrib/forks/deepseek-harness/node_modules/.pnpm/@vitest+spy@4.1.11/node_modules/@vitest/spy/dist/index.js:332:34)
+    at CordisRunOrchestrator.drive (/home/prog7/home/dev/contrib/forks/deepseek-harness/packages/extensions/cordis-client-runner/src/client/orchestrator.ts:346:36)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at /home/prog7/home/dev/contrib/forks/deepseek-harness/packages/extensions/cordis-client-runner/tests/orchestrator.client.spec.ts:398:5
+    at file:///home/prog7/home/dev/contrib/forks/deepseek-harness/node_modules/.pnpm/@vitest+runner@4.1.11/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:20
+
+stderr | packages/extensions/cordis-client-runner/tests/orchestrator.client.spec.ts > startUserRun > records a load failure, stringifying a non-Error rejection
+[cordis-client-runner] Client activation dyn-1/pkg-1 (run-1) failed: plain rejection
+
+ ✓ |thread-safe| packages/extensions/cordis-client-runner/tests/orchestrator.client.spec.ts (30 tests) 50ms
+ ✓ |thread-safe| packages/client/ui-sidebar/tests/sidebar-styles.client.spec.ts (13 tests) 265ms
+ ✓ |thread-safe| packages/client/ui-theme/tests/corner-shape-styles.client.spec.ts (4 tests) 140ms
+ ✓ |thread-safe| packages/client/ui-conversation/tests/user-text-scheduling.client.spec.ts (27 tests) 205ms
+ ✓ |thread-safe| packages/client/ui-theme/tests/focus-ring-styles.client.spec.ts (4 tests) 102ms
+ ✓ |thread-safe| packages/client/ui-mermaid/tests/svg.client.spec.ts (5 tests) 186ms
+ ✓ |thread-safe| packages/client/ui-conversation/tests/reference-activation.client.spec.ts (2 tests) 200ms
+ ✓ |thread-safe| packages/client/ui-sidebar-terminal/tests/apply.client.spec.ts (6 tests) 161ms
+ ✓ |thread-safe| packages/client/ui-chat/tests/chat-node-source.client.spec.ts (2 tests) 133ms
+ ✓ |thread-safe| packages/extensions/cordis-client-runner/tests/plugin.client.spec.ts (15 tests) 136ms
+ ✓ |thread-safe| packages/client/ui-conversation/tests/conversation-registry.client.spec.ts (23 tests) 153ms
+ ✓ |thread-safe| packages/client/ui-sidebar-documentpreview/tests/face.client.spec.ts (36 tests) 168ms
+ ✓ |thread-safe| packages/client/connection/tests/web-authorization.host.spec.ts (3 tests) 143ms
+ ✓ |thread-safe| packages/client/shortcuts/tests/native.client.spec.ts (6 tests) 245ms
+ ✓ |thread-safe| packages/client/ui-chat/tests/fence-layers.client.spec.tsx (3 tests) 117ms
+ ✓ |thread-safe| packages/client/ui-chat/tests/tool-preparation.client.spec.ts (17 tests) 135ms
+ ✓ |thread-safe| packages/client/ui-conversation/tests/selection-survival.client.spec.tsx (3 tests) 126ms
+ ✓ |thread-safe| packages/client/ui-conversation/tests/async-insertion.client.spec.ts (2 tests) 92ms
+ ✓ |thread-safe| packages/client/ui-theme/tests/radius-styles.client.spec.ts (2 tests) 188ms
+ ✓ |thread-safe| packages/client/ui-chat/tests/final-answer-card.client.spec.tsx (6 tests) 176ms
+ ✓ |thread-safe| packages/client/ui-sidebar-documentpreview/tests/html-pack.client.spec.ts (9 tests) 144ms
+ ✓ |thread-safe| packages/client/ui-sidebar-documentpreview/tests/code-registration.client.spec.tsx (5 tests) 168ms
+ ✓ |thread-safe| packages/client/ui-sidebar-documentpreview/tests/html-bootstrap.client.spec.ts (4 tests) 252ms
+ ✓ |thread-safe| packages/client/connection/tests/authentication.host.spec.ts (13 tests) 174ms
+ ✓ |thread-safe| packages/client/ui-sidebar-documentpreview/tests/basic-html.client.spec.ts (3 tests) 222ms
+ ✓ |thread-safe| packages/client/ui-conversation/tests/reference-insertion.client.spec.ts (3 tests) 126ms
+ ✓ |thread-safe| packages/client/ui-sidebar-documentpreview/tests/excel-formats.client.spec.ts (17 tests) 185ms
+ ✓ |thread-safe| packages/client/ui-conversation/tests/user-text-registry.client.spec.ts (30 tests) 98ms
+ ✓ |thread-safe| packages/client/ui-conversation/tests/user-text-whitespace.client.spec.ts (19 tests) 113ms
+ ✓ |thread-safe| packages/client/connection/tests/fetch-routes.host.spec.ts (5 tests) 182ms
+ ✓ |thread-safe| packages/client/shortcuts/tests/fixed-input.client.spec.ts (7 tests) 108ms
+ ✓ |thread-safe| packages/client/ui-chat/tests/process-groups.client.spec.ts (52 tests) 77ms
+ ✓ |thread-safe| packages/client/ui-conversation/tests/conversation-assembler.client.spec.ts (49 tests) 173ms
+ ✓ |thread-safe| packages/client/ui-sidebar-right/tests/tab-info.client.spec.tsx (5 tests) 95ms
+ ✓ |thread-safe| packages/client/ui-sidebar-right/tests/open-destination.client.spec.ts (13 tests) 103ms
+ ✓ |thread-safe| packages/client/ui-chat/tests/coverage-tails.client.spec.tsx (3 tests) 192ms
+ ✓ |thread-safe| packages/client/ui-sidebar-documentpreview/tests/pdf-document.client.spec.ts (5 tests) 81ms
+ ✓ |thread-safe| packages/client/ui-chat/tests/config.host.spec.ts (5 tests) 83ms
+ ✓ |thread-safe| packages/client/ui-chat/tests/running-whale-tail.client.spec.tsx (2 tests) 82ms
+ ✓ |thread-safe| packages/client/connection/tests/generation.client.spec.ts (1 test) 70ms
+ ✓ |thread-safe| packages/client/ui-sidebar-browser/tests/electron-frame.client.spec.ts (1 test) 76ms
+ ✓ |thread-safe| packages/client/shortcuts/tests/storage.client.spec.ts (2 tests) 87ms
+ ✓ |thread-safe| packages/client/ui-sidebar-right/tests/stores.client.spec.ts (25 tests) 109ms
+stderr | packages/client/ui-sidebar-right/tests/session-views.client.spec.ts > retires only unselected Views without retained bodies and rejects released reference identities
+Sidebar Session opening failed: Error: Session reference "a" is released
+    at TestSessionReference.release (/home/prog7/home/dev/contrib/forks/deepseek-harness/packages/test-support/client-runtime/src/sessions.ts:280:20)
+    at TestSessionReference.release (file:///home/prog7/home/dev/contrib/forks/deepseek-harness/node_modules/.pnpm/@vitest+spy@4.1.11/node_modules/@vitest/spy/dist/index.js:332:34)
+    at SidebarSessionView.dispose (/home/prog7/home/dev/contrib/forks/deepseek-harness/packages/client/ui-sidebar-right/src/client/session-view.ts:89:20)
+    at /home/prog7/home/dev/contrib/forks/deepseek-harness/packages/client/ui-sidebar-right/src/client/session-view.ts:50:51
+    at /home/prog7/home/dev/contrib/forks/deepseek-harness/packages/client/ui-sidebar-right/tests/session-views.client.spec.ts:79:3
+    at file:///home/prog7/home/dev/contrib/forks/deepseek-harness/node_modules/.pnpm/@vitest+runner@4.1.11/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:20
+Sidebar Session opening failed: Error: Session reference "b" is released
+    at TestSessionReference.release (/home/prog7/home/dev/contrib/forks/deepseek-harness/packages/test-support/client-runtime/src/sessions.ts:280:20)
+    at SidebarSessionView.dispose (/home/prog7/home/dev/contrib/forks/deepseek-harness/packages/client/ui-sidebar-right/src/client/session-view.ts:89:20)
+    at SidebarSessionView.retire (/home/prog7/home/dev/contrib/forks/deepseek-harness/packages/client/ui-sidebar-right/src/client/session-view.ts:80:33)
+    at SidebarSessionViews.prune (/home/prog7/home/dev/contrib/forks/deepseek-harness/packages/client/ui-sidebar-right/src/client/session-views.ts:72:10)
+    at SidebarSessionViews.select (/home/prog7/home/dev/contrib/forks/deepseek-harness/packages/client/ui-sidebar-right/src/client/session-views.ts:41:50)
+    at /home/prog7/home/dev/contrib/forks/deepseek-harness/packages/client/ui-sidebar-right/tests/session-views.client.spec.ts:82:9
+    at file:///home/prog7/home/dev/contrib/forks/deepseek-harness/node_modules/.pnpm/@vitest+runner@4.1.11/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:20
+
+ ✓ |thread-safe| packages/client/ui-sidebar-right/tests/session-views.client.spec.ts (3 tests) 112ms
+ ✓ |thread-safe| packages/client/ui-sidebar-files/tests/apply.client.spec.ts (9 tests) 96ms
+ ✓ |thread-safe| packages/client/shortcuts/tests/dom.client.spec.ts (14 tests) 136ms
+ ✓ |thread-safe| packages/client/ui-conversation/tests/file-intake.client.spec.ts (7 tests) 87ms
+ ✓ |thread-safe| packages/client/ui-theme/tests/client-styles.client.spec.ts (11 tests) 92ms
+ ✓ |thread-safe| packages/extensions/cordis-client-runner/tests/guard.client.spec.ts (18 tests) 73ms
+ ✓ |thread-safe| packages/client/ui-conversation/tests/reference-chip.client.spec.tsx (3 tests) 87ms
+ ✓ |thread-safe| packages/client/ui-deliverables/tests/present-open.client.spec.ts (24 tests) 85ms
+ ✓ |thread-safe| packages/client/ui-sidebar-documentpreview/tests/definition.client.spec.ts (33 tests) 81ms
+ ✓ |thread-safe| packages/client/ui-conversation/tests/historical-images.client.spec.ts (4 tests) 102ms
+ ✓ |thread-safe| packages/client/ui-sidebar-right/tests/tab-registry.client.spec.ts (28 tests) 76ms
+ ✓ |thread-safe| packages/client/ui-theme/tests/config.host.spec.ts (4 tests) 69ms
+ ✓ |thread-safe| packages/client/ui-chat/tests/gate-branch-tails.client.spec.tsx (3 tests) 98ms
+ ✓ |thread-safe| packages/extensions/cordis-client-runner/tests/evaluator.client.spec.ts (16 tests) 54ms
+ ✓ |thread-safe| packages/client/ui-sidebar-files/tests/face.client.spec.ts (32 tests) 91ms
+ ✓ |thread-safe| packages/client/ui-subagent/tests/sidebar-chat.client.spec.tsx (17 tests) 104ms
+ ✓ |thread-safe| packages/client/ui-chat/tests/assistant-markdown-path-images.client.spec.tsx (8 tests) 97ms
+ ✓ |thread-safe| packages/client/ui-mermaid/tests/mermaid-entry.client.spec.ts (3 tests) 49ms
+ ✓ |thread-safe| packages/client/ui-sidebar-right/tests/persistence.client.spec.ts (3 tests) 84ms
+ ✓ |thread-safe| packages/client/ui-sidebar-right/tests/flash.client.spec.tsx (3 tests) 58ms
+ ✓ |thread-safe| packages/client/ui-conversation/tests/config.host.spec.ts (2 tests) 83ms
+ ✓ |thread-safe| packages/client/ui-sidebar-documentpreview/tests/image-pan.client.spec.ts (7 tests) 58ms
+ ✓ |thread-safe| packages/client/ui-chat/tests/chat-history-intent.client.spec.ts (14 tests) 57ms
+ ✓ |thread-safe| packages/client/ui-sidebar/tests/apply.client.spec.tsx (7 tests) 100ms
+ ✓ |thread-safe| packages/client/ui-conversation/tests/lexical-editor-core.client.spec.tsx (28 tests) 80ms
+ ✓ |thread-safe| packages/client/ui-sidebar-files/tests/definition.client.spec.ts (3 tests) 53ms
+ ✓ |thread-safe| packages/client/ui-conversation/tests/conversation-routing.client.spec.ts (17 tests) 70ms
+ ✓ |thread-safe| packages/client/ui-chat/tests/turn-process-tail.client.spec.ts (3 tests) 62ms
+ ✓ |thread-safe| packages/client/ui-sidebar-files/tests/files-title.client.spec.tsx (1 test) 69ms
+ ✓ |thread-safe| packages/client/ui-sidebar-documentpreview/tests/text-title.client.spec.tsx (2 tests) 62ms
+ ✓ |thread-safe| packages/client/ui-sidebar-files/tests/search-face.client.spec.ts (10 tests) 75ms
+ ✓ |thread-safe| packages/client/ui-conversation/tests/safari.client.spec.ts (11 tests) 59ms
+ ✓ |thread-safe| packages/client/ui-chat/tests/presentation-policy.client.spec.tsx (7 tests) 44ms
+ ✓ |thread-safe| packages/client/ui-sidebar-documentpreview/tests/pdf-runtime.client.spec.ts (11 tests) 49ms
+ ✓ |thread-safe| packages/client/shortcuts/tests/desktop-chords.client.spec.ts (12 tests) 53ms
+ ✓ |thread-safe| packages/client/connection/tests/socket.client.spec.ts (4 tests) 36ms
+ ✓ |thread-safe| packages/client/ui-conversation/tests/user-text-reference-composition.client.spec.ts (8 tests) 45ms
+ ✓ |thread-safe| packages/client/ui-sidebar-right/tests/close-focus.client.spec.ts (5 tests) 44ms
+ ✓ |thread-safe| packages/extensions/cordis-client-runner/tests/api-catalog.client.spec.ts (4 tests) 28ms
+ ✓ |thread-safe| packages/client/ui-chat/tests/turn-tail-spacing.client.spec.ts (8 tests) 36ms
+ ✓ |thread-safe| packages/client/connection/tests/api-request-trust.host.spec.ts (13 tests) 58ms
+ ✓ |thread-safe| packages/client/ui-conversation/tests/conversation-groups.client.spec.ts (12 tests) 44ms
+ ✓ |thread-safe| packages/client/ui-theme/tests/boot-theme.client.spec.ts (8 tests) 43ms
+ ✓ |thread-safe| packages/client/ui-sidebar-browser/tests/browser-title.client.spec.tsx (1 test) 50ms
+ ✓ |thread-safe| packages/client/ui-sidebar-right/tests/tab-domain.client.spec.ts (13 tests) 36ms
+ ✓ |thread-safe| packages/client/ui-sidebar-files/tests/store.client.spec.ts (14 tests) 35ms
+ ✓ |thread-safe| packages/client/ui-sidebar-files/tests/search-preferences.client.spec.ts (17 tests) 61ms
+ ✓ |thread-safe| packages/client/shortcuts/tests/registry.client.spec.ts (19 tests) 75ms
+ ✓ |thread-safe| packages/client/ui-conversation/tests/conversation-store.client.spec.ts (22 tests) 41ms
+ ✓ |thread-safe| packages/client/ui-sidebar-documentpreview/tests/excel-parse.client.spec.ts (20 tests) 50ms
+ ✓ |thread-safe| packages/client/ui-chat/tests/approval-command.client.spec.tsx (4 tests) 48ms
+ ✓ |thread-safe| packages/client/shortcuts/tests/persistence.client.spec.ts (10 tests) 28ms
+ ✓ |thread-safe| packages/client/ui-sidebar-documentpreview/tests/pdf-text.client.spec.ts (3 tests) 45ms
+ ✓ |thread-safe| packages/client/ui-sidebar-documentpreview/tests/config.host.spec.ts (2 tests) 21ms
+ ✓ |thread-safe| packages/client/ui-settings-models/tests/welcome-store.client.spec.ts (8 tests) 37ms
+ ✓ |thread-safe| packages/client/ui-sidebar-files/tests/directory-node.client.spec.ts (15 tests) 40ms
+ ✓ |thread-safe| packages/client/ui-conversation/tests/views-type-chain.client.spec.tsx (2 tests) 33ms
+ ✓ |thread-safe| packages/client/shortcuts/tests/configuration.client.spec.ts (27 tests) 38ms
+ ✓ |thread-safe| packages/client/ui-sidebar-files/tests/search-rules.client.spec.ts (96 tests) 35ms
+ ✓ |thread-safe| packages/client/ui-theme/tests/illustration-colors.client.spec.ts (18 tests) 42ms
+ ✓ |thread-safe| packages/extensions/cordis-client-runner/tests/providers.client.spec.ts (2 tests) 24ms
+ ✓ |thread-safe| packages/client/ui-sidebar-right/tests/tab-menu-content.client.spec.tsx (1 test) 71ms
+ ✓ |thread-safe| packages/client/ui-conversation/tests/submit-machine.client.spec.ts (48 tests) 33ms
+ ✓ |thread-safe| packages/client/ui-conversation/tests/interaction-registry.client.spec.ts (3 tests) 24ms
+ ✓ |thread-safe| packages/client/ui-sidebar-documentpreview/tests/image-registration.client.spec.ts (2 tests) 29ms
+ ✓ |thread-safe| packages/client/ui-settings-models/tests/store.client.spec.ts (29 tests) 68ms
+ ✓ |thread-safe| packages/client/ui-sidebar-files/tests/watch.client.spec.ts (6 tests) 23ms
+ ✓ |thread-safe| packages/client/ui-sidebar-terminal/tests/terminal-theme.client.spec.ts (20 tests) 24ms
+ ✓ |thread-safe| packages/client/ui-sidebar-right/tests/tab-inventory.client.spec.ts (5 tests) 31ms
+ ✓ |thread-safe| packages/client/ui-conversation/tests/conversation-group-store.client.spec.ts (19 tests) 28ms
+ ✓ |thread-safe| packages/client/ui-chat/tests/scroll-follow.client.spec.ts (14 tests) 24ms
+ ✓ |thread-safe| packages/client/ui-conversation/tests/stop-sequence.client.spec.ts (9 tests) 27ms
+ ✓ |thread-safe| packages/client/ui-sidebar-documentpreview/tests/document-registry.client.spec.ts (7 tests) 15ms
+ ✓ |thread-safe| packages/client/ui-sidebar-documentpreview/tests/html-apply.client.spec.ts (2 tests) 25ms
+ ✓ |thread-safe| packages/client/connection/tests/rpc-schema.host.spec.ts (4 tests) 23ms
+ ✓ |thread-safe| packages/client/ui-sidebar-documentpreview/tests/html-read-relative.client.spec.ts (7 tests) 28ms
+ ✓ |thread-safe| packages/client/ui-sidebar-documentpreview/tests/excel-registration.client.spec.ts (1 test) 18ms
+ ✓ |thread-safe| packages/client/ui-conversation/tests/quote-user-text.client.spec.tsx (3 tests) 18ms
+ ✓ |thread-safe| packages/client/ui-conversation/tests/composer-seat-styles.client.spec.ts (6 tests) 17ms
+ ✓ |thread-safe| packages/client/shortcuts/tests/config.host.spec.ts (2 tests) 15ms
+ ✓ |thread-safe| packages/client/ui-sidebar-terminal/tests/bundle-split.client.spec.ts (1 test) 19ms
+ ✓ |thread-safe| packages/client/ui-chat/tests/chat-font-axis-styles.client.spec.ts (13 tests) 20ms
+ ✓ |thread-safe| packages/client/ui-sidebar-documentpreview/tests/markdown-path-images.client.spec.ts (28 tests) 17ms
+ ✓ |thread-safe| packages/client/ui-sidebar-documentpreview/tests/store.client.spec.ts (8 tests) 22ms
+ ✓ |thread-safe| packages/client/ui-sidebar-files/tests/workspace-tree.client.spec.ts (10 tests) 13ms
+ ✓ |thread-safe| packages/client/ui-chat/tests/chat-store.client.spec.ts (4 tests) 14ms
+ ✓ |thread-safe| packages/client/ui-chat/tests/transcript-view-policy.client.spec.ts (16 tests) 26ms
+ ✓ |thread-safe| packages/client/ui-theme/tests/settings-store.client.spec.ts (5 tests) 11ms
+ ✓ |thread-safe| packages/client/ui-conversation/tests/system-prompt.client.spec.ts (7 tests) 13ms
+ ✓ |thread-safe| packages/client/ui-sidebar-browser/tests/browser-navigation.client.spec.ts (3 tests) 18ms
+ ✓ |thread-safe| packages/client/ui-deliverables/tests/changes-diff.client.spec.ts (1 test) 19ms
+ ✓ |thread-safe| packages/client/ui-sidebar/tests/panel-pins.client.spec.ts (4 tests) 28ms
+ ✓ |thread-safe| packages/client/ui-chat/tests/reasoning-text.client.spec.ts (5 tests) 15ms
+ ✓ |thread-safe| packages/client/connection/tests/recovery-config.client.spec.ts (10 tests) 17ms
+ ✓ |thread-safe| packages/client/ui-chat/tests/conversation.client.spec.ts (4 tests) 27ms
+ ✓ |thread-safe| packages/client/ui-account-notifications/tests/config.client.spec.ts (2 tests) 43ms
+ ✓ |thread-safe| packages/client/ui-sidebar-documentpreview/tests/pdf-assets.client.spec.ts (5 tests) 39ms
+ ✓ |thread-safe| packages/client/ui-sidebar-documentpreview/tests/excel-readonly-panning.client.spec.ts (2 tests) 10ms
+ ✓ |thread-safe| packages/client/ui-sidebar-documentpreview/tests/resource-group.client.spec.ts (5 tests) 20ms
+ ✓ |thread-safe| packages/client/ui-sidebar-documentpreview/tests/pdf-store.client.spec.ts (2 tests) 11ms
+ ✓ |thread-safe| packages/client/ui-sidebar-browser/tests/workspace.client.spec.ts (3 tests) 15ms
+ ✓ |thread-safe| packages/client/ui-sidebar-browser/tests/browser-frame.client.spec.ts (1 test) 28ms
+ ✓ |thread-safe| packages/client/ui-sidebar-right/tests/guide-pins.client.spec.ts (5 tests) 25ms
+ ✓ |thread-safe| packages/client/ui-conversation/tests/request-inspection.client.spec.ts (7 tests) 19ms
+ ✓ |thread-safe| packages/client/ui-sidebar-documentpreview/tests/rpc.client.spec.ts (6 tests) 16ms
+ ✓ |thread-safe| packages/client/ui-conversation/tests/submission-policy.client.spec.ts (5 tests) 20ms
+ ✓ |thread-safe| packages/client/ui-chat/tests/chat-visibility.client.spec.ts (17 tests) 13ms
+ ✓ |thread-safe| packages/client/ui-settings-models/tests/styles.client.spec.ts (5 tests) 11ms
+ ✓ |thread-safe| packages/client/ui-mermaid/tests/fit.client.spec.ts (7 tests) 10ms
+ ✓ |thread-safe| packages/client/ui-chat/tests/chat-group-container-styles.client.spec.ts (4 tests) 11ms
+ ✓ |thread-safe| packages/client/ui-conversation/tests/view-pins.client.spec.ts (4 tests) 11ms
+ ✓ |thread-safe| packages/client/ui-chat/tests/group-tree-segments.client.spec.ts (6 tests) 21ms
+ ✓ |thread-safe| packages/client/ui-sidebar-files/tests/search-tree.client.spec.ts (10 tests) 16ms
+ ✓ |thread-safe| packages/client/ui-chat/tests/skill-name-projector.client.spec.ts (5 tests) 11ms
+ ✓ |thread-safe| packages/client/ui-chat/tests/event-projection.client.spec.ts (10 tests) 15ms
+ ✓ |thread-safe| packages/client/ui-chat/tests/sticky-header-styles.client.spec.ts (4 tests) 9ms
+ ✓ |thread-safe| packages/client/ui-chat/tests/tool-call-tree.client.spec.ts (4 tests) 32ms
+ ✓ |thread-safe| packages/client/connection/tests/api-helpers.client.spec.ts (2 tests) 9ms
+ ✓ |thread-safe| packages/client/ui-conversation/tests/width-handle-styles.client.spec.ts (3 tests) 10ms
+ ✓ |thread-safe| packages/client/ui-sidebar-browser/tests/store.client.spec.ts (1 test) 11ms
+ ✓ |thread-safe| packages/client/connection/tests/loopback-hostname.client.spec.ts (2 tests) 6ms
+ ✓ |thread-safe| packages/client/ui-sidebar-documentpreview/tests/lines.client.spec.ts (4 tests) 9ms
+ ✓ |thread-safe| packages/client/ui-chat/tests/turn-metrics.client.spec.ts (6 tests) 9ms
+ ✓ |thread-safe| packages/client/ui-sidebar-documentpreview/tests/failure-line.client.spec.ts (6 tests) 9ms
+ ✓ |thread-safe| packages/client/ui-settings-models/tests/readiness.client.spec.ts (7 tests) 11ms
+ ✓ |thread-safe| packages/client/ui-sidebar-browser/tests/url.client.spec.ts (3 tests) 22ms
+ ✓ |thread-safe| packages/client/ui-conversation/tests/composer-blocks.client.spec.ts (1 test) 8ms
+ ✓ |thread-safe| packages/client/ui-chat/tests/aside-styles.client.spec.ts (2 tests) 9ms
+ ✓ |thread-safe| packages/client/ui-theme/tests/stylesheet-scan.client.spec.ts (1 test) 8ms
+ ✓ |thread-safe| packages/client/ui-conversation/tests/view-selection.client.spec.ts (2 tests) 6ms
+ ✓ |thread-safe| packages/client/ui-sidebar-documentpreview/tests/zoom-store.client.spec.ts (1 test) 10ms
+ ✓ |thread-safe| packages/client/ui-theme/tests/brand-font.client.spec.ts (1 test) 8ms
+ ✓ |thread-safe| packages/client/ui-deliverables/tests/turn-tail-spacing.client.spec.ts (1 test) 11ms
+ ✓ |thread-safe| packages/client/ui-mermaid/tests/config.client.spec.ts (5 tests) 12ms
+ ✓ |thread-safe| packages/client/ui-sidebar-documentpreview/tests/document-unviewable.client.spec.ts (3 tests) 18ms
+ ✓ |thread-safe| packages/client/ui-conversation/tests/header-styles.client.spec.ts (4 tests) 9ms
+ ✓ |thread-safe| packages/client/ui-sidebar-right/tests/sidebar-right-styles.client.spec.ts (3 tests) 16ms
+ ✓ |thread-safe| packages/client/ui-chat/tests/final-answer-card-material.client.spec.ts (2 tests) 11ms
+ ✓ |thread-safe| packages/client/ui-sidebar-browser/tests/apply.host.spec.ts (1 test) 6ms
+ ✓ |thread-safe| packages/client/ui-chat/tests/chat-scroll-overflow.client.spec.ts (1 test) 9ms
+ ✓ |thread-safe| packages/client/ui-chat/tests/turn-rail-items.client.spec.ts (5 tests) 9ms
+ ✓ |thread-safe| packages/client/ui-chat/tests/views-type-chain.client.spec.tsx (1 test) 4ms
+ ✓ |thread-safe| packages/client/ui-chat/tests/performance-usage.client.spec.ts (3 tests) 12ms
+ ✓ |thread-safe| packages/client/ui-mermaid/tests/mermaid-viewer-styles.client.spec.ts (2 tests) 6ms
+ ✓ |thread-safe| packages/client/ui-conversation/tests/image-labels.client.spec.ts (3 tests) 5ms
+
+ Test Files  350 passed (350)
+      Tests  5138 passed (5138)
+   Start at  16:24:06
+   Duration  117.32s (transform 29.91s, setup 10.57s, import 300.08s, tests 146.68s, environment 170.06s)

@@ -1,6 +1,6 @@
 # Гайды rc.4, не касающиеся форка (2026-11-19)
 
-$ grep -rn "ForgeFailure[\\x27code\\x27]|/plugins/events|EVENTS_ENDPOINT" ~/home/dev/dsh-plugins packages/fork
+$ grep -rEn "ForgeFailure\[.code.\]|/plugins/events|EVENTS_ENDPOINT" /home/prog7/home/dev/dsh-plugins packages/fork
 matches: 0
 
 # Выбор провайдера поиска в апстриме

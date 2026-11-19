@@ -43,3 +43,10 @@ exit=0
     fetchProvider: http
 
 предупреждений patch:/WEB_PROVIDER_AMBIGUOUS/invalid config: 0
+
+# Baseline без пина (тот же профиль, блок web снят):
+$ DSH_HOME=/home/prog7/.dsh-probe pnpm dsh --profile web --dump-config-schema
+exit=1
+invalid config: 0
+unrecognized Loader tree carrier: 5
+Вывод: exit 1 и те же 5 carrier-ошибок были до пина; пин не добавляет ни carrier, ни config-ошибку.

@@ -1,0 +1,194 @@
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+
+ RUN  v4.1.11 /home/prog7/home/dev/contrib/forks/deepseek-harness
+
+ ✓ |thread-safe| packages/mcp/mcp-client/tests/reconnect.spec.ts (46 tests) 1916ms
+ ✓ |thread-safe| packages/session/session-persistence-sqlite/tests/normal-fork-concurrency-validation.spec.ts (28 tests) 926ms
+ ✓ |thread-safe| packages/mcp/mcp-client/tests/oauth-credentials.spec.ts (20 tests) 2874ms
+   ✓ rejects incompatible durable grants and changed endpoint, client, or scope without sending requests  392ms
+ ✓ |thread-safe| packages/mcp/mcp-client/tests/status.spec.ts (20 tests) 712ms
+ ✓ |thread-safe| packages/session/session-persistence-sqlite/tests/frames.spec.ts (21 tests) 705ms
+ ✓ |thread-safe| packages/mcp/mcp-client/tests/apply.spec.ts (26 tests) 797ms
+ ✓ |thread-safe| packages/mcp/mcp-client/tests/mcp-client.spec.ts (62 tests) 614ms
+ ✓ |thread-safe| packages/mcp/mcp-client/tests/oauth.spec.ts (29 tests) 5777ms
+     ✓ selects compatible registrations when configured scope changes (clientId=undefined)  332ms
+     ✓ selects compatible registrations when configured scope changes (clientId=static-client)  337ms
+     ✓ bounds retries after cancellation times out behind another grant refresh, then recovers after cleanup  362ms
+     ✓ keeps the old grant on cancellation and failure, then replaces it only after a successful retry  363ms
+     ✓ re-registers an invalid dynamic client on the next explicit attempt (callback)  358ms
+     ✓ re-registers an invalid dynamic client on the next explicit attempt (token)  361ms
+     ✓ keeps passive probes noninteractive and connects with a committed grant  556ms
+ ✓ |thread-safe| packages/session/session-persistence-sqlite/tests/group-commit.spec.ts (11 tests) 604ms
+ ✓ |thread-safe| packages/session/session-persistence-sqlite/tests/storage-failures.spec.ts (74 tests) 1846ms
+ ✓ |thread-safe| packages/session/session-persistence-sqlite/tests/creation-identity.spec.ts (8 tests) 353ms
+ ✓ |thread-safe| packages/session/session-persistence-sqlite/tests/legacy-import.spec.ts (9 tests) 673ms
+ ✓ |thread-safe| packages/session/session-persistence-sqlite/tests/persistence.spec.ts (24 tests) 813ms
+ ✓ |thread-safe| packages/session/session-persistence-sqlite/tests/structure.spec.ts (8 tests) 608ms
+ ✓ |thread-safe| packages/session/session-persistence-sqlite/tests/publication.spec.ts (4 tests) 512ms
+ ✓ |thread-safe| packages/mcp/mcp-client/tests/host.spec.ts (7 tests) 572ms
+ ✓ |thread-safe| packages/mcp/mcp-client/tests/negotiation-lifecycle.spec.ts (5 tests) 729ms
+     ✓ reaps the probe before starting the serving process  407ms
+ ✓ |thread-safe| packages/session/session-persistence-sqlite/tests/write-recovery.spec.ts (3 tests) 322ms
+ ✓ |thread-safe| packages/mcp/mcp-client/tests/oauth-adapter.spec.ts (4 tests) 351ms
+ ✓ |thread-safe| packages/session/session-persistence-sqlite/tests/routing.spec.ts (21 tests) 283ms
+ ✓ |thread-safe| packages/session/session-persistence-sqlite/tests/unknown-outcome.spec.ts (4 tests) 320ms
+ ✓ |thread-safe| packages/session/session-persistence-sqlite/tests/write-deadline.spec.ts (4 tests) 116ms
+ ✓ |thread-safe| packages/mcp/mcp-client/tests/tool-loading.spec.ts (11 tests) 384ms
+ ✓ |thread-safe| packages/session/session-persistence-sqlite/tests/win32.spec.ts (11 tests) 91ms
+ ✓ |thread-safe| packages/session/session-persistence-sqlite/tests/open-lifecycle.spec.ts (3 tests) 257ms
+ ✓ |thread-safe| packages/mcp/mcp-client/tests/protocol.spec.ts (6 tests) 312ms
+ ✓ |thread-safe| packages/session/session-persistence-sqlite/tests/delete.spec.ts (6 tests) 180ms
+ ✓ |thread-safe| packages/session/session-persistence-sqlite/tests/recovery-regressions.spec.ts (10 tests) 163ms
+ ✓ |thread-safe| packages/mcp/mcp-client/tests/egress.spec.ts (1 test) 236ms
+ ✓ |thread-safe| packages/session/session-persistence-sqlite/tests/initialization.spec.ts (6 tests) 212ms
+ ✓ |thread-safe| packages/session/session-persistence-sqlite/tests/listing.spec.ts (4 tests) 327ms
+ ✓ |thread-safe| packages/session/session-persistence-sqlite/tests/migration.spec.ts (12 tests) 107ms
+ ✓ |thread-safe| packages/mcp/mcp-client/tests/generation.spec.ts (6 tests) 164ms
+ ✓ |thread-safe| packages/mcp/mcp-client/tests/credentials.spec.ts (6 tests) 146ms
+ ✓ |thread-safe| packages/session/session-persistence-sqlite/tests/relationships.spec.ts (3 tests) 87ms
+ ✓ |thread-safe| packages/fork/web-search-zai/tests/zai.spec.ts (36 tests) 267ms
+ ✓ |thread-safe| packages/session/session-persistence-sqlite/tests/list-concurrency.spec.ts (1 test) 109ms
+ ✓ |thread-safe| packages/sandbox/sandbox-policy/tests/policy.spec.ts (30 tests) 160ms
+ ✓ |thread-safe| packages/sandbox/sandbox-policy/tests/workspace-root.spec.ts (2 tests) 277ms
+ ✓ |thread-safe| packages/mcp/mcp-client/tests/server-context.spec.ts (2 tests) 84ms
+ ✓ |thread-safe| packages/mcp/mcp-client/tests/tool-definition.spec.ts (6 tests) 51ms
+ ✓ |thread-safe| packages/mcp/mcp-client/tests/probe.spec.ts (16 tests) 130ms
+ ✓ |thread-safe| packages/experimental/worktree/tests/sandbox.spec.ts (7 tests) 31597ms
+     ✓ refuses creation under read-only policy without changing the Session directory  2506ms
+     ✓ creates an unfiltered checkout in the default pool under the source workspace-write grant  3548ms
+     ✓ enters an existing worktree under read-only policy with confined read commands, and the boundary follows  1054ms
+     ✓ does not widen a linked-checkout grant to the shared Git administration directory  2923ms
+     ✓ creates and restores from a linked checkout once a registered grant covers its shared Git administration directory  9022ms
+     ✓ denies a commit inside the Session's worktree under workspace-write until a grant covers the repository's Git directory  4506ms
+     ✓ restores a removed worktree under the source checkout boundary while the Session root is the removed directory  8034ms
+ ✓ |thread-safe| packages/session/session-persistence-sqlite/tests/buffer.spec.ts (6 tests) 19ms
+ ✓ |thread-safe| packages/session/session-persistence-sqlite/tests/directory-durability.spec.ts (5 tests) 54ms
+ ✓ |thread-safe| packages/mcp/mcp-client/tests/diagnostic.spec.ts (14 tests) 14ms
+ ✓ |thread-safe| packages/session/session-persistence-sqlite/tests/codec.spec.ts (22 tests) 32ms
+ ✓ |thread-safe| packages/bundle/base/tests/base.spec.ts (2 tests) 133ms
+ ✓ |thread-safe| packages/sandbox/sandbox-policy/tests/admission.spec.ts (4 tests) 250ms
+ ✓ |thread-safe| packages/experimental/worktree/tests/process.spec.ts (1 test) 655ms
+     ✓ returns the early answer when stopping rejects the outcome of an unacknowledged launch  651ms
+ ✓ |thread-safe| packages/experimental/worktree/tests/settings.spec.ts (1 test) 117ms
+ ✓ |thread-safe| packages/session/session-persistence-sqlite/tests/lease.spec.ts (7 tests) 72ms
+ ✓ |thread-safe| packages/fork/web-search-zai/tests/mcp.spec.ts (5 tests) 260ms
+ ✓ |thread-safe| packages/session/session-persistence-sqlite/tests/paths.spec.ts (1 test) 8ms
+ ✓ |thread-safe| packages/mcp/mcp-client/tests/load-path.spec.ts (1 test) 8ms
+ ✓ |thread-safe| packages/experimental/worktree/tests/checkout-safety.spec.ts (13 tests) 46542ms
+     ✓ disables required clean and smudge filters named some.nested.driver without changing repository configuration  3790ms
+     ✓ disables required clean and smudge filters named x=y without changing repository configuration  3794ms
+     ✓ disables required clean and smudge filters named lfs without changing repository configuration  3627ms
+     ✓ disables a required process filter that makes ordinary checkout fail  4066ms
+     ✓ restores a removed checkout without running its required smudge filter  7989ms
+     ✓ retains stored binary content without running its decryption filter  3547ms
+     ✓ reports invalid destination-only configuration and retains the unpopulated checkout  3006ms
+     ✓ refuses truncated destination filter configuration before materializing files  3057ms
+     ✓ discovers filters selected only by the newly created branch  3356ms
+     ✓ ignores inherited repository, replacement-ref and command-config selectors  3867ms
+     ✓ uses the selected checkout attributes instead of an inherited attribute tree  3343ms
+     ✓ honors repository-local replacement refs while reporting the resolved object name  3036ms
+ ✓ |thread-safe| packages/experimental/worktree/tests/removal.spec.ts (20 tests) 70605ms
+     ✓ removes a clean checkout, preserves local commits and restores the retained branch  7657ms
+     ✓ retains modified files  3426ms
+     ✓ retains staged files  4479ms
+     ✓ retains untracked files  3814ms
+     ✓ removes a checkout whose only edits are to assume-unchanged files, which git status hides  3816ms
+     ✓ removes a checkout whose only edits are to skip-worktree files, which git status hides  3732ms
+     ✓ retains a checkout holding a submodule repository, which Git refuses to remove  3805ms
+     ✓ removes a checkout whose submodule was never initialized there, as Git does  3347ms
+     ✓ leaves a committed embedded repository to Git, which refuses the removal  4057ms
+     ✓ removes a checkout that holds only ignored files, as Git does without force  3429ms
+     ✓ retains a locked checkout  3017ms
+     ✓ retains a detached checkout  3223ms
+     ✓ retains a branch-mismatch checkout  2978ms
+     ✓ retains a outside-pool checkout  2307ms
+     ✓ retains a missing checkout  2054ms
+     ✓ retains a nested-repository checkout  2381ms
+     ✓ retains a checkout when the repository identity changes during inspection  2571ms
+     ✓ retains a checkout when the registration changes during inspection  2453ms
+     ✓ retains a checkout when the checked-out branch changes during inspection  2472ms
+     ✓ restores over the identity checks removal shares, rejecting a target outside the pool  5582ms
+ ✓ |thread-safe| packages/experimental/worktree/tests/archive.spec.ts (27 tests) 116264ms
+     ✓ removes the clean checkout the archived Session created and keeps its branch and commits  6464ms
+     ✓ removes a clean checkout whose file listing exceeds maxOutputBytes  6269ms
+     ✓ retains a checkout whose status output exceeds maxOutputBytes instead of failing  5963ms
+     ✓ removes a clean checkout when the worktree listing exceeds maxOutputBytes  6269ms
+     ✓ returns from admission before the inspection runs  6015ms
+     ✓ removes the checkout after the Session moved elsewhere, and the ordinary ensure contract holds afterwards  12892ms
+     ✓ retains an untracked file but not ignored files  7041ms
+     ✓ registers nothing for a Session that created no checkout or only inherited one  2822ms
+     ✓ retains a checkout while a fork or a directory borrower is unarchived, and does not reconsider when they archive  2361ms
+     ✓ treats a subagent child beneath the archived Session as archived  3619ms
+     ✓ retains a checkout for an unrelated subagent child that works inside it  2344ms
+     ✓ removes a persisted checkout without loading its Agent, reading cold Sessions from the projection cache when present  6833ms
+     ✓ retains a checkout while a live fork that moved elsewhere still carries its creation  2643ms
+     ✓ treats a cached cold Session that recorded no directory as working nowhere  4861ms
+     ✓ reads a cold Session from its log without the cache  2666ms
+     ✓ does not wait for the archived Session's own stopping work  4199ms
+     ✓ retains a checkout under its creator's read-only policy  2785ms
+     ✓ keeps the archive and reports a failed removal  2445ms
+     ✓ cancels an unadmitted removal on unarchive and waits for an admitted one  3882ms
+     ✓ holds directory entry into a checkout being removed and leaves other paths alone  4153ms
+     ✓ registers nothing for a cold Session without creations and ignores an unarchive without an attempt  2691ms
+     ✓ retains a checkout for a borrower that appeared between the eligible inspection and the locked recheck  2668ms
+     ✓ treats a subagent child whose parent is unknown to the corpus as unarchived  2532ms
+     ✓ skips a creation record whose payload fails validation  2325ms
+     ✓ keeps one entry per entered directory, skips an entry record whose payload fails validation, and reclaims only creations  2483ms
+     ✓ registers no attempt while retainOnArchive is set, and resumes once it is cleared  4418ms
+     ✓ withdraws listeners before draining, so disposal neither fails unrelated access nor serves a stale result  2617ms
+ ✓ |thread-safe| packages/experimental/worktree/tests/worktree.spec.ts (54 tests) 154955ms
+     ✓ pins HEAD, preserves source edits and index, enters the new branch, and ignores its new pool  3731ms
+     ✓ exits a nested worktree to the worktree it was created in, then to the source checkout, and refuses outside one  7242ms
+     ✓ exits a worktree from one of its subdirectories  3510ms
+     ✓ enters an existing worktree of the pool by name, records the entry, and exits to the checkout it entered from  1028ms
+     ✓ enters a worktree again after leaving it, reporting its creation on exit, and lets another Session enter it  7232ms
+     ✓ enters a detached worktree without a branch, and a nested worktree only from the checkout that holds it  9384ms
+     ✓ refuses a name outside the pool, an unregistered directory, and a link that leaves the pool, without moving  2350ms
+     ✓ rejects an exit cancelled before it starts, and every exit after service disposal, without changing the directory  3463ms
+     ✓ reports the prepare stage, then the checkout stage, before each begins  3777ms
+     ✓ uses current cwd for repository discovery and accepts an annotated local tag  3507ms
+     ✓ keeps existing pool files and honors configured location and generated-name prefix  3078ms
+     ✓ names a generated worktree after the UUID in the Session id  2975ms
+     ✓ creates from a linked checkout using its own commit and default pool  2822ms
+     ✓ refuses a regular file at the pool path during preflight without replacing it or creating a branch  1369ms
+     ✓ refuses a regular file at the pool path during allocation without replacing it or creating a branch  1391ms
+     ✓ keeps the resolved commit when HEAD advances before checkout allocation  2217ms
+     ✓ refuses missing partial-clone objects without fetching from the available local remote  2080ms
+     ✓ claims one checkout when concurrent callers choose the same new name  2755ms
+     ✓ leaves an existing pool without a gitignore unchanged  2555ms
+     ✓ refuses branch or destination reuse and invalid local revisions before changing cwd  3569ms
+     ✓ retains the checkout and branch if publishing the new cwd fails with an unclassified failure  2720ms
+     ✓ retains the checkout and branch if publishing the new cwd fails with a classified failure  2808ms
+     ✓ does not reset the dirty source when shared Git configuration points at it  2687ms
+     ✓ refuses truncated Git metadata before allocating a checkout  693ms
+     ✓ classifies a separate AbortError thrown after caller cancellation  2304ms
+     ✓ classifies a distinct failure thrown after caller cancellation  2383ms
+     ✓ retains a caller cancellation reason when allocation is cancelled before its child starts  1459ms
+     ✓ fetches only the chosen branch, without tags, then pins and checks out the fetched commit without an upstream  3102ms
+     ✓ fetches from the longest configured remote name that owns the branch  3004ms
+     ✓ refuses a base that is not a remote-tracking branch of a configured remote  1731ms
+     ✓ reports a failed fetch without creating a branch, a checkout, or the pool  1289ms
+     ✓ checks the branch out again at its latest commit after removing only its stale registration, without entering the checkout  8054ms
+     ✓ finds the stale registration when the worktree listing exceeds maxOutputBytes  5647ms
+     ✓ creates a deleted branch again at its base commit, without the commits it had gained  5505ms
+     ✓ refuses a directory that exists before running any command  2523ms
+     ✓ rejects an unavailable recorded base before allocating files or removing registrations  1206ms
+     ✓ retains cancellation reason Error: caller stopped when restoration is cancelled before its allocation starts  4292ms
+     ✓ retains cancellation reason caller stopped when restoration is cancelled before its allocation starts  4346ms
+     ✓ rejects invalid outside before mutating the repository  2248ms
+     ✓ rejects invalid traversal before mutating the repository  2193ms
+     ✓ rejects invalid branch before mutating the repository  2754ms
+     ✓ rejects invalid unsafe-branch before mutating the repository  2299ms
+     ✓ rejects invalid commit before mutating the repository  2469ms
+     ✓ rejects invalid root before mutating the repository  2422ms
+     ✓ rejects invalid nested-root before mutating the repository  3039ms
+     ✓ preserves a locked missing worktree registration  4124ms
+   ✓ rejects a restore path redirected outside the pool by a symlink  2998ms
+   ✓ does not remove a registration when its directory reappears during restoration validation  4220ms
+
+ Test Files  59 passed (59)
+      Tests  806 passed (806)
+   Start at  16:26:09
+   Duration  159.69s (transform 16.16s, setup 2.82s, import 42.06s, tests 447.75s, environment 13ms)

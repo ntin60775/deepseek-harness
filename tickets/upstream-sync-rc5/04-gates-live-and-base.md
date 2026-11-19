@@ -30,3 +30,35 @@
 - Копия профиля: `package.json`, `cordis.yml`, `cordis.patch.yml`, `pnpm-workspace.yaml`, `pnpm-lock.yaml`, `node_modules`; относительные симлинки `link:` ломаются при другой глубине `DSH_HOME`.
 - Сообщение `failed to load` клиентское и критерием старта не является; критерий — exit code и отсутствие двух строк про bundle и patch.
 - Отчёт доказательств — в этот файл; скриншоты — `tickets/upstream-sync-rc5/proofs/`.
+
+## Отчёт исполнения (2026-11-19)
+
+### Гейты лайт-контура
+
+- **Build.** `pnpm run build` — 10/10 гейтов зелёные в зелёном прогоне ритуала (сводка в [proofs/02-ritual.log](proofs/02-ritual.log)). Перепрогон на финальном HEAD оператор запретил («пересборку не делай, я сам запущу») — пробел назван, не выдан за прогон.
+- **Typecheck.** `pnpm run typecheck` — 5/5 зелёные на HEAD после мержа ([proofs/04-gates.log](proofs/04-gates.log)).
+- **Constraints.** `pnpm run constraints` — exit 0 ([proofs/04-gates.log](proofs/04-gates.log)); версия форк-пакета `ui-mermaid` выровнена на `0.2.2-rc.5`.
+- **Доки.** `pnpm run test:docs` — 21/21, `pnpm run doc-sync` — 43/43 ([proofs/04-gates.log](proofs/04-gates.log)).
+- **Снапшоты.** Node `v24.19.0`; `pnpm run test:snapshot` — 276 passed / 2 skipped, падений нет ([proofs/04-gates.log](proofs/04-gates.log)).
+- **Focused.** GUI-пакеты (`ui-chat`, `ui-conversation`, `ui-sidebar`, `ui-subagent`, `ui-mermaid`, `ui-theme`, `ui-sidebar-documentpreview`, `ui-deliverables`, `ui-account-notifications`, `connection`, `ui-settings-models`, `shortcuts`, `extensions/cordis-client-runner`) — 350 файлов / 5138 тестов зелёные; юнит-пакеты (`fork/web-search-zai`, `bundle/base`, `mcp-client`, `session-persistence-sqlite`, `sandbox-policy`, `worktree`) — 59 файлов / 806 тестов зелёные ([proofs/04-focused-gui.log](proofs/04-focused-gui.log), [proofs/04-focused-unit.log](proofs/04-focused-unit.log)); `pnpm run fork:invariants` — 27/27.
+- **Классификатор темы.** `node ~/home/dev/dsh-plugins/theme-omp/verify/classify.mjs --checkout $PWD --strict` — exit 0, `classify: OK` (254 элемента; два новых слота `forge.review.conversation` и `sidebar.panellist.trailing` классифицированы `inherits-dsh` в тикете 02).
+
+### Живая проба
+
+`DSH_HOME=/home/prog7/.dsh-probe pnpm dsh web --port 3081 --no-open` (Node 24): HTTP 200 по cookie, `401` без launch-токена, в логе старта нет `skipping profile bundle` и `patch: ... not found`, заголовок UI — `0.2.2-rc.5` ([proofs/04-probe.log](proofs/04-probe.log)). `:3080` не рестартился и не гасился; живой профиль запинен, HMR `patchReload: live`.
+
+Экраны прочитаны глазами (скриншоты в `proofs/`): шапка сеанса и тоггл панели сеанса (`04-probe-session-dark.png`, `04-probe-session-panel-dark.png`), композер (`04-probe-session-dark.png`), страница Plugins (`04-probe-plugins-dark.png`), Settings → Web search and fetch с выбранным DeepSeek Search API (`04-probe-settings-websearch-dark.png`), светлая схема (`04-probe-settings-general-light.png`), карточка `@local/dsh-omp-demo-panel` (`04-probe-omp-demo-panel-light.png`), страница ревью forge (`04-probe-forge-review-dark.png`) и карточка change request (`04-probe-forge-card-light.png`).
+
+**Пробелы пробы, названные явно.** В копии `DSH_HOME` нет credentials и сессий, поэтому законченной Conversation не создать: виджет темы в composer dock не материализуется, а `omp-demo-panel` открывается только на `data-content-phase="active"`. Экран `omp-demo-panel` проверен как карточка плагина; страница ревью forge открыта, но список пуст и карточка PR отдаёт «change request does not exist» — у пробы нет workspace и доступа к PR. Оба пробела — следствие изоляции пробы, а не мержа.
+
+### База и доки
+
+- `packages/fork/upstream-base.json` — `{ "tag": "dsh-v0.2.2-rc.5", "mergedAt": "2026-11-19" }`; запись сделана терминальной фазой ритуала в тикете 02, здесь проверена.
+- Обновлены [docs/ops/fork-upgrade.md](../../docs/ops/fork-upgrade.md), [docs/reference/fork-merge-ritual.md](../../docs/reference/fork-merge-ritual.md), [packages/fork/README.md](../../packages/fork/README.md), [.agents/notes/implemented/process/2026-09-08-fork-merge-ritual.md](../../.agents/notes/implemented/process/2026-09-08-fork-merge-ritual.md) и [docs/ops/continue.md](../../docs/ops/continue.md): диапазон от merge-base, персистентность базы, staged-пары, `FORK_SKIP_FULL_GUI`, новые фазы и состояние rc.5.
+- KB: `gitmark index` — 1641 файл / 26295 чанков; `gitmark lint --strict` — чисто; `gitmark map` — 1641 файл, 0 вне индекса.
+
+### Пробелы контура
+
+- Полный `test:gui` ритуалом не гонялся (`FORK_SKIP_FULL_GUI=1`); внеплановый полный прогон ревьюера на этом дереве — 14327 passed / 2 skipped, exit 0. Replay-лэйн `test:web` и unit-лэйн целиком не гонялись.
+- Пересборка на финальном HEAD не запускалась — по указанию оператора; build 10/10 зафиксирован в зелёном прогоне ритуала.
+- Push не делался (рамки спеки).

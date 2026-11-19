@@ -1,0 +1,31 @@
+# Гейты финального HEAD (2026-11-19)
+
+$ pnpm run typecheck
+exit=0
+run-gates: 5 passed, 0 failed, 0 skipped in 27.76s.
+
+$ pnpm run constraints
+exit=0 (версия ui-mermaid 0.2.2-rc.5 совпадает с корнем)
+
+$ pnpm run test:docs
+exit=0
+run-gates: 21 passed, 0 failed, 0 skipped in 123.86s.
+
+$ pnpm run doc-sync
+exit=0
+run-gates: 43 passed, 0 failed, 0 skipped in 91.39s.
+
+$ node -v
+v24.19.0
+
+$ pnpm run test:snapshot
+exit=0
+ Test Files  4 passed (4)
+      Tests  276 passed | 2 skipped (278)
+
+$ node ~/home/dev/dsh-plugins/theme-omp/verify/classify.mjs --checkout $PWD --strict
+exit=0
+classify: OK
+
+$ pnpm run fork:invariants
+27 passed (27)
