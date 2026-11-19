@@ -200,7 +200,8 @@ describe('CI worker allocation', () => {
       workers: 12,
       source: '12 local default worker(s) of 256 CPU(s)',
     })
-    expect(defaultConcurrency('ci-static', 60, 8, {}).workers).toBe(8)
+    // Halved gate budget: ci-static on 8 CPUs yields 4 workers.
+    expect(defaultConcurrency('ci-static', 60, 8, {}).workers).toBe(4)
   })
 
   it('halves the local coverage budget below the memory cap', () => {

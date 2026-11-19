@@ -7,7 +7,10 @@ import { defineConfig } from 'vitest/config'
 import { standardDecoratorPlugin, vitestExecArgv } from './vitest.shared.ts'
 import { COVERAGE_EXEMPT_ENV, coverageExemptHeavySuites } from './scripts/coverage-exempt.ts'
 import { COVERAGE_PARTITION_MODE_ENV, COVERAGE_TEST_TIMEOUT_ENV, coverageTestTimeoutOptions } from './scripts/coverage-partitions.ts'
-import { defaultTestParallelism } from './scripts/parallelism.ts'
+import { defaultTestParallelism, lowerLocalPriority } from './scripts/parallelism.ts'
+
+// Local Vitest runs yield CPU to interactive work; children inherit the priority. CI is a no-op.
+lowerLocalPriority(process.env)
 
 // Prints exact `path:line:col` records for every uncovered statement, branch
 // path, and function when a file misses the per-file 100% gate — the built-in

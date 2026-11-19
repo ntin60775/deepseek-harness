@@ -12,7 +12,7 @@ import { performance } from 'node:perf_hooks'
 import { CLIENT_BUILD_PROFILE_SELECTOR } from './client-build-environment.ts'
 import { COVERAGE_EXEMPT_ENV, coverageExemptHeavySuites } from './coverage-exempt.ts'
 import { COVERAGE_PARTITIONS_ENV, parseCoveragePartitionCount } from './coverage-partitions.ts'
-import { defaultParallelism, defaultTestParallelism, describeDefaultParallelism } from './parallelism.ts'
+import { defaultParallelism, defaultTestParallelism, describeDefaultParallelism, lowerLocalPriority } from './parallelism.ts'
 import { pnpmInvocation } from './pnpm-invocation.ts'
 
 /** A named aggregate exposed by the gate runner. */
@@ -109,6 +109,7 @@ if (import.meta.main) {
 }
 
 async function main(args: string[]): Promise<number> {
+  lowerLocalPriority(process.env)
   const mode = parseMode(args[0])
   const workerEnv = ciWorkerEnvironment(mode, process.env)
   Object.assign(process.env, workerEnv)
@@ -238,6 +239,8 @@ export function ciWorkerEnvironment(
   const setDefault = (name: string, value: number): void => {
     if (env[name] === undefined || env[name] === '') additions[name] = String(value)
   }
+  // Local ci-* rehearsals halve twice (budget, then shared): a quarter of the host CPUs for the
+  // overlapping readers is intentional; CI keeps the full runner budget.
   const shared = Math.max(1, Math.floor(budget / 2))
   setDefault('DSH_OXLINT_THREADS', shared)
   setDefault('DSH_PUBLINT_CONCURRENCY', shared)
