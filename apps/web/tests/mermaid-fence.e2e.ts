@@ -91,7 +91,7 @@ describe('web e2e: mermaid fence diagram card', () => {
       const vp = el.parentElement!.parentElement!
       vp.scrollLeft = vp.scrollWidth
       return { right: el.getBoundingClientRect().right, vpRight: vp.getBoundingClientRect().right }
-    }).then(end => expect(end.right).toBeCloseTo(end.vpRight, 0))
+    }).then((end) => { expect(end.right).toBeCloseTo(end.vpRight, 0) })
     await dialog.locator('[aria-label="Diagram scroll region"]').evaluate((el) => { el.scrollLeft = 0 })
     // The scroller is keyboard-reachable: Tab from the close control lands on it.
     await dialog.getByRole('button', { name: 'Close', exact: true }).focus()
@@ -136,7 +136,7 @@ describe('web e2e: mermaid fence diagram card', () => {
     expect(wideOverflow.scroll).toBeGreaterThan(wideOverflow.client)
     // The cached svg node survives resize: a mode switch rewrites attributes
     // only, it never swaps the rendered diagram.
-    await wide.locator('[role="img"] svg').evaluate(el => el.setAttribute('data-resize-probe', 'kept'))
+    await wide.locator('[role="img"] svg').evaluate((el) => { el.setAttribute('data-resize-probe', 'kept') })
     await page.setViewportSize({ width: 320, height: 1000 })
     await expect.poll(() => small.getAttribute('data-fit-mode')).toBe('natural')
     const narrowOverflow = await small.locator('[role="img"]').evaluate(el => ({ scroll: el.scrollWidth, client: el.clientWidth }))
