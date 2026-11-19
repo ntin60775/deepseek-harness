@@ -56,9 +56,9 @@ $ grep -c onWorkspaceSelected packages/client/ui-conversation/README.md
 == install ==
 == audit: fork surfaces vs upstream ==
 == fork upgrade audit ==
-диапазон: ca33fd6843b205e279c7ccb6cb73a472c78f5760..upstream/master
-база: ca33fd6843b205e279c7ccb6cb73a472c78f5760
-записанный тег: dsh-v0.2.2-rc.5 = 9c2670d3bce5275e0d1610272958121af87787bb
+диапазон: <commit>..upstream/master
+база: <commit>
+записанный тег: dsh-v0.2.2-rc.5 = <commit>
 влит в HEAD: да
 238 коммитов (мерджей 99)
 == upgrade guides в диапазоне (читай до адаптации) ==

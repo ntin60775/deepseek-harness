@@ -30,3 +30,36 @@
 - `--dump-config-schema` печатает схему и не содержит значений; доказательством применения служит `--dump-config`.
 - При exit code 1 pnpm дописывает `[ELIFECYCLE]` в stdout — JSON парсится до этой строки.
 - Отчёт доказательств — в этот файл; фрагменты — `tickets/upstream-sync-rc5/proofs/`.
+## Отчёт исполнения (2026-11-19)
+
+### Что сделано
+
+- В живой профиль `~/.dsh/profiles/web/cordis.patch.yml` добавлен НОВЫЙ top-level элемент `- id: web` с `name: "@deepseek-ai/dsh-web"` и полным `config: {searchProvider: deepseek-search-api, fetchProvider: http}` (не `insert:`, не правка несуществующей строки). Точные строки:
+
+  ```yaml
+  # Web search stays on the DeepSeek Search API for every model route: the base
+  # composition no longer pins a provider (docs/upgrade-guide/v0.2.2-rc.4/web-search-deepseek-model-default).
+  - id: web
+    name: "@deepseek-ai/dsh-web"
+    config:
+      searchProvider: deepseek-search-api
+      fetchProvider: http
+  ```
+
+- Пин сначала проверен на копии `DSH_HOME=/home/prog7/.dsh-probe` (та же глубина, что `~/.dsh`; скопированы `package.json`, `cordis.yml`, `cordis.patch.yml`, `pnpm-workspace.yaml`, `pnpm-lock.yaml`, `node_modules`; сессии и credentials не копировались), затем записан в живой профиль. `patchReload: live` доносит его до `:3080` без рестарта; `:3080` не рестартился и не гасился.
+- Три гайда прочитаны; выводы ниже. `v0.2.2-rc.4/web-search-deepseek-model-default` обработан пином; `v0.2.2-rc.4/workspace-write-boundary-follows-root` разобран по профилям; `v0.2.2-rc.4/forge-rate-limited-failure` и правка `v0.2.2-rc.3/client-hmr-plugin-events-stream` форка не касаются.
+
+### Критерии приёмки
+
+1. **Строка пина.** Фрагмент выше; строки `web` в профиле до этого не было (`grep` пуст), `insert:` не используется.
+2. **Применение.** На копии: слой профиля помечен `patched by /home/prog7/.dsh-probe/profiles/web/cordis.patch.yml`, у строки `web` оба ключа, `patch:`-предупреждений нет, exit 0. После записи в живой профиль то же на `~/.dsh` — [proofs/03-dump-config.log](proofs/03-dump-config.log).
+3. **Схема.** `--dump-config-schema` на копии: exit 1, `invalid config:` — 0, единственная причина ненулевого кода — 5 `unrecognized Loader tree carrier` (несущий слой, не конфиг; поведение было и до пина). Критерий формы выполнен: схема конфиг принимает, пин ничего не ломает.
+4. **Песочница.** `packages/sandbox/sandbox-policy/tests/workspace-root.spec.ts` и `packages/experimental/worktree/tests/sandbox.spec.ts` — 9 passed, 0 skipped, лог [proofs/03-sandbox.log](proofs/03-sandbox.log). На дефолтном таймауте Vitest 5 с четыре теста `worktree` падают по таймауту на этой машине (git worktree операции 4–7 с); прогон с `--testTimeout=20000` зелёный, тесты не пропущены.
+5. **Вывод по песочнице.** `danger-full-access` с `defaultPreset` есть только у профиля `web` (`~/.dsh/profiles/web/cordis.patch.yml`); `headless` и `sdk` держат пустой список пресетов и получают `workspace-write` + approval `ask` из base (`packages/bundle/base/cordis.patch.yml`, `sandbox-policy.mode ?? 'workspace-write'`, `approval.policy ... ? 'never' : 'ask'`). Поэтому граница `workspace-write` следует за рабочим каталогом и у SDK `setWorkingDirectory` (`packages/sdk/client/src/api.ts:248`), и грант `.git` нужен `headless`/`sdk` уже сейчас. Субагенты получают явный `sandboxMode` родителя и approval pin (`packages/subagent/subagent/src/child-agent.ts:252-282`), а изнутри эскалаций не имеют — «operations that require approval are rejected automatically» в их runtime-контексте (`:173`).
+6. **Два нерелевантных гайда.** `grep -rn "ForgeFailure\['code'\]|/plugins/events|EVENTS_ENDPOINT"` по `~/home/dev/dsh-plugins` и `packages/fork` — 0 совпадений: плагины форка не коммутируют по `ForgeFailure['code']` и не читают `/plugins/events`/`EVENTS_ENDPOINT` ([proofs/03-guides.log](proofs/03-guides.log)).
+7. **Маршруты.** Пин держит поведение на маршрутах `deepseek-official` и `deepseek-account`: апстрим иначе выбрал бы там legacy Messages search (`DEEPSEEK_MODEL_ROUTES`, `DEEPSEEK_ROUTE_SEARCH_PROVIDER = 'deepseek-official'`). На `qwen-token-plan-deepseek` пин — no-op: апстрим и без него выбирает `deepseek-search-api` (`OTHER_ROUTE_SEARCH_PROVIDER`) — [proofs/03-guides.log](proofs/03-guides.log).
+
+### Пробелы
+
+- Патч профиля лежит вне git; ревьюится по фрагменту в этом отчёте и логам, а не диффом.
+- Визуальная проверка страницы Settings с выбранным DeepSeek Search API — в живой пробе тикета 04 (тот же профиль).

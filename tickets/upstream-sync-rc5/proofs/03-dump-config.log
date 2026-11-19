@@ -1,0 +1,45 @@
+# Профиль web на копии DSH_HOME=/home/prog7/.dsh-probe (2026-11-19)
+
+$ DSH_HOME=/home/prog7/.dsh-probe pnpm dsh --profile web --dump-config
+exit=0
+
+446:       - 8
+444:     argumentsPreviewChars: 500
+445: # == @deepseek-ai/dsh-base, patched by /home/prog7/.dsh-probe/profiles/web/cordis.patch.yml
+- id: web
+447:   name: '@deepseek-ai/dsh-web'
+448:   config:
+449:     searchProvider: deepseek-search-api
+450:     fetchProvider: http
+451: # == @deepseek-ai/dsh-base
+
+$ DSH_HOME=/home/prog7/.dsh-probe pnpm dsh --profile web --dump-config-schema
+exit=1
+invalid config: 0
+unrecognized Loader tree carrier: 5
+schema bytes: 1075412
+
+# Патч профиля (копия; в живой профиль переносятся те же строки)
+# Web search stays on the DeepSeek Search API for every model route: the base
+# composition no longer pins a provider (docs/upgrade-guide/v0.2.2-rc.4/web-search-deepseek-model-default).
+- id: web
+  name: "@deepseek-ai/dsh-web"
+  config:
+    searchProvider: deepseek-search-api
+    fetchProvider: http
+
+# Живой профиль ~/.dsh (после записи пина)
+$ pnpm dsh --profile web --dump-config
+exit=0
+
+      - 5
+      - 8
+    argumentsPreviewChars: 500
+# == @deepseek-ai/dsh-base, patched by /home/prog7/.dsh/profiles/web/cordis.patch.yml
+- id: web
+  name: '@deepseek-ai/dsh-web'
+  config:
+    searchProvider: deepseek-search-api
+    fetchProvider: http
+
+предупреждений patch:/WEB_PROVIDER_AMBIGUOUS/invalid config: 0

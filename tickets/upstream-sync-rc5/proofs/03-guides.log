@@ -1,0 +1,44 @@
+# Гайды rc.4, не касающиеся форка (2026-11-19)
+
+$ grep -rn "ForgeFailure[\\x27code\\x27]|/plugins/events|EVENTS_ENDPOINT" ~/home/dev/dsh-plugins packages/fork
+matches: 0
+
+# Выбор провайдера поиска в апстриме
+58:const DEEPSEEK_MODEL_ROUTES: ReadonlySet<string> = new Set(['deepseek-official', 'deepseek-account'])
+64:const DEEPSEEK_ROUTE_SEARCH_PROVIDER = 'deepseek-official'
+67:const OTHER_ROUTE_SEARCH_PROVIDER = 'deepseek-search-api'
+97: *   the search serves is usable → that provider: `deepseek-official` (Messages search) on the
+98: *   `deepseek-official` and `deepseek-account` routes, `deepseek-search-api` on every other
+233:      : OTHER_ROUTE_SEARCH_PROVIDER
+
+# Пресеты песочницы по профилям
+headless: 0
+sdk: 0
+web: 1
+
+# База: песочница workspace-write + approval ask
+    # The environment remains an explicit deployment override; otherwise fresh
+    # sessions pin workspace-write + ask through the permission service below.
+    - id: sandbox
+      name: '@deepseek-ai/dsh-sandbox-local'
+
+    - id: sandbox-policy
+      name: '@deepseek-ai/dsh-sandbox-policy'
+      config:
+        mode: !!js process.env.DSH_PERMISSION_MODE ?? 'workspace-write'
+        workspaceRoot: !!js process.cwd()
+
+    - id: bash-sandbox
+      name: '@deepseek-ai/dsh-bash-sandbox'
+      disabled: !!js process.platform === 'win32'
+      config:
+        timeoutMs: 60000
+
+    - id: pwsh-sandbox
+      name: '@deepseek-ai/dsh-pwsh-sandbox'
+      disabled: !!js process.platform !== 'win32'
+
+    - id: approval
+      name: '@deepseek-ai/dsh-user-approval'
+      config:
+        policy: !!js "(process.env.DSH_PERMISSION_MODE ?? 'workspace-write') === 'danger-full-access' ? 'never' : 'ask'"
