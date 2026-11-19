@@ -42,7 +42,8 @@ Options:
                                  profile layer (repeatable)
   --dump-config                  print the composed profile tree and exit
   --dump-config-schema           print JSON Schema for profile entries and
-                                 patches without mounting
+                                 patches without mounting; literal configs are
+                                 validated, so a broken overlay exits 1
   --dump-default-config          print the profile tree without its user layer
                                  or --patch overlays and exit
 
