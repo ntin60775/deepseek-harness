@@ -1,0 +1,7 @@
+- dialog "Diagram viewer":
+  - button "Close"
+  - img "Mermaid diagram"
+  - toolbar "Zoom controls":
+    - button "Zoom out"
+    - button "Choose zoom": {{percent}}
+    - button "Zoom in"

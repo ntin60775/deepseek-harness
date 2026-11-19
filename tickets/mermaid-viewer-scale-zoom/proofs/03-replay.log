@@ -1,0 +1,13 @@
+$ DSH_SNAPSHOT=replay pnpm exec vitest run --config vitest.web.config.ts apps/web/tests/mermaid-viewer.e2e.ts apps/web/tests/mermaid-fence.e2e.ts apps/web/tests/markdown-images.e2e.ts
+ RUN  v4.1.11 /home/prog7/home/dev/contrib/forks/deepseek-harness/.agents/worktrees/mermaid-viewer-replay-docs
+ ✓ apps/web/tests/markdown-images.e2e.ts (2 tests) 6226ms
+     ✓ loads permitted images and shows authored text for failures  2673ms
+ ✓ apps/web/tests/mermaid-viewer.e2e.ts (2 tests) 6459ms
+     ✓ opens the chat-scale SVG in a named dialog and steps the catalog zoom  1104ms
+     ✓ reopens on the dark theme after settle and keeps the chat scale in a narrow column  962ms
+ ✓ apps/web/tests/mermaid-fence.e2e.ts (2 tests) 7009ms
+     ✓ renders two named diagram cards with source swap and a viewport-fit viewer  1523ms
+ Test Files  3 passed (3)
+      Tests  6 passed (6)
+   Start at  15:09:58
+   Duration  22.94s (transform 975ms, setup 0ms, import 2.90s, tests 19.69s, environment 0ms)

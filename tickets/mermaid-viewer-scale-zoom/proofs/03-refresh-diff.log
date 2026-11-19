@@ -1,0 +1,5 @@
+$ git diff --stat -- snapshots/web/mermaid-fence/ui.expected.md apps/web/tests/expected/markdown-images/ui.expected.md
+(no output above = zero diff)
+
+$ git status --porcelain -- snapshots/web/mermaid-fence apps/web/tests/expected/markdown-images
+(no output above = no new/changed golden files)

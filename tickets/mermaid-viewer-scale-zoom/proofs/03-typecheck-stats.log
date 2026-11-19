@@ -1,0 +1,2 @@
+$ pnpm exec tsc -b packages/experimental/client-ui-stats/tsconfig.json
+exit=0
