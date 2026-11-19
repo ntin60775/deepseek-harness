@@ -3,7 +3,7 @@ node_type: index
 title: Fork-local capability references
 service: _platform
 status: active
-updated: 2026-11-10
+updated: 2026-11-19
 tags: [kb, reference, fork]
 links:
   part_of: [../README.md]
@@ -18,4 +18,5 @@ Each page here records one capability or adaptation this fork carries on top of 
 - [fork-session-permanent-deletion.md](fork-session-permanent-deletion.md) — one permanent Session deletion traced from the sidebar action through the Remote command, storage removal, and registry cleanup, with its irreversibility limits and tests.
 - [fork-merge-ritual.md](fork-merge-ritual.md) — the phase order of `scripts/fork-merge-ritual.sh`, what each upstream merge restores, and the script exceptions that keep fork-local surfaces alive.
 - [fork-build-and-gate-adaptations.md](fork-build-and-gate-adaptations.md) — edits to the catalog generators, the Model Experience gate, and the two TypeScript program manifests that fork additions require.
+- [fork-profile-config-validation.md](fork-profile-config-validation.md) — a profile patch row replaces an entry's whole `config`, the 2026-11-18 preset-registry outage it caused, and the required-entry and schema-dump guards that now catch it.
 - [fork-package-adaptations.md](fork-package-adaptations.md) — the single-file differences in liveshare, conversation, feedback, both inspect catalogs, and the client test runtime, each traced to the fork's Session-deletion API.

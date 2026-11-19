@@ -963,10 +963,14 @@ const FIBER_DISPOSED = 4 as FiberState.DISPOSED
  *
  * The list is global rather than profile metadata. Missing or disabled ids do
  * not affect startup; an enabled listed entry must activate. The list covers
- * shared Agent execution, application endpoints, and Web bootstrap/transport.
+ * shared Agent execution, application endpoints, Web bootstrap/transport, and
+ * the preset registry every Agent composition resolves through: a registry that
+ * fails to activate leaves Agents preset-free, which silently strips their tools
+ * instead of failing the boot.
  */
 const requiredStartupEntryIds = new Set<string>([
   'agent-loop',
+  'agent-preset-registry',
   'tool-executor-native',
   'tool-executor-ptc',
   'webserver',

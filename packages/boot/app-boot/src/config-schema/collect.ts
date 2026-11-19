@@ -9,7 +9,7 @@ import Include, { applyEntryPatches, entryYamlErrorPosition, parseEntryYaml, typ
 import type { Profile, RuntimeResolution } from '../profile.ts'
 import { installRuntimeInterception } from '../profile-resolution/resolver.ts'
 import { buildConfigSchemaDocument } from './document.ts'
-import type { CollectedConfigEntry, ConfigSchemaDiagnostic, ConfigSchemaDump } from './types.ts'
+import type { CollectedConfigEntry, ConfigSchemaDiagnostic, ConfigSchemaDump, NativeConfigSchema } from './types.ts'
 import { isNativeConfigSchema } from './native.ts'
 import { includeFilename } from '../include-filename.ts'
 
@@ -68,6 +68,50 @@ function includePatches(value: unknown): PatchOptions[] | undefined {
   return value as PatchOptions[]
 }
 
+/** Options for one schema collection. */
+export interface CollectConfigSchemasOptions {
+  /**
+   * Validate each literal `config` against its plugin schema and report the
+   * failure the Loader would raise on activation. Discovery alone stays
+   * side-effect-free: a config holding an unevaluated `!!js` expression, and an
+   * entry whose `disabled` is not literal `false`, are left to runtime.
+   */
+  validateConfigs?: boolean
+}
+
+/** A native schema the Loader calls to validate one config; a lazy builder is not callable this way. */
+type CallableConfigSchema = NativeConfigSchema & ((value: unknown) => unknown)
+
+/** Whether a composed value still carries an unevaluated `!!js` expression anywhere. */
+function hasExpression(value: unknown): boolean {
+  if (isJsExpr(value)) return true
+  if (Array.isArray(value)) return value.some(hasExpression)
+  return record(value) ? Object.values(value).some(hasExpression) : false
+}
+
+/**
+ * Validate one composed config against the schema that would validate it at activation.
+ * @param row - the composed entry row.
+ * @param schema - its plugin's native Config schema.
+ * @param path - structural position reported with a failure.
+ * @param report - diagnostic sink for the collection result.
+ */
+function validateConfig(
+  row: ParsedEntry,
+  schema: NativeConfigSchema,
+  path: string,
+  report: (path: string, error: unknown) => void,
+): void {
+  if (row.config === undefined || hasExpression(row.config)) return
+  if (row.disabled !== undefined && row.disabled !== false) return
+  if (typeof schema !== 'function' || Reflect.get(schema, 'builder') !== undefined) return
+  try {
+    (schema as CallableConfigSchema)(structuredClone(row.config))
+  } catch (error) {
+    report(path, new Error(`invalid config: ${error instanceof Error ? error.message : String(error)}`))
+  }
+}
+
 /**
  * Generate JSON Schema from parsed entry rows and root-tree patches without applying plugins or evaluating expressions.
  * Imports, Config getters, and lazy schema builders execute trusted plugin code; transform callbacks do not. Calls must not overlap
@@ -76,6 +120,7 @@ function includePatches(value: unknown): PatchOptions[] | undefined {
  * @param entries - unvalidated rows from profile composition; malformed rows become positioned diagnostics without losing siblings.
  * @param resolution - the same immutable package resolution used for profile boot.
  * @param diagnostics - existing composition diagnostics; copied into the returned catalog.
+ * @param options - `validateConfigs` also validates literal configs against their plugin schemas.
  * @returns a JSON Schema document with partial-result diagnostics and Config references under `x-cordis`.
  * @throws when Node's profile module resolution cannot be installed.
  */
@@ -84,6 +129,7 @@ export async function collectConfigSchemas(
   entries: readonly unknown[],
   resolution: RuntimeResolution,
   diagnostics: readonly ConfigSchemaDiagnostic[] = [],
+  options: CollectConfigSchemasOptions = {},
 ): Promise<ConfigSchemaDump> {
   const result: { entries: CollectedConfigEntry[]; diagnostics: ConfigSchemaDiagnostic[] } = {
     entries: [], diagnostics: [...diagnostics],
@@ -215,6 +261,7 @@ export async function collectConfigSchemas(
             } else {
               entry.status = 'schema'
               entry.native = schema
+              if (options.validateConfigs === true) validateConfig(row, schema, path, report)
             }
           }
         } catch (error) {

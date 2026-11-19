@@ -615,6 +615,7 @@ describe('installFailLoud', () => {
 describe('auditStartupEntries', () => {
   const requiredIds = [
     'agent-loop',
+    'agent-preset-registry',
     'tool-executor-native',
     'tool-executor-ptc',
     'webserver',

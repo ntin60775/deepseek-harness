@@ -635,3 +635,52 @@ describe('collectConfigSchemas', () => {
     expect(dispose).toHaveBeenCalledOnce()
   })
 })
+
+describe('collectConfigSchemas config validation', () => {
+  const registry = Schema.object({
+    default: Schema.string().required(),
+    selectedDefault: Schema.string(),
+  })
+
+  beforeEach(() => { modules.set('registry', { Config: registry }) })
+
+  it('reports a literal config that fails its plugin schema and marks the dump incomplete', async () => {
+    const result = await collectConfigSchemas(profile, [row('registry', { selectedDefault: '1c' })], resolution, [], { validateConfigs: true })
+    expect(result['x-cordis'].complete).toBe(false)
+    expect(result['x-cordis'].diagnostics).toEqual([
+      { level: 'error', path: '/0', message: expect.stringContaining('invalid config:') },
+    ])
+    expect(result['x-cordis'].diagnostics[0]!.message).toContain('default')
+  })
+
+  it('accepts a config that satisfies its schema', async () => {
+    const result = await collectConfigSchemas(profile, [
+      row('registry', { default: 'standard', selectedDefault: '1c' }),
+    ], resolution, [], { validateConfigs: true })
+    expect(result['x-cordis'].complete).toBe(true)
+    expect(result['x-cordis'].diagnostics).toEqual([])
+  })
+
+  it('leaves expression-bearing, conditionally disabled, and disabled entries to runtime', async () => {
+    const rows = [
+      row('registry', { selectedDefault: { __jsExpr: 'ctx.value' } }),
+      { ...row('registry', { selectedDefault: '1c' }), disabled: { __jsExpr: 'ctx.disabled' } },
+      { ...row('registry', { selectedDefault: '1c' }), disabled: true },
+    ] as EntryOptions[]
+    const result = await collectConfigSchemas(profile, rows, resolution, [], { validateConfigs: true })
+    expect(result['x-cordis'].diagnostics).toEqual([])
+    expect(result['x-cordis'].complete).toBe(true)
+  })
+
+  it('skips schemas the Loader resolves lazily', async () => {
+    modules.set('lazy', { Config: Schema.lazy(() => registry) })
+    const result = await collectConfigSchemas(profile, [row('lazy', { selectedDefault: '1c' })], resolution, [], { validateConfigs: true })
+    expect(result['x-cordis'].diagnostics).toEqual([])
+    expect(result['x-cordis'].complete).toBe(true)
+  })
+
+  it('validates nothing unless asked', async () => {
+    const result = await collectConfigSchemas(profile, [row('registry', { selectedDefault: '1c' })], resolution)
+    expect(result['x-cordis'].complete).toBe(true)
+  })
+})
