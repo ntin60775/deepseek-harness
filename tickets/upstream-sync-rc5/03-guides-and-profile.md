@@ -64,3 +64,16 @@
 
 - Патч профиля лежит вне git; ревьюится по фрагменту в этом отчёте и логам, а не диффом.
 - Визуальная проверка страницы Settings с выбранным DeepSeek Search API — [04-probe-settings-websearch-dark.png](proofs/04-probe-settings-websearch-dark.png) (живая проба тикета 04, тот же профиль).
+
+### Ревью-панель (один прогон)
+
+Роли: reviewer-spec, reviewer-tests, reviewer-code, reviewer-kb — `qwen-token-plan/qwen3.8-flash` @ `xhigh`; модель сессии другая, фолбэков нет.
+
+- **P2 (spec, tests, code)** — команда критерия 4 (`pnpm run test -- <пути>`) фильтр не пробрасывает и не могла дать лог «2 файла / 9 тестов»; в доказательствах не было самой команды. Исправлено: рабочая форма `node_modules/.bin/vitest run <пути>` с `LANG=C`, шапка команды и `exit=0` в логе; отклонение `pnpm run test --` названо в отчёте.
+- **P2 (spec, tests, code)** — `grep` в критерии 6 был вакуозным (BRE, `|` литералом, а `['code']` — класс символов). Переписано на `grep -rEn "ForgeFailure\[['\"](code)['\"]\]|/plugins/events|EVENTS_ENDPOINT"`; второй широкий проход `failure.code|assertNever\(` тоже 0.
+- **P2 (spec, kb)** — критерий 3 противоречил сам себе («критерий — exit code» при exit 1). Переформулировано: множество carrier-диагностик пином не изменилось (`/204–207`, `/233`, 5 уникальных путей / 10 строк), `invalid config:` пуст, ненулевой код — штатный сигнал `!complete`; baseline без пина приложен к доказательствам.
+- **P2 (kb)** — механизм HMR назван мёртвым ключом `patchReload: live`; в дереве его никто не читает. Отчёт переписан на `dsh-hmr` из base; ключ удалён из живого профиля и копии. Апстримная Agent Note `2026-08-22-single-dsh-application-launcher.md` всё ещё описывает `patchReload` как shipped — upstream-запись решения, в юните не правилась, зацепка названа.
+- **P2 (spec)** — фантомная команда `pnpm run fork-merge-ritual` в демо-пути тикета 01 исправлена на `scripts/fork-merge-ritual.sh`; фраза о базе мержа исправлена.
+- **P3** — ссылка на Settings-экран теперь ведёт на снятый скриншот `04-probe-settings-websearch-dark.png`; счёт «четыре теста» уточнён до «несколько (в наблюдении четыре)»; формулировка про `headless`/`sdk` уточнена (worktree-инструмента у них нет, границу двигает SDK `setWorkingDirectory`); критерий 6 дополнен проверкой `apply(ctx)` без второго параметра (`SyncedConfig`-ветка гайда).
+
+Открытых зацепок нет; зацепка про upstream Agent Note живёт в отчёте тикета 04.
