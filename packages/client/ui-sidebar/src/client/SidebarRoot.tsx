@@ -14,7 +14,7 @@
  * column's only vertical scroller; its scrollbar stays drawn whenever the
  * list overflows, so the sessions are always reachable by dragging the bar.
  */
-import { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { useEffect, useId, useLayoutEffect, useRef, useState } from 'react'
 import clsx from 'clsx'
 import {
   FishLogo, IconAppsAddOutlineRegular, IconNewChatOutlineMedium, IconNewChatOutlineRegular,
@@ -61,6 +61,7 @@ function PanelRow({
   id, label, wide, unpinLabel, unpinTooltip, canUnpin, usePanelInfo, selectPanel, setPinned, trackEntryClick, renderFactorySlot,
 }: PanelRowProps) {
   const active = usePanelInfo(info => info.activePanelId === id)
+  const trailing = useId()
   return (
     <div className={clsx(css.panelEntry, wide && css.panelEntryWide, active && css.panelEntryActive)}>
       <Tooltip label={label} delayMs={500} disabled={wide}>
@@ -68,6 +69,7 @@ function PanelRow({
           type="button"
           className={css.panelRow}
           aria-label={label}
+          aria-describedby={trailing}
           aria-current={active ? 'page' : undefined}
           onClick={() => {
             const entry = officialEntry(id)
@@ -83,6 +85,7 @@ function PanelRow({
               {label}
             </span>
           )}
+          <span id={trailing} className={css.panelTrailing}>{renderFactorySlot('sidebar.panel.trailing', { id, wide, active })}</span>
         </button>
       </Tooltip>
       {wide && canUnpin && <Tooltip label={unpinTooltip} side="bottom" align="end" delayMs={500} portal>
