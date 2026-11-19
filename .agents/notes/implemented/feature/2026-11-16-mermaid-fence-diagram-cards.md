@@ -14,7 +14,7 @@ Size handling is a resolved mode, not a CSS comparison: the pure function `resol
 
 Measurement is pixel-based and apply-owned: `clientWidth` of the card's inner non-scrolling measure container arrives through a ref-callback face ([measure.ts](../../../../packages/client/ui-mermaid/src/client/measure.ts), precedent `ui-plugin-manager/header-scroll.ts`), so the component creates no machinery. A ResizeObserver without debounce applies the threshold in its callback; a mode switch rewrites the cached svg's root attributes, and mermaid never re-renders on resize.
 
-The viewer shows the same live diagram at the chat scale with catalog zoom; [the viewer decision](2026-11-19-mermaid-viewer-chat-scale.md) owns its scale, zoom, and chrome rules.
+The viewer shows the same live diagram at the chat scale with catalog zoom; [the viewer decision](2026-11-18-mermaid-viewer-chat-scale.md) owns its scale, zoom, and chrome rules.
 
 DOMPurify is the only sanitizer (default profile plus `FORBID_TAGS: ['foreignObject']`); the post-sanitize check reads the tree for the non-empty-text invariant but never filters it, and a render left with no visible text degrades like a parse error to the code block with a notice. Mermaid renders with `htmlLabels: false` globally.
 

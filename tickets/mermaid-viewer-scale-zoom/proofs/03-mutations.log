@@ -1,0 +1,10 @@
+- mutation M1: viewer drops the fractional published scale (src: useState(Number(initialScale.toFixed(0))))
+     × opens the diagram at the published chat scale and steps the catalog zoom grid 135ms
+AssertionError: expected 916.5 to be close to 816, received difference is 100.5, but expected 0.5
+  -> replay red: AssertionError: expected 916.5 to be close to 816 (viewer rendered the medium diagram at natural width instead of the published 0.89 chat scale)
+
+- mutation M2: random golden drift (append `- button "Random drift"` to snapshots/web/mermaid-viewer/ui.expected.md)
+  -> replay red: AssertionError: golden comparison failed (dialog ARIA mismatch); golden restored, md5 unchanged
+
+- mutation M3 (fence-level, ticket 02's invariant): the mermaid-fence golden stays untouched by this ticket
+  -> `git diff --stat` for snapshots/web/mermaid-fence/ui.expected.md is empty (proofs/03-refresh-diff.log)

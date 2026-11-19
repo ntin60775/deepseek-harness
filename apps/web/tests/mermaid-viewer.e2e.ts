@@ -17,7 +17,7 @@ const MODE = webSnapshotMode()
 const DIAGRAM_NAME = 'Mermaid diagram'
 const SCROLL_LABEL = 'Diagram scroll region'
 const DIALOG = '[role="dialog"][aria-label="Diagram viewer"]'
-/** Catalog zoom contract from `DOCUMENT_ZOOM`: additive 0.25 steps clamped to [0.25, 4]. */
+/** Catalog zoom contract: `DOCUMENT_ZOOM` steps land on the next 0.25 grid node, clamped to [0.25, 4]. */
 const ZOOM_STEP = 0.25
 const ZOOM_MAX = 4
 
@@ -44,7 +44,7 @@ interface ViewerFacts {
  * @param card - the settled diagram card.
  * @returns the card's fit mode, published scale, viewBox width, and rendered width.
  */
-async function chatFacts(card: Locator): Promise<ChatFacts> {
+async function cardFacts(card: Locator): Promise<ChatFacts> {
   return await card.evaluate((node) => {
     const svg = node.querySelector('[role="img"] svg') as SVGSVGElement
     return {
@@ -76,19 +76,6 @@ async function viewerFacts(dialog: Locator): Promise<ViewerFacts> {
 }
 
 /**
- * Wait until every card shows a freshly rendered svg: a theme revision replaces
- * each card body with the code block until its new attempt settles.
- * @param cards - the scenario's diagram cards.
- * @param stale - svg ids observed before the revision.
- */
-async function settleCards(cards: Locator, stale: readonly string[]): Promise<void> {
-  await expect.poll(async () => await cards.evaluateAll((nodes, previous) => {
-    const ids = nodes.map(node => node.querySelector('[role="img"] svg')?.getAttribute('id') ?? null)
-    return ids.length === 2 && ids.every(id => id !== null && !previous.includes(id))
-  }, stale), { timeout: 20_000, message: 'diagram cards did not settle after the theme revision' }).toBe(true)
-}
-
-/**
  * Read the toolbar's committed zoom percentage.
  * @param dialog - the open diagram viewer.
  * @returns the percentage shown in the zoom menu control.
@@ -96,6 +83,19 @@ async function settleCards(cards: Locator, stale: readonly string[]): Promise<vo
 async function zoomPercent(dialog: Locator): Promise<number> {
   const text = (await dialog.getByRole('button', { name: 'Choose zoom', exact: true }).textContent())?.trim() ?? ''
   return Number.parseInt(text, 10)
+}
+
+/**
+ * Wait until every card shows a freshly rendered svg: a theme revision replaces
+ * each card body with the code block until its new attempt settles.
+ * @param cards - the scenario's diagram cards.
+ * @param stale - svg ids observed before the revision.
+ */
+async function settleCards(cards: Locator, stale: readonly string[]): Promise<void> {
+  await expect.poll(async () => await cards.evaluateAll((nodes, previous) => {
+    const ids = nodes.map(node => node.querySelector('[role="img"] svg')?.getAttribute('id') ?? '')
+    return ids.length === previous.length && ids.every(id => id !== '' && !previous.includes(id))
+  }, stale), { timeout: 20_000, message: 'diagram cards did not settle after the theme revision' }).toBe(true)
 }
 
 describe('web e2e: mermaid diagram viewer', () => {
@@ -114,10 +114,10 @@ describe('web e2e: mermaid diagram viewer', () => {
     await page.locator('[role="treeitem"]').first().click()
     await page.locator('[role="treeitem"]').nth(1).click()
     // The overlay guard: without the enabled row the fence stays a code block
-    // and this wait times out instead of asserting viewer geometry.
+    // and this wait times out instead of snapshotting a stable code golden.
     await page.getByRole('img', { name: DIAGRAM_NAME }).first().waitFor({ timeout: 30_000 })
-    // Attempts serialize across cards; the wide pipeline fence settles second.
-    await page.getByRole('img', { name: DIAGRAM_NAME }).nth(1).waitFor({ timeout: 30_000 })
+    // Attempts serialize across cards; the wide pipeline fence settles last.
+    await page.getByRole('img', { name: DIAGRAM_NAME }).nth(2).waitFor({ timeout: 30_000 })
   }, 120_000)
 
   afterAll(async () => {
@@ -125,23 +125,27 @@ describe('web e2e: mermaid diagram viewer', () => {
     await scaffold?.close()
   })
 
-  it('opens the chat-scale SVG in a named dialog and steps the catalog zoom', async () => {
+  it('opens the diagram at the published chat scale and steps the catalog zoom grid', async () => {
     onTestFailed(() => saveFailureShot(page, 'web-e2e-mermaid-viewer-scale'))
     const cards = page.locator('[data-mermaid-card]')
-    const fitCard = cards.first()
-    expect(await cards.count()).toBe(2)
-    const fit = await chatFacts(fitCard)
-    const natural = await chatFacts(cards.nth(1))
-    // The fitted card publishes its resolved column fit, the wide one keeps 1:1,
-    // and both render at exactly that published scale.
-    expect(fit.mode).toBe('fit')
-    expect(fit.scale).toBeCloseTo(Math.min(1, fit.rendered / fit.intrinsic), 2)
-    expect(natural.mode).toBe('natural')
-    expect(natural.scale).toBe(1)
-    expect(fit.rendered).toBeCloseTo(fit.scale * fit.intrinsic, 0)
-    expect(natural.rendered).toBeCloseTo(natural.scale * natural.intrinsic, 0)
+    expect(await cards.count()).toBe(3)
+    // Three fences: a narrow loop that fits at 1:1, the wide pipeline at its
+    // natural width, and the medium pipeline that the column fits below 1:1.
+    const loop = await cardFacts(cards.nth(0))
+    const pipeline = await cardFacts(cards.nth(1))
+    const medium = await cardFacts(cards.nth(2))
+    expect(loop.mode).toBe('fit')
+    expect(pipeline.mode).toBe('natural')
+    expect(medium.mode).toBe('fit')
+    // The fitted card proves the published scale is the resolved column fit, not
+    // a constant 1:1: a viewer that ignored data-fit-scale renders it wider.
+    expect(medium.scale).toBeLessThan(1)
+    expect(medium.scale).toBeGreaterThanOrEqual(0.85)
+    expect(medium.rendered).toBeCloseTo(medium.scale * medium.intrinsic, 0)
+    expect(loop.rendered).toBeCloseTo(loop.scale * loop.intrinsic, 0)
+    expect(pipeline.rendered).toBeCloseTo(pipeline.scale * pipeline.intrinsic, 0)
 
-    await fitCard.getByRole('button', { name: 'Open diagram in viewer' }).click()
+    await cards.nth(2).getByRole('button', { name: 'Open diagram in viewer' }).click()
     const dialog = page.getByRole('dialog', { name: 'Diagram viewer' })
     await dialog.waitFor()
     // The viewer holds live vector SVG at the chat scale under the card's name.
@@ -149,35 +153,41 @@ describe('web e2e: mermaid diagram viewer', () => {
     await dialog.getByRole('img', { name: DIAGRAM_NAME, exact: true }).waitFor()
     await dialog.locator(`[aria-label="${SCROLL_LABEL}"]`).waitFor()
     const opened = await viewerFacts(dialog)
-    expect(opened.width).toBeCloseTo(fit.rendered, 0)
-    expect(opened.width).toBeCloseTo(fit.scale * opened.intrinsic, 0)
+    expect(opened.width).toBeCloseTo(medium.rendered, 0)
+    expect(opened.width).toBeCloseTo(medium.scale * medium.intrinsic, 0)
     // The golden pins the dialog structure and labels; the numeric scale stays
     // in the explicit expects above, so the percentage is tokenized.
     const percent = await zoomPercent(dialog)
     await compareOrRefreshGolden(join(SNAPSHOT_DIR, 'ui.expected.md'), await captureStableAria(page, DIALOG,
       scaffold.workspaceCwd, { replacements: [[`${percent}%`, '{{percent}}']] }), MODE)
 
-    // One catalog step snaps to the next 0.25 grid node above the chat scale.
-    const stepped = Math.min(ZOOM_MAX, (Math.floor(fit.scale / ZOOM_STEP) + 1) * ZOOM_STEP)
+    // One catalog step snaps to the next 0.25 grid node above the off-grid chat
+    // scale, and the reverse step lands on the grid node below it.
+    const stepped = Math.min(ZOOM_MAX, (Math.floor(medium.scale / ZOOM_STEP) + 1) * ZOOM_STEP)
+    const steppedBack = Math.max(0.25, stepped - ZOOM_STEP)
+    expect(stepped).toBeGreaterThan(medium.scale)
+    expect(steppedBack).toBeLessThan(medium.scale)
     const zoomIn = dialog.getByRole('button', { name: 'Zoom in', exact: true })
     await zoomIn.click()
     expect(await zoomPercent(dialog)).toBe(Math.round(stepped * 100))
     await expect.poll(async () => (await viewerFacts(dialog)).width).toBeCloseTo(stepped * opened.intrinsic, 0)
     await dialog.getByRole('button', { name: 'Zoom out', exact: true }).click()
-    expect(await zoomPercent(dialog)).toBe(Math.round(fit.scale * 100))
-    await expect.poll(async () => (await viewerFacts(dialog)).width).toBeCloseTo(fit.scale * opened.intrinsic, 0)
+    expect(await zoomPercent(dialog)).toBe(Math.round(steppedBack * 100))
+    await expect.poll(async () => (await viewerFacts(dialog)).width).toBeCloseTo(steppedBack * opened.intrinsic, 0)
     await page.keyboard.press('Escape')
     await expect.poll(() => dialog.count()).toBe(0)
 
+    // The natural card opens at its 1:1 width, which is what the chat shows.
     await cards.nth(1).getByRole('button', { name: 'Open diagram in viewer' }).click()
     await dialog.waitFor()
-    await expect.poll(async () => (await viewerFacts(dialog)).width).toBeCloseTo(natural.rendered, 0)
+    await expect.poll(async () => (await viewerFacts(dialog)).width).toBeCloseTo(pipeline.rendered, 0)
     await mkdir(SHOT_DIR, { recursive: true })
     await page.screenshot({ path: join(SHOT_DIR, `scale-light-${MODE}-${process.pid}.png`) })
 
     // A short page viewport at the zoom ceiling overflows both axes; the start
     // and both ends stay reachable through the scroll viewport.
-    await page.setViewportSize({ width: 1680, height: 200 })
+    const originalViewport = page.viewportSize()!
+    await page.setViewportSize({ width: originalViewport.width, height: 200 })
     for (let step = 0; step < 16; step += 1) {
       if (await zoomIn.isDisabled()) break
       await zoomIn.click()
@@ -215,7 +225,7 @@ describe('web e2e: mermaid diagram viewer', () => {
     expect(end.scrollLeft).toBe(end.maxLeft)
     expect(end.scrollTop).toBe(end.maxTop)
     await page.screenshot({ path: join(SHOT_DIR, `scale-zoommax-${MODE}-${process.pid}.png`) })
-    await page.setViewportSize({ width: 1680, height: 1000 })
+    await page.setViewportSize(originalViewport)
     await page.keyboard.press('Escape')
     await expect.poll(() => dialog.count()).toBe(0)
 
@@ -227,35 +237,36 @@ describe('web e2e: mermaid diagram viewer', () => {
   it('reopens on the dark theme after settle and keeps the chat scale in a narrow column', async () => {
     onTestFailed(() => saveFailureShot(page, 'web-e2e-mermaid-viewer-theme'))
     const cards = page.locator('[data-mermaid-card]')
-    const fitCard = cards.first()
+    const loopCard = cards.nth(0)
     const stale = await cards.evaluateAll(nodes =>
       nodes.map(node => node.querySelector('[role="img"] svg')?.getAttribute('id') ?? ''))
-    await fitCard.getByRole('button', { name: 'Open diagram in viewer' }).click()
+    await loopCard.getByRole('button', { name: 'Open diagram in viewer' }).click()
     const dialog = page.getByRole('dialog', { name: 'Diagram viewer' })
     await dialog.waitFor()
     // A theme revision closes the open viewer; the reopen follows the settled card.
     await page.emulateMedia({ colorScheme: 'dark' })
     await expect.poll(() => dialog.count()).toBe(0)
     await settleCards(cards, stale)
-    const dark = await chatFacts(fitCard)
-    await fitCard.getByRole('button', { name: 'Open diagram in viewer' }).click()
+    const dark = await cardFacts(loopCard)
+    await loopCard.getByRole('button', { name: 'Open diagram in viewer' }).click()
     await dialog.waitFor()
     await expect.poll(async () => (await viewerFacts(dialog)).width).toBeCloseTo(dark.scale * dark.intrinsic, 0)
     await mkdir(SHOT_DIR, { recursive: true })
     await page.screenshot({ path: join(SHOT_DIR, `scale-dark-${MODE}-${process.pid}.png`) })
     await page.keyboard.press('Escape')
     await expect.poll(() => dialog.count()).toBe(0)
+
     const darkStale = await cards.evaluateAll(nodes =>
       nodes.map(node => node.querySelector('[role="img"] svg')?.getAttribute('id') ?? ''))
     await page.emulateMedia({ colorScheme: 'light' })
     await settleCards(cards, darkStale)
 
-    // A narrow column flips the small diagram to natural size; the viewer still
+    // A narrow column flips the loop diagram to natural size; the viewer still
     // opens it at the published chat scale and scrolls the overflow.
     await page.setViewportSize({ width: 320, height: 1000 })
-    await expect.poll(() => fitCard.getAttribute('data-fit-mode')).toBe('natural')
-    const narrow = await chatFacts(fitCard)
-    await fitCard.getByRole('button', { name: 'Open diagram in viewer' }).click()
+    await expect.poll(() => loopCard.getAttribute('data-fit-mode')).toBe('natural')
+    const narrow = await cardFacts(loopCard)
+    await loopCard.getByRole('button', { name: 'Open diagram in viewer' }).click()
     await dialog.waitFor()
     const opened = await viewerFacts(dialog)
     expect(opened.width).toBeCloseTo(narrow.rendered, 0)

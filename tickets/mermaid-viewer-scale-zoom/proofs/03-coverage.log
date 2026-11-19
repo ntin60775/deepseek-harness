@@ -1,27 +1,8 @@
+$ git diff --stat -- packages/client/ui-mermaid/src packages/client/ui-primitives/src
+(пусто = src не тронут: критерий «per-file coverage тронутого src» вне объёма тикета, baseline держит тикет 02)
+
 $ pnpm exec vitest run packages/client/ui-mermaid --coverage
-(no src diff in this ticket: the viewer, shell, and card sources are unchanged; rows below re-prove the 100% per-file baseline of the package the scenarios exercise)
-  desktop-entry.ts |       0 |        0 |       0 |       0 | 17-75
-  ...ions-linux.ts |       0 |        0 |       0 |       0 | 12-65
-  ...ns-windows.ts |       0 |        0 |       0 |       0 | 8-274
-  ...plications.ts |       0 |        0 |       0 |       0 | 10-199
-  ...nvironment.ts |       0 |        0 |       0 |       0 | 17-19
- ...al-bundles/src |       0 |      100 |     100 |       0 |
-  ....generated.ts |       0 |      100 |     100 |       0 | 6
-  ...in-manager.ts |       0 |      100 |     100 |       0 | 8-67
- ...-retention/src |       0 |        0 |       0 |       0 |
- ...e-manifest/src |       0 |        0 |       0 |       0 |
-  client-module.ts |       0 |        0 |       0 |       0 |
- ...gin-detail/src |       0 |        0 |       0 |       0 |
- ...rket-index/src |       0 |        0 |       0 |       0 |
- ...ext-search/src |       0 |        0 |       0 |       0 |
- ...space-path/src |    1.28 |        0 |       0 |    1.63 |
-  ...ugin-gfm.d.ts |       0 |        0 |       0 |       0 |
- ...epseek-api/src |       0 |        0 |       0 |       0 |
- ...fetch-http/src |       0 |        0 |       0 |       0 |
-  ...rt-failure.ts |       0 |        0 |       0 |       0 | 24-120
- ...h-deepseek/src |       0 |        0 |       0 |       0 |
- ...l-workflow/src |       0 |        0 |       0 |       0 |
- ...rkflow-ptc/src |       0 |        0 |       0 |       0 |
- ...w/workflow/src |       0 |        0 |       0 |       0 |
-  runtime-types.ts |       0 |        0 |       0 |       0 |
- .../workspace/src |       0 |        0 |       0 |       0 |
+ Test Files  15 passed (15)
+      Tests  94 passed (94)
+uncovered-записей по ui-mermaid/src: 0
+threshold-ошибок по ui-mermaid: 0

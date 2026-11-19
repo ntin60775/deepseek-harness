@@ -1,11 +1,5 @@
 $ pnpm run test:docs
-run-gates: PASS package README model experience (6.36s)
-run-gates: start package README limitations
-run-gates: PASS upgrade guides (1.54s)
-run-gates: PASS documentation standard tests (2.28s)
-run-gates: PASS package README limitations (4.99s)
-run-gates: PASS markdown wrap (23.03s)
-run-gates: PASS markdown links (23.25s)
-run-gates: PASS translation pairing (27.02s)
+run-gates: PASS markdown wrap (36.29s)
+run-gates: PASS translation pairing (41.30s)
 
-run-gates: 21 passed, 0 failed, 0 skipped in 27.03s.
+run-gates: 21 passed, 0 failed, 0 skipped in 41.31s.

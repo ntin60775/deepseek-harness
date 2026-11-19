@@ -50,7 +50,7 @@ describe('mermaid card header and viewer', () => {
     await vi.waitFor(() => { expect(writeText).toHaveBeenCalledWith(diagramCode) })
   })
 
-  it('opens the viewport-fit viewer from the header button and closes on Escape with focus restore', async () => {
+  it('opens the chat-scale viewer from the header button and closes on Escape with focus restore', async () => {
     await renderedCard(wideSvg)
     const wrapper = screen.getByRole('img')
     wrapper.focus()

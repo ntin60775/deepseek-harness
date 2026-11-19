@@ -43,7 +43,7 @@ describe('web e2e: mermaid fence diagram card', () => {
     await scaffold?.close()
   })
 
-  it('renders two named diagram cards with source swap and a viewport-fit viewer', async () => {
+  it('renders two named diagram cards with source swap and a chat-scale viewer', async () => {
     onTestFailed(() => saveFailureShot(page, 'web-e2e-mermaid-fence'))
     const card = page.locator('[data-mermaid-card]').first()
     expect(await page.locator('[data-mermaid-card]').count()).toBe(2)

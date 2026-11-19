@@ -13,6 +13,7 @@ A ` ```mermaid ` fence in the chat transcript renders as an SVG diagram card ins
 
 - [Use this package](#use-this-package)
 - [Fit rule and configuration](#fit-rule-and-configuration)
+- [Diagram viewer](#diagram-viewer)
 - [Model Experience](#model-experience)
 - [Known Limitations and Deferred Work](#known-limitations-and-deferred-work)
 - [Dev Note](#dev-note)
@@ -54,9 +55,9 @@ Every SVG passes DOMPurify (default profile plus `FORBID_TAGS: ['foreignObject']
 
 The viewer mounts the shared `LightboxShell` chrome from `ui-primitives` around the live sanitized SVG, so the diagram stays vector at every zoom. It opens at the scale the card publishes through `data-fit-scale` and never recomputes it; a missing published scale fails the open instead of defaulting. Width and height follow `W×s` and `H×s` from the viewBox, and mermaid's inline `max-width` and `width` on the injected root are removed, so a zoom above the chat scale grows the diagram past its card width.
 
-The toolbar is the catalog `ZoomControls` with `DOCUMENT_ZOOM` semantics: additive 0.25 steps, clamp `[0.25, 4]`, fixed presets and the percentage menu, and no fitting row. It sits at the stage's bottom edge over the scroll viewport, and the close control stays in the stage's top-right corner. The scroll viewport centers a diagram smaller than itself through auto margins and keeps the start reachable when the scaled diagram overflows on either axis.
+The toolbar is the catalog `ZoomControls` with `DOCUMENT_ZOOM` semantics: each step lands on the next 0.25 grid node, the scale clamps to `[0.25, 4]`, and the control carries the fixed presets and the percentage menu, with no fitting row. It sits at the stage's bottom edge over the scroll viewport, and the close control stays in the stage's top-right corner. The scroll viewport centers a diagram smaller than itself through auto margins and keeps the start reachable when the scaled diagram overflows on either axis.
 
-The wrapper carries `role="img"` with the diagram label and the inner svg stays `aria-hidden`; the scroll viewport and the toolbar carry their own accessible names. A theme revision closes the viewer and restores focus to the card button; the next open starts again from the chat scale.
+The wrapper carries `role="img"` with the diagram label and the inner svg stays `aria-hidden`; the scroll viewport and the toolbar carry their own accessible names. Closing returns focus to the control that opened the viewer. A theme revision closes the viewer while the card re-renders, so that opener is gone and focus falls back to the document; the next open starts again from the chat scale.
 
 <a id="model-experience"></a>
 ## Model Experience

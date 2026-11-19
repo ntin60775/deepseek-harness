@@ -1,5 +1,20 @@
+$ git branch --show-current   # mermaid-viewer-replay-docs (tree под тикетом 03, 2026-11-19)
+$ DSH_SNAPSHOT=refresh pnpm exec vitest run --config vitest.web.config.ts apps/web/tests/mermaid-viewer.e2e.ts apps/web/tests/mermaid-fence.e2e.ts apps/web/tests/markdown-images.e2e.ts
+ ✓ apps/web/tests/mermaid-viewer.e2e.ts (2 tests) 6777ms
+     ✓ opens the diagram at the published chat scale and steps the catalog zoom grid  1330ms
+     ✓ reopens on the dark theme after settle and keeps the chat scale in a narrow column  1086ms
+ ✓ apps/web/tests/mermaid-fence.e2e.ts (2 tests) 6010ms
+     ✓ renders two named diagram cards with source swap and a chat-scale viewer  1280ms
+ ✓ apps/web/tests/markdown-images.e2e.ts (2 tests) 6583ms
+     ✓ loads permitted images and shows authored text for failures  2968ms
+ Test Files  3 passed (3)
+      Tests  6 passed (6)
+
 $ git diff --stat -- snapshots/web/mermaid-fence/ui.expected.md apps/web/tests/expected/markdown-images/ui.expected.md
-(no output above = zero diff)
+(пусто выше = нулевой дифф)
 
 $ git status --porcelain -- snapshots/web/mermaid-fence apps/web/tests/expected/markdown-images
-(no output above = no new/changed golden files)
+(пусто выше = голдены не изменились/не появились)
+
+$ git status --porcelain -- snapshots/web/mermaid-viewer
+ M snapshots/web/mermaid-viewer/session.v4.jsonl

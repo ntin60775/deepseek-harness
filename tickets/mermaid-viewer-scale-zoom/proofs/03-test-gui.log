@@ -1,12 +1,3 @@
-$ nice -n 19 pnpm run test:gui
- ✓ |thread-safe| packages/client/ui-plugin-market/tests/node-plugin.client.spec.ts (1 test) 4ms
- ✓ |thread-safe| packages/client/ui-schedule/tests/definition.client.spec.ts (1 test) 4ms
- ✓ |thread-safe| packages/client/ui-sidebar-browser/tests/apply.host.spec.ts (1 test) 4ms
- ✓ |thread-safe| packages/client/ui-sidebar-files/tests/files-title.client.spec.tsx (1 test) 37ms
- ✓ |thread-safe| packages/client/ui-entry-customization/tests/reader-boot.client.spec.ts (1 test) 1834ms
-   ✓ boots the shipped Web client without the Plugins page navigation  1832ms
-
+$ nice -n 19 pnpm run test:gui   # финальное дерево (merge-forward + правки панели)
  Test Files  820 passed (820)
-      Tests  14305 passed | 2 skipped (14307)
-   Start at  14:57:53
-   Duration  304.37s (transform 56.14s, setup 25.10s, import 717.04s, tests 498.27s, environment 410.84s)
+      Tests  14327 passed | 2 skipped (14329)

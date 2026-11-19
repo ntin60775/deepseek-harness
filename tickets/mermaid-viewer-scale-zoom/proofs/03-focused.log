@@ -1,12 +1,5 @@
+$ git branch --show-current   # mermaid-viewer-replay-docs (tree под тикетом 03, 2026-11-19)
 $ pnpm exec vitest run packages/client/ui-mermaid packages/client/ui-primitives packages/client/ui-attachment
- ✓ |thread-safe| packages/client/ui-mermaid/tests/config.client.spec.ts (5 tests) 12ms
- ✓ |thread-safe| packages/client/ui-primitives/tests/quote-text.spec.ts (1 test) 6ms
- ✓ |thread-safe| packages/client/ui-primitives/tests/tooltip-node.client.spec.ts (1 test) 6ms
- ✓ |thread-safe| packages/client/ui-primitives/tests/UserMessageBubble.client.spec.tsx (2 tests) 173ms
- ✓ |thread-safe| packages/client/ui-primitives/tests/menu-submenu-position.client.spec.tsx (5 tests) 5ms
- ✓ |thread-safe| packages/client/ui-primitives/tests/image-preview.client.spec.tsx (1 test) 196ms
-
+ ✓ |thread-safe| packages/client/ui-mermaid/tests/fence-header.client.spec.tsx (7 tests) 3023ms
  Test Files  112 passed (112)
       Tests  2242 passed (2242)
-   Start at  14:59:37
-   Duration  55.56s (transform 18.67s, setup 6.49s, import 108.83s, tests 78.02s, environment 106.54s)
