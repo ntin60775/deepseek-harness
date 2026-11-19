@@ -23,6 +23,7 @@ describe('mermaid entry', () => {
       theme: 'base',
       htmlLabels: false,
       themeVariables: variables,
+      suppressErrorRendering: true,
     })
     expect(mermaid.render).toHaveBeenCalledWith('dsh-mermaid-1', 'flowchart LR\n A-->B')
     expect(result).toContain('Label')

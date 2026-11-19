@@ -16,6 +16,7 @@ const SHOT_DIR = fileURLToPath(new URL('../../../.artifacts/screenshots/mermaid-
 const MODE = webSnapshotMode()
 const DIAGRAM_NAME = 'Mermaid diagram'
 const SCROLL_LABEL = 'Diagram scroll region'
+const FAILURE_NOTICE = 'The diagram could not be rendered; showing the source.'
 const DIALOG = '[role="dialog"][aria-label="Diagram viewer"]'
 /** Catalog zoom contract: `DOCUMENT_ZOOM` steps land on the next 0.25 grid node, clamped to [0.25, 4]. */
 const ZOOM_STEP = 0.25
@@ -155,6 +156,12 @@ describe('web e2e: mermaid diagram viewer', () => {
     const opened = await viewerFacts(dialog)
     expect(opened.width).toBeCloseTo(medium.rendered, 0)
     expect(opened.width).toBeCloseTo(medium.scale * medium.intrinsic, 0)
+    // A fence that cannot parse renders the source notice, and mermaid's own
+    // "Syntax error" graphic must not be left in the document.
+    await page.getByText(FAILURE_NOTICE, { exact: true }).waitFor()
+    expect(await page.evaluate(() => [...document.querySelectorAll('*')]
+      .filter(node => node.textContent?.includes('Syntax error in text')).length)).toBe(0)
+
     // The golden pins the dialog structure and labels; the numeric scale stays
     // in the explicit expects above, so the percentage is tokenized.
     const percent = await zoomPercent(dialog)

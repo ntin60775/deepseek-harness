@@ -20,6 +20,9 @@ export async function renderMermaid(id: string, code: string, variables: Mermaid
     theme: 'base',
     htmlLabels: false,
     themeVariables: variables,
+    // A failed parse stays a card-level notice: without this, mermaid inserts its
+    // own "Syntax error" diagram into the document body, one per failed fence.
+    suppressErrorRendering: true,
   })
   const { svg } = await mermaid.render(id, code)
   return sanitizeMermaidSvg(svg)
