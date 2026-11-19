@@ -30,6 +30,8 @@ The procedure below is packaged as the `dsh-web-launcher` skill (`.agents/skills
 | `DSH_HOME` | Data directory with sessions, default `~/.dsh` |
 | `XDG_RUNTIME_DIR` | Where `dsh-web.log` and `dsh-web.pid` live |
 
+The desktop entry starts the window from a session whose `PATH` holds only the system directories, while user tools such as `gh`, `pnpm`, `go`, or `cargo` live in directories the login shell adds. The window therefore asks `$SHELL -lic` for the login `PATH` and gives the server the login entries first, followed by the remaining inherited entries, so the tools resolve both inside the server and in the shells it starts. A shell that does not answer (no `$SHELL`, or five seconds without output) leaves `PATH` as inherited.
+
 ## How the state is detected
 
 The window looks for `node … apps/cli/src/bin.ts web` processes whose working directory is this checkout, using both the PID file and the process table, so a stale PID file cannot point it at an unrelated process. The access URL (with its token) comes from `dsh-web.log`, where the server prints it. A stop counts as finished only after the process is gone; SIGTERM is followed by SIGKILL after ten seconds.

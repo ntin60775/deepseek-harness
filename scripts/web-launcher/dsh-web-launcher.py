@@ -60,6 +60,12 @@ WORK_MAX_IDLE_SECONDS = 300.0
 START_TIMEOUT_SECONDS = 90.0
 STOP_TIMEOUT_SECONDS = 10.0
 
+# The desktop entry starts this window from a session whose PATH holds only the system
+# directories, so the server would miss every user tool (`gh`, `pnpm`, `go`) that the
+# login shell puts on PATH. The window asks that shell for the real PATH instead.
+LOGIN_PATH_MARKER = "__DSH_LOGIN_PATH__"
+LOGIN_PATH_TIMEOUT_SECONDS = 5.0
+
 
 # --- environment ------------------------------------------------------------
 
@@ -84,6 +90,45 @@ def node_binary() -> str | None:
         if candidate.is_file():
             return str(candidate)
     return None
+
+
+def login_path() -> str | None:
+    """Return the PATH the user's login shell exports, or None when it cannot be read."""
+    shell = os.environ.get("SHELL")
+    if not shell or not Path(shell).is_file():
+        return None
+    try:
+        completed = subprocess.run(
+            [shell, "-lic", f'printf "\n{LOGIN_PATH_MARKER}%s\n" "$PATH"'],
+            stdin=subprocess.DEVNULL,
+            capture_output=True,
+            text=True,
+            errors="replace",
+            timeout=LOGIN_PATH_TIMEOUT_SECONDS,
+        )
+    except (OSError, subprocess.TimeoutExpired):
+        return None
+    for line in completed.stdout.splitlines():
+        if line.startswith(LOGIN_PATH_MARKER):
+            return line[len(LOGIN_PATH_MARKER) :].strip() or None
+    return None
+
+
+def merged_path() -> str:
+    """Return PATH with login-shell entries first, then the remaining inherited entries."""
+    inherited = [entry for entry in os.environ.get("PATH", "").split(":") if entry]
+    logged_in = [entry for entry in (login_path() or "").split(":") if entry]
+    return ":".join(dict.fromkeys([*logged_in, *inherited]))
+
+
+def server_env() -> dict[str, str]:
+    """Return the environment the server and the checkout's scripts run with."""
+    env = dict(os.environ)
+    env["PATH"] = merged_path()
+    node = node_binary()
+    if node:
+        env["DSH_NODE"] = node
+    return env
 
 
 def browser_command() -> list[str] | None:
@@ -332,6 +377,7 @@ class StartWorker(QThread):
             self._process = subprocess.Popen(
                 [node, "--import", "tsx/esm", "apps/cli/src/bin.ts", "web", "--no-open"],
                 cwd=REPO,
+                env=server_env(),
                 stdin=subprocess.DEVNULL,
                 stdout=log,
                 stderr=subprocess.STDOUT,
@@ -411,10 +457,7 @@ class RebuildWorker(QThread):
         if not REBUILD_SCRIPT.is_file():
             self.failed.emit(f"Скрипт пересборки не найден: {REBUILD_SCRIPT}")
             return
-        env = dict(os.environ)
-        node = node_binary()
-        if node:
-            env["DSH_NODE"] = node
+        env = server_env()
         try:
             completed = subprocess.run(
                 [str(REBUILD_SCRIPT)],

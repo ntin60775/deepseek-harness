@@ -43,6 +43,7 @@ Then run `dsh-web` and check the window: the status chip must read `запуще
 ## Runtime contract
 
 - Server command: `node --import tsx/esm apps/cli/src/bin.ts web --no-open`, working directory is the checkout root; the window prints nothing to a terminal, the server log is `$XDG_RUNTIME_DIR/dsh-web.log` and the PID file is `$XDG_RUNTIME_DIR/dsh-web.pid`.
+- Server environment: the window asks `$SHELL -lic` for the login `PATH` and gives the server those entries first, then the remaining inherited ones, so `gh`, `pnpm`, `go`, and `cargo` resolve in the server and in every shell it starts. A server started elsewhere keeps that shell's `PATH`.
 - State detection: the PID file plus a process-table scan; a candidate must run `apps/cli/src/bin.ts web`, have this checkout as its working directory and be a `node` binary, so a recycled PID is never signalled.
 - The access URL with its token is read from the log line `dsh web: http://…`.
 - Stop sends SIGTERM to every matching process of the checkout, then SIGKILL after ten seconds, and reports success only when the processes are gone.
@@ -58,6 +59,7 @@ Then run `dsh-web` and check the window: the status chip must read `запуще
 | `Остановка` refuses or behaves oddly | Another checkout's server may own the port; the window only stops processes of its own checkout. |
 | Menu entry missing after install | `kbuildsycoca6 --noincremental`, or log out and back in. |
 | Browser does not open | Set `DSH_BROWSER=chromium` (or any command that accepts a URL). |
+| A tool reports `spawn gh ENOENT` (or another missing user binary) | The server was started from a shell without the login `PATH`; start it from this window, or restart the window's server after `git pull` so it resolves the login `PATH` |
 
 ## Uninstall
 
