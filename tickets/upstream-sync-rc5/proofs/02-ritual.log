@@ -48,3 +48,45 @@ $ grep -n "sidebar.panel.trailing" packages/client/ui-sidebar/src/client/contrac
 
 $ grep -c onWorkspaceSelected packages/client/ui-conversation/README.md
 1
+
+# Зелёный перепрогон после фиксов (rm -f .git/FORK_MERGE_BASE; база восстановлена как merge-base первого родителя merge-коммита)
+
+== preflight ==
+== merge upstream/master ==
+== install ==
+== audit: fork surfaces vs upstream ==
+== fork upgrade audit ==
+диапазон: ca33fd6843b205e279c7ccb6cb73a472c78f5760..upstream/master
+база: ca33fd6843b205e279c7ccb6cb73a472c78f5760
+записанный тег: dsh-v0.2.2-rc.5 = 9c2670d3bce5275e0d1610272958121af87787bb
+влит в HEAD: да
+238 коммитов (мерджей 99)
+== upgrade guides в диапазоне (читай до адаптации) ==
+гайдов 3 новых + 1 изменённый
+== пересечение: файлы, которые менял и апстрим, и форк ==
+файлов пересечения 61; апстрим изменил 960; полный список: .scratch/fork-upgrade/overlap.txt
+== форк-поверхности ==
+== слоты форк-плагинов в смерженном дереве ==
+== строки профилей на этой машине ==
+== итог ==
+== audit: theme UI classifier ==
+classify: 254 classified element(s) against /home/prog7/home/dev/contrib/forks/deepseek-harness
+classify: OK
+== invariants: fork design gates ==
+      Tests  27 passed (27)
+== build ==
+run-gates: 10 passed, 0 failed, 0 skipped in 39.21s.
+== docs: regenerate catalogs ==
+== docs: re-record pairing ==
+== verify: typecheck, constraints, doc gates, GUI units, snapshots ==
+run-gates: 5 passed, 0 failed, 0 skipped in 31.64s.
+== verify: profile configs against plugin schemas ==
+run-gates: 21 passed, 0 failed, 0 skipped in 25.43s.
+FORK_SKIP_FULL_GUI=1 — полный pnpm run test:gui пропущен; GUI-доказательство несут focused-прогоны и живая проба, пробел назван в отчёте
+      Tests  276 passed | 2 skipped (278)
+== record upstream base ==
+база записана — dsh-v0.2.2-rc.5
+== github actions: fork-disabled workflows stay disabled ==
+== commit ==
+нечего коммитить — все поверхности были на месте
+== готово ==
