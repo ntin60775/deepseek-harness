@@ -1,13 +1,18 @@
 import { spawnSync } from 'node:child_process'
+import { readFileSync } from 'node:fs'
 import { createRequire } from 'node:module'
 import { setPriority } from 'node:os'
-import { resolve } from 'node:path'
+import { join, resolve } from 'node:path'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { LOCAL_PARALLELISM_CAP, LOCAL_RUN_PRIORITY, LOCAL_TEST_PARALLELISM_CAP, defaultParallelism, defaultTestParallelism, describeDefaultParallelism, lowerLocalPriority } from './parallelism.ts'
 
 // The priority effect is a process-global boundary: mock setPriority to observe the resolved
-// value (raising nice back needs privileges a spec worker does not have), keep the real
-// availableParallelism for the budget cases, and prove the real lowering in a child process.
+// value (raising nice back needs privileges a spec worker does not have) and keep the real
+// availableParallelism for the budget cases. The child probe below reads the real priority back
+// against os.constants.priority.PRIORITY_LOW (the Windows readback maps to priority classes) and
+// isolates causality: from a normal-priority parent the before/after delta shows the lowering;
+// from an already-lowered parent a POSIX negative control attempts the opt-out raise and must
+// be refused (EPERM/EACCES), which a no-op implementation would not produce.
 vi.mock('node:os', async (importOriginal) => {
   const actual = await importOriginal<typeof import('node:os')>()
   return { ...actual, setPriority: vi.fn() }
@@ -50,7 +55,7 @@ describe('default worker budget', () => {
 describe('local run priority', () => {
   it('lowers to nice 19 by default outside CI', () => {
     lowerLocalPriority({})
-    expect(mockedSetPriority).toHaveBeenCalledWith(0, LOCAL_RUN_PRIORITY)
+    expect(mockedSetPriority).toHaveBeenCalledWith(0, 19)
     expect(LOCAL_RUN_PRIORITY).toBe(19)
   })
 
@@ -67,7 +72,7 @@ describe('local run priority', () => {
       mockedSetPriority.mockClear()
       if (raw === '') {
         lowerLocalPriority({ DSH_LOCAL_PRIORITY: raw })
-        expect(mockedSetPriority).toHaveBeenCalledWith(0, LOCAL_RUN_PRIORITY)
+        expect(mockedSetPriority).toHaveBeenCalledWith(0, 19)
         continue
       }
       expect(() => lowerLocalPriority({ DSH_LOCAL_PRIORITY: raw })).toThrow('DSH_LOCAL_PRIORITY must be an integer 0-19')
@@ -81,14 +86,35 @@ describe('local run priority', () => {
     expect(mockedSetPriority).not.toHaveBeenCalled()
   })
 
-  it('lowers a real child process to nice 19', { timeout: 60_000 }, () => {
+  it('lowers a real child process priority with an isolated causality control', { timeout: 60_000 }, () => {
     const tsxEsm = createRequire(import.meta.url).resolve('tsx/esm')
     const root = resolve(import.meta.dirname, '..')
-    const probe = spawnSync(process.execPath, [
-      '--import', tsxEsm, '--input-type=module', '-e',
-      "const { lowerLocalPriority } = await import('./scripts/parallelism.ts'); const { getPriority } = await import('node:os'); lowerLocalPriority(process.env); console.log(getPriority())",
-    ], { cwd: root, env: { ...process.env, CI: '', DSH_LOCAL_PRIORITY: '' }, encoding: 'utf8', timeout: 30_000 })
+    const code = "const { lowerLocalPriority } = await import('./scripts/parallelism.ts'); const os = await import('node:os'); const before = os.getPriority(); lowerLocalPriority(process.env); console.log(JSON.stringify({ before, after: os.getPriority(), low: os.constants.priority.PRIORITY_LOW }))"
+    const probe = spawnSync(process.execPath, ['--import', tsxEsm, '--input-type=module', '-e', code], {
+      cwd: root, env: { ...process.env, CI: '', DSH_LOCAL_PRIORITY: '' }, encoding: 'utf8', timeout: 30_000,
+    })
     expect(probe.status).toBe(0)
-    expect(Number(probe.stdout.trim().split('\n').at(-1))).toBe(19)
+    const readback: { before: number; after: number; low: number } = JSON.parse(probe.stdout.trim().split('\n').at(-1) ?? '{}')
+    expect(readback.after).toBe(readback.low)
+    if (readback.before !== readback.low) {
+      // Normal-priority parent (CI): the delta itself shows the lowering.
+      expect(readback.after).not.toBe(readback.before)
+    } else if (process.platform !== 'win32') {
+      // Already-lowered parent: the opt-out attempts to raise nice back and must be refused
+      // (EPERM/EACCES), proving the real syscall runs; Windows priority classes allow the raise,
+      // so the control is POSIX-only and the readback carries the effect there.
+      const control = spawnSync(process.execPath, ['--import', tsxEsm, '--input-type=module', '-e', code], {
+        cwd: root, env: { ...process.env, CI: '', DSH_LOCAL_PRIORITY: '0' }, encoding: 'utf8', timeout: 30_000,
+      })
+      expect(control.status).not.toBe(0)
+      expect(control.stderr).toMatch(/EPERM|EACCES|operation not permitted|permission denied/i)
+    }
+  })
+
+  it('wires lowerLocalPriority into every heavy entrypoint', () => {
+    const root = resolve(import.meta.dirname, '..')
+    for (const entry of ['scripts/run-gates.ts', 'scripts/build.ts', 'vitest.config.ts']) {
+      expect(readFileSync(join(root, entry), 'utf8')).toContain('lowerLocalPriority(process.env)')
+    }
   })
 })

@@ -1,0 +1,9 @@
+# Base-proof тикета 04
+
+База: master до коммита тикета. Mutation-проба 2026-11-19: реализация (parallelism.ts, run-gates.ts, build.ts, vitest.config.ts) временно возвращена к базе, новые спеки сохранены. Полный лог: 04-base-proof-full.log.
+
+Красные на базе (6 кейсов): «halves local gate workers under the cap» (12 CPU даёт 12, ожидание 6); «lowers to nice 19 by default outside CI», «honors DSH_LOCAL_PRIORITY including the normal-priority opt-out», «refuses invalid DSH_LOCAL_PRIORITY values before any priority change», «leaves CI priority untouched», «lowers a real child process to nice 19» (функции lowerLocalPriority на базе нет).
+
+Ко-обновлённый кейс: «caps local defaults below the CPU count Node reports» — ci-static 8 CPU на базе даёт 8, ожидание тикета 4; красный на базе (вторая проба в том же логе, Start at 09:32:54).
+
+Инварианты CI (256→available, OXLINT/WEB при CI=true) в base-прогоне skipped фильтром; зелёность на базе следует из CI-ветки и подтверждена полным прогоном на дереве тикета.

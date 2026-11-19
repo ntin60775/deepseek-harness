@@ -1,0 +1,318 @@
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+
+ RUN  v4.1.11 /home/prog7/home/dev/contrib/forks/deepseek-harness/.worktrees/gui-loop-gate-priority
+
+ ↓ |thread-safe| scripts/run-gates.spec.ts (169 tests | 169 skipped)
+ ❯ |thread-safe| scripts/parallelism.spec.ts (8 tests | 6 failed | 2 skipped) 125ms
+     ↓ uses every reported CPU in CI
+     × halves local gate workers under the cap 7ms
+     ↓ halves local Vitest forks under the memory cap
+     × lowers to nice 19 by default outside CI 1ms
+     × honors DSH_LOCAL_PRIORITY including the normal-priority opt-out 0ms
+     × refuses invalid DSH_LOCAL_PRIORITY values before any priority change 3ms
+     × leaves CI priority untouched 0ms
+     × lowers a real child process to nice 19 111ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 6 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |thread-safe| scripts/parallelism.spec.ts > default worker budget > halves local gate workers under the cap
+AssertionError: expected 12 to be 6 // Object.is equality
+
+- Expected
++ Received
+
+- 6
++ 12
+
+ ❯ scripts/parallelism.spec.ts:30:40
+     28|   it('halves local gate workers under the cap', () => {
+     29|     expect(LOCAL_PARALLELISM_CAP).toBe(12)
+     30|     expect(defaultParallelism({}, 12)).toBe(6)
+       |                                        ^
+     31|     expect(defaultParallelism({}, 3)).toBe(1)
+     32|     expect(defaultParallelism({}, 1)).toBe(1)
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/6]⎯
+
+ FAIL  |thread-safe| scripts/parallelism.spec.ts > local run priority > lowers to nice 19 by default outside CI
+TypeError: lowerLocalPriority is not a function
+ ❯ scripts/parallelism.spec.ts:52:5
+     50| describe('local run priority', () => {
+     51|   it('lowers to nice 19 by default outside CI', () => {
+     52|     lowerLocalPriority({})
+       |     ^
+     53|     expect(mockedSetPriority).toHaveBeenCalledWith(0, LOCAL_RUN_PRIORI…
+     54|     expect(LOCAL_RUN_PRIORITY).toBe(19)
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/6]⎯
+
+ FAIL  |thread-safe| scripts/parallelism.spec.ts > local run priority > honors DSH_LOCAL_PRIORITY including the normal-priority opt-out
+TypeError: lowerLocalPriority is not a function
+ ❯ scripts/parallelism.spec.ts:58:5
+     56|
+     57|   it('honors DSH_LOCAL_PRIORITY including the normal-priority opt-out'…
+     58|     lowerLocalPriority({ DSH_LOCAL_PRIORITY: '0' })
+       |     ^
+     59|     expect(mockedSetPriority).toHaveBeenCalledWith(0, 0)
+     60|     mockedSetPriority.mockClear()
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/6]⎯
+
+ FAIL  |thread-safe| scripts/parallelism.spec.ts > local run priority > refuses invalid DSH_LOCAL_PRIORITY values before any priority change
+AssertionError: expected [Function] to throw error including 'DSH_LOCAL_PRIORITY must be an integer…' but got '__vi_import_4__.lowerLocalPriority is…'
+
+Expected: "DSH_LOCAL_PRIORITY must be an integer 0-19"
+Received: "__vi_import_4__.lowerLocalPriority is not a function"
+
+ ❯ scripts/parallelism.spec.ts:73:69
+     71|         continue
+     72|       }
+     73|       expect(() => lowerLocalPriority({ DSH_LOCAL_PRIORITY: raw })).to…
+       |                                                                     ^
+     74|       expect(mockedSetPriority).not.toHaveBeenCalled()
+     75|     }
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/6]⎯
+
+ FAIL  |thread-safe| scripts/parallelism.spec.ts > local run priority > leaves CI priority untouched
+TypeError: lowerLocalPriority is not a function
+ ❯ scripts/parallelism.spec.ts:79:5
+     77|
+     78|   it('leaves CI priority untouched', () => {
+     79|     lowerLocalPriority({ CI: 'true' })
+       |     ^
+     80|     lowerLocalPriority({ CI: 'true', DSH_LOCAL_PRIORITY: 'abc' })
+     81|     expect(mockedSetPriority).not.toHaveBeenCalled()
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/6]⎯
+
+ FAIL  |thread-safe| scripts/parallelism.spec.ts > local run priority > lowers a real child process to nice 19
+AssertionError: expected 1 to be +0 // Object.is equality
+
+- Expected
++ Received
+
+- 0
++ 1
+
+ ❯ scripts/parallelism.spec.ts:91:26
+     89|       "const { lowerLocalPriority } = await import('./scripts/parallel…
+     90|     ], { cwd: root, env: { ...process.env, CI: '', DSH_LOCAL_PRIORITY:…
+     91|     expect(probe.status).toBe(0)
+       |                          ^
+     92|     expect(Number(probe.stdout.trim().split('\n').at(-1))).toBe(19)
+     93|   })
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/6]⎯
+
+
+ Test Files  1 failed | 1 skipped (2)
+      Tests  6 failed | 171 skipped (177)
+   Start at  09:32:14
+   Duration  401ms (transform 255ms, setup 119ms, import 207ms, tests 125ms, environment 0ms)
+
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+
+ RUN  v4.1.11 /home/prog7/home/dev/contrib/forks/deepseek-harness/.worktrees/gui-loop-gate-priority
+
+ ❯ |thread-safe| scripts/run-gates.spec.ts (169 tests | 1 failed | 168 skipped) 13ms
+     ↓ shares a 1 CPU coverage budget without multiplying pools
+     ↓ shares a 2 CPU coverage budget without multiplying pools
+     ↓ shares a 4 CPU coverage budget without multiplying pools
+     ↓ shares a 8 CPU coverage budget without multiplying pools
+     ↓ shares a 16 CPU coverage budget without multiplying pools
+     ↓ shares a 64 CPU coverage budget without multiplying pools
+     ↓ bounds overlapping readers and lets the isolated browser pool use the runner
+     × caps local defaults below the CPU count Node reports 10ms
+     ↓ halves the local coverage budget below the memory cap
+     ↓ preserves serial reference overrides on large hosts
+     ↓ honors an explicit coverage budget and partition override
+     ↓ leaves the plain unit inventory with the environment pnpm run test finds
+     ↓ rejects invalid worker budget 0
+     ↓ rejects invalid worker budget -1
+     ↓ rejects invalid worker budget NaN
+     ↓ rejects invalid worker budget 2.5
+     ↓ keeps local documentation defaults unchanged
+     ↓ constructs and executes preflight for a valid non-empty ci-primary graph
+     ↓ constructs and executes preflight for a valid non-empty ci-linux-primary graph
+     ↓ constructs and executes preflight for a valid non-empty ci-static graph
+     ↓ constructs and executes preflight for a valid non-empty ci-lint-contracts-ready graph
+     ↓ constructs and executes preflight for a valid non-empty ci-coverage graph
+     ↓ constructs and executes preflight for a valid non-empty ci-unit graph
+     ↓ constructs and executes preflight for a valid non-empty ci-bench graph
+     ↓ constructs and executes preflight for a valid non-empty ci-snapshot graph
+     ↓ constructs and executes preflight for a valid non-empty ci-artifacts graph
+     ↓ constructs and executes preflight for a valid non-empty ci-consumers graph
+     ↓ constructs and executes preflight for a valid non-empty ci-windows-blocking graph
+     ↓ constructs and executes preflight for a valid non-empty ci-windows-complete graph
+     ↓ constructs and executes preflight for a valid non-empty ci-windows-observational-ready graph
+     ↓ constructs and executes preflight for a valid non-empty node-compat graph
+     ↓ constructs and executes preflight for a valid non-empty check-all graph
+     ↓ constructs and executes preflight for a valid non-empty hygiene graph
+     ↓ constructs and executes preflight for a valid non-empty doc-sync graph
+     ↓ constructs and executes preflight for a valid non-empty doc-quick graph
+     ↓ uses the internal CI benchmark runner without changing the public benchmark scripts
+     ↓ checks all maintained repository references locally and in CI
+     ↓ keeps the public repository link policy in the documentation gate
+     ↓ allocates one CLI help child inside each aggregate when its allowance is undefined
+     ↓ allocates one CLI help child inside each aggregate when its allowance is ""
+     ↓ passes an explicit CLI help allowance "3" to its owner
+     ↓ passes an explicit CLI help allowance "invalid" to its owner
+     ↓ keeps the concrete terminology policy in the documentation gate
+     ↓ checks retrospective releases alongside the current persistence history
+     ↓ requires complete Session format references locally and in CI
+     ↓ keeps package-group subsystem ownership in the documentation gate
+     ↓ keeps the package README Summary limit in the documentation gate
+     ↓ derives the quick documentation aggregate from marked doc-sync leaves
+     ↓ checks the recorded npm dependency catalog in both documentation aggregates
+     ↓ keeps the hygiene aggregate aligned with the package script checks
+     ↓ includes JSON resource checks in local and CI aggregates
+     ↓ caps the local hygiene aggregate at eight workers
+     ↓ schedules the longest documentation leaves before short checks
+     ↓ launches a native pnpm entrypoint directly
+     ↓ keeps the DSH package license policy in ci-primary
+     ↓ keeps the DSH package license policy in ci-static
+     ↓ keeps the DSH package license policy in check-all
+     ↓ rejects new unknown casts in ci-primary
+     ↓ rejects new unknown casts in ci-static
+     ↓ rejects new unknown casts in check-all
+     ↓ rejects new unknown casts in hygiene
+     ↓ rejects silent empty catches in ci-primary
+     ↓ rejects silent empty catches in ci-static
+     ↓ rejects silent empty catches in check-all
+     ↓ rejects silent empty catches in hygiene
+     ↓ rejects new Cordis root reads in ci-primary
+     ↓ rejects new Cordis root reads in ci-static
+     ↓ rejects new Cordis root reads in check-all
+     ↓ rejects new Cordis root reads in hygiene
+     ↓ keeps package dependency enforcement in ci-primary
+     ↓ keeps package dependency enforcement in ci-static
+     ↓ keeps package dependency enforcement in check-all
+     ↓ keeps package dependency enforcement in hygiene
+     ↓ executes default-product experimental isolation in ci-primary
+     ↓ executes default-product experimental isolation in ci-static
+     ↓ executes default-product experimental isolation in check-all
+     ↓ executes default-product experimental isolation in hygiene
+     ↓ keeps the client dependency policy in ci-primary
+     ↓ keeps the client dependency policy in ci-static
+     ↓ keeps the client dependency policy in check-all
+     ↓ keeps weighted approval policy tests in ci-primary
+     ↓ keeps weighted approval policy tests in ci-static
+     ↓ keeps weighted approval policy tests in check-all
+     ↓ keeps hard-coded Client UI copy enforcement in ci-primary
+     ↓ keeps hard-coded Client UI copy enforcement in ci-static
+     ↓ keeps hard-coded Client UI copy enforcement in check-all
+     ↓ keeps hard-coded Client UI copy enforcement in hygiene
+     ↓ keeps browser app-route resolution enforcement in ci-primary
+     ↓ keeps browser app-route resolution enforcement in ci-static
+     ↓ keeps browser app-route resolution enforcement in check-all
+     ↓ keeps browser app-route resolution enforcement in hygiene
+     ↓ keeps application entrypoint enforcement in ci-primary
+     ↓ keeps application entrypoint enforcement in ci-static
+     ↓ keeps application entrypoint enforcement in check-all
+     ↓ keeps application entrypoint enforcement in hygiene
+     ↓ keeps native Windows coverage blocking and behind the complete build
+     ↓ runs the Windows built-bin smoke after other observational gates settle
+     ↓ reuses the Windows build without dropping diagnostics or rebuilding the workspace
+     ↓ runs built Windows smoke after failed diagnostics settle on an existing build
+     ↓ provisions Electron before Windows coverage with partition count undefined
+     ↓ provisions Electron before Windows coverage with partition count 3
+     ↓ provisions the locked Electron binary before built smoke in ci-windows-complete
+     ↓ provisions the locked Electron binary before built smoke in ci-windows-observational-ready
+     ↓ keeps failed Electron provisioning visible without stopping unrelated diagnostics in ci-windows-complete
+     ↓ keeps failed Electron provisioning visible without stopping unrelated diagnostics in ci-windows-observational-ready
+     ↓ only provisions Electron for native Windows coverage in ci-coverage
+     ↓ only provisions Electron for native Windows coverage in ci-artifacts
+     ↓ only provisions Electron for native Windows coverage in ci-windows-blocking
+     ↓ restores the platform descriptor when coverage configuration is rejected
+     ↓ leaves the lane test budget to the inherited environment on both coverage gates
+     ↓ runs the plain unit inventory after the native build and leaves its budget to the inherited environment
+     ↓ selects partitioned coverage only when explicitly configured
+     ↓ rejects an invalid coverage partition count before starting a gate
+     ↓ rejects empty before starting a child
+     ↓ rejects duplicate ids before starting a child
+     ↓ rejects unknown dependencies before starting a child
+     ↓ rejects unknown ordering predecessors before starting a child
+     ↓ rejects cycles before starting a child
+     ↓ rejects mixed cycles before starting a child
+     ↓ rejects an invalid worker count before starting a child
+     ↓ skips dependents after their prerequisite fails
+     ↓ runs an ordered follower after its predecessor fails
+     ↓ runs an ordered follower after its predecessor is skipped
+     ↓ uses the package script when no worker bound is configured
+     ↓ surfaces the configured worker bound on the shared package script
+     ↓ prepares primary source consumers once before they run
+     ↓ reuses contracts from the validated consumer build
+     ↓ keeps standalone doc sync responsible for preparation
+     ↓ runs all source compatibility smokes serially on Node 24.9.0
+     ↓ runs all source compatibility smokes serially on Node 24.19.0
+     ↓ runs all source compatibility smokes serially on Node 26.0.0
+     ↓ keeps source compatibility smokes serial with inherited VITEST_MAX_WORKERS=1
+     ↓ keeps source compatibility smokes serial with inherited VITEST_MAX_WORKERS=8
+     ↓ keeps Node 24.19.0 compatibility source-only
+     ↓ keeps Node 26.0.0 compatibility source-only
+     ↓ builds the complete Node 24.9 artifacts once with skip-typecheck=undefined
+     ↓ builds the complete Node 24.9 artifacts once with skip-typecheck=1
+     ↓ runs the Node 24.9 lazy-search smoke only after a passed build (passed)
+     ↓ runs the Node 24.9 lazy-search smoke only after a passed build (failed)
+     ↓ keeps the static lane source-only
+     ↓ owns the build and orders its artifact consumers
+     ↓ adds the same compare-only web gate after built client artifacts
+     ↓ streams selected gate output without retaining it
+     ↓ reports signal termination independently from exit status
+     ↓ runs a gate that declares no retries exactly once
+     ↓ repeats a failed gate until a later attempt passes
+     ↓ stops at the declared attempt count and keeps the last failure
+     ↓ does not repeat a gate that the fail-fast signal terminated
+     ↓ aborts the aggregate at the first blocking failure
+     ↓ does not abort on a non-blocking gate failure
+     ↓ runs independent gates to completion when fail-fast is disabled
+     ↓ kills the child when the abort signal fires
+     ↓ marks a zero-exit child as aborted when the signal fired
+     ↓ kills the whole gate process tree when the abort signal fires
+     ↓ forwards host interruption signals to the abort path
+     ↓ pairs host signal forwarding with fail-fast at the CLI entrypoint
+     ↓ rejects host signal forwarding without fail-fast
+     ↓ leaves an un-aborted child running to completion
+     ↓ kills a detached descendant that outlived the child when the abort arrives later
+     ↓ keeps a reparented detached descendant tracked across a sampler tick
+     ↓ excludes the root when a parent link returns to it
+     ↓ visits duplicate and cyclic descendant links only once
+     ↓ returns no descendants for an isolated or self-parented root
+     ↓ walks a wide child set without spreading it into call arguments
+     ↓ parses `pid ppid` rows from a POSIX ps dump
+     ↓ parses Windows PowerShell Get-CimInstance output of the same shape
+     ↓ drops blank and malformed lines
+     ↓ targets the root first and each captured descendant after it
+     ↓ terminates the root alone when no descendant was captured
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |thread-safe| scripts/run-gates.spec.ts > CI worker allocation > caps local defaults below the CPU count Node reports
+AssertionError: expected 8 to be 4 // Object.is equality
+
+- Expected
++ Received
+
+- 4
++ 8
+
+ ❯ scripts/run-gates.spec.ts:204:64
+    202|     })
+    203|     // Co-updated with the halved gate budget: 8 CPUs now yield 4 work…
+    204|     expect(defaultConcurrency('ci-static', 60, 8, {}).workers).toBe(4)
+       |                                                                ^
+    205|   })
+    206|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 168 skipped (169)
+   Start at  09:32:54
+   Duration  311ms (transform 135ms, setup 56ms, import 120ms, tests 13ms, environment 0ms)

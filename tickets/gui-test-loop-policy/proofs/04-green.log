@@ -1,0 +1,27 @@
+# Зелёный прогон носителей тикета 04 (финальное дерево после правок rev04-tests, 2026-11-19)
+
+Команда: pnpm exec vitest run scripts/parallelism.spec.ts scripts/run-gates.spec.ts scripts/lane-test-budget.spec.ts scripts/build.spec.ts --maxWorkers=2
+
+```
+ Test Files  4 passed (4)
+      Tests  202 passed (202)
+   Start at  11:14:54
+```
+
+parallelism.spec: gate-бюджет 12→6, 3→1, 1→1, 256→12, CI 256→256, ко-обновлённый 4→2; vitest-бюджет тикета 01 без изменений; приоритет: дефолт 19 (литерал), DSH_LOCAL_PRIORITY 0/7, невалидные ('abc','20','-1','1.5') громкий отказ до setPriority, пустая строка = дефолт, CI no-op; реальная child-проба: readback против os.constants.priority.PRIORITY_LOW (кроссплатформенно), причинность изолирована — из нормального родителя виден before/after-дельта, из уже lowered родителя POSIX-негативный контроль (opt-out пытается поднять nice → отказ EPERM/EACCES, no-op реализация прошла бы с exit 0); wiring-охранник: все три entrypoint содержат вызов lowerLocalPriority(process.env). run-gates.spec: ко-обновлённый ci-static 8→4, остальные кейсы (CI-ветка, 256→48/32, override, doc-sync cap 8) без правок. lane-test-budget.spec и build.spec зелёные.
+
+Правки rev04-tests (один раунд): P2-A Windows-хрупкость → сравнение с PRIORITY_LOW-константой; P2-B причинность пробы → before/after + негативный контроль EACCES (фактический отказ libuv зафиксирован в прогоне); P3-A литерал 19 вместо само-ссылочной константы; P3-B wiring-охранник на три entrypoint.
+
+# Живая проба приоритета агрегата (критерий 3)
+
+Запуск `pnpm run test:docs` (run-gates doc-quick) на дереве тикета; sample `ps -eo pid,ni,args` в момент прогона: 04-live-nice.log.
+
+```
+1805250  19 node … tsx/dist/loader.mjs scripts/run-gates.ts doc-quick
+```
+
+Процесс агрегата на nice 19; дети наследуют. Обёртки pnpm/sh/tsx-cli остаются на 0 (приоритет ставится в main агрегата).
+
+# Applied gate-бюджет
+
+Зонд-кейс lane-test-budget.spec (runtime-зонд корневого конфига) и кейсы defaultConcurrency пинят бюджет; живая строка run-gates «worker settings» при CI-прогонах не меняется (CI-ветка).
