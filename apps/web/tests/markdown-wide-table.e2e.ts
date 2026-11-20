@@ -1,19 +1,16 @@
-// Web e2e scenario: markdown tables in the message column, deepsuite-chat
-// parity. Tables under four columns (and long-cell tables) fill the 748px
-// message column and wrap; four-or-more-column tables keep their natural
-// width, scroll horizontally inside their wrapper, and — through the
-// renderer's `md-table-wide` hook plus AssistantMarkdown's container-query
-// breakout — span the whole transcript width instead of clipping at the
-// message column, with the table content still starting at the message
-// column's left edge. When the transcript is narrower than the message
-// column the breakout clamps to neutral and the plain in-column scroll
-// remains.
+// Web e2e scenario: markdown tables in the message column. Tables under four
+// columns (and long-cell tables) fill the message column and wrap;
+// four-or-more-column tables keep their natural width and scroll horizontally
+// inside a bounded block that stays within the message column — they never
+// break out past it. The block's themed scrollbar is visible whenever the
+// natural width overflows, without hover, and an expand control opens the same
+// table in the shared fullscreen lightbox.
 //
-// Only a real engine lays out CSS tables and resolves container-query
-// units, so the fill/scroll/breakout relations, the lead-padding alignment,
-// arrow-key scrolling, and the zoom/DPR arms are all measured in Chromium
-// across viewport stops. The golden records relations and booleans, never
-// pixels: absolute widths document the platform, not the behavior.
+// Only a real engine lays out CSS tables, so the fill/scroll/containment
+// relations, arrow-key scrolling, the always-visible scrollbar, the fullscreen
+// preview, and the zoom/DPR arms are all measured in Chromium across viewport
+// stops. The golden records relations and booleans, never pixels: absolute
+// widths document the platform, not the behavior.
 //
 // Zero model calls: the transcript is a closed turn assembled through the
 // Session API and seeded cold; a stray stream would fail loud with
@@ -64,11 +61,12 @@ const TABLE_NAMES = ['fill', 'wide', 'long-cell']
 
 /**
  * Viewport sweep. The wide stops leave the transcript far wider than the
- * 748px message column, so the breakout relation holds with a fat margin on
- * every platform; the narrow stop drops the transcript below the message
- * column, which must clamp the breakout to neutral. The sidebar is collapsed
- * for the whole sweep (see beforeAll), so the transcript width follows the
- * viewport identically on overlay- and classic-scrollbar platforms.
+ * message column, so the containment relation (the wide block never exceeds
+ * the column) holds with a fat margin on every platform; the narrow stop drops
+ * the transcript below the message column, where the block still fills the
+ * available width and scrolls. The sidebar is collapsed for the whole sweep
+ * (see beforeAll), so the transcript width follows the viewport identically on
+ * overlay- and classic-scrollbar platforms.
  */
 const WIDTHS = [1680, 1100, 640]
 
@@ -169,12 +167,10 @@ interface TableReading {
   clientWidth: number
   /** Rendered wrapper height; wrapping shows up as growth when the column narrows. */
   height: number
-  /** Renderer marked the table with the `md-table-wide` breakout hook. */
+  /** Renderer marked the table with the `md-table-wide` hook. */
   wideHook: boolean
-  /** Resolved lead padding (the breakout's alignment compensation). */
-  paddingLeft: number
-  /** The table's own left x, for the content-alignment relation. */
-  tableLeft: number
+  /** Resolved horizontal overflow: the block scrolls visibly without hover. */
+  overflowX: string
 }
 
 /** Read all three tables' relations in one pass. */
@@ -192,8 +188,7 @@ function readTables(page: Page): Promise<TableReading[]> {
         clientWidth: wrapper.clientWidth,
         height: wrapper.getBoundingClientRect().height,
         wideHook: wrapper.classList.contains('md-table-wide'),
-        paddingLeft: Number.parseFloat(getComputedStyle(wrapper).paddingLeft),
-        tableLeft: table.getBoundingClientRect().left,
+        overflowX: getComputedStyle(wrapper).overflowX,
       }
     })
   }, MARKERS)
@@ -229,7 +224,7 @@ async function awaitTableLayout(target: Page): Promise<void> {
 /**
  * Render the golden body: relations only. `fills` is the wrap-first claim
  * (the wrapper has no residual horizontal scroll), `scrolls` the many-column
- * fallback, and `breaks out` whether the wide wrapper spans past the message
+ * fallback, and `stays within` whether the wrapper never exceeds the message
  * column (compared against the fill table, which by construction is exactly
  * the message column's width).
  * @param stops - the measured stops, in sweep order.
@@ -241,13 +236,13 @@ function renderGeometry(stops: TableStop[], wrapTighter: Map<string, boolean>): 
   return [
     '# Markdown wide-table relations',
     '',
-    '| viewport | table | fills the column | scrolls | breaks out past the column |',
+    '| viewport | table | fills the column | scrolls | stays within the column |',
     '| --- | --- | --- | --- | --- |',
     ...stops.flatMap((stop) => {
       const columnWidth = stop.tables[0]!.clientWidth
       return stop.tables.map((table, index) =>
         `| ${String(stop.width)}px | ${TABLE_NAMES[index]} | ${String(table.overflow <= 1)} `
-        + `| ${String(table.overflow > 1)} | ${String(table.clientWidth > columnWidth + 8)} |`,
+        + `| ${String(table.overflow > 1)} | ${String(table.clientWidth <= columnWidth + 8)} |`,
       )
     }),
     '',
@@ -257,7 +252,7 @@ function renderGeometry(stops: TableStop[], wrapTighter: Map<string, boolean>): 
   ].join('\n')
 }
 
-describe('web e2e: markdown tables fill the column, wide ones break out and scroll', () => {
+describe('web e2e: markdown tables fill the column, wide ones scroll inside it and expand', () => {
   let scaffold: WebScaffold
   let browser: Browser
   let page: Page
@@ -321,13 +316,13 @@ describe('web e2e: markdown tables fill the column, wide ones break out and scro
     return swept
   }
 
-  it('fills narrow tables, scrolls wide ones, and breaks them out where the transcript is wider', async () => {
+  it('fills narrow tables and scrolls wide ones inside the column', async () => {
     onTestFailed(() => saveFailureShot(page, 'web-e2e-markdown-wide-table'))
     const stops = await sweep()
     for (const stop of stops) {
       const [fill, wide, longCell] = stop.tables
       const columnWidth = fill!.clientWidth
-      // #520: an ordinary wide table fills the message column and wraps…
+      // An ordinary wide table fills the message column and wraps…
       expect(fill!.overflow, `fill viewport ${String(stop.width)}`).toBeLessThanOrEqual(1)
       // …a long unbroken token and long CJK prose wrap instead of forcing a scroll…
       expect(longCell!.overflow, `long-cell viewport ${String(stop.width)}`).toBeLessThanOrEqual(1)
@@ -337,19 +332,10 @@ describe('web e2e: markdown tables fill the column, wide ones break out and scro
       expect(wide!.wideHook).toBe(true)
       expect(fill!.wideHook).toBe(false)
       expect(longCell!.wideHook).toBe(false)
-      if (stop.width > 748) {
-        // Breakout: the wide wrapper spans past the message column, and its
-        // lead padding keeps the table content starting at the message
-        // column's left edge (compared to the fill table's content).
-        expect(wide!.clientWidth, `wide breakout at ${String(stop.width)}`).toBeGreaterThan(columnWidth + 8)
-        expect(wide!.paddingLeft, `lead at ${String(stop.width)}`).toBeGreaterThan(0)
-        expect(Math.abs(wide!.tableLeft - fill!.tableLeft), `alignment at ${String(stop.width)}`).toBeLessThan(1.5)
-      } else {
-        // Below the message column there is no spare width: the breakout
-        // clamps to neutral and the wrapper stays the column's width.
-        expect(Math.abs(wide!.clientWidth - columnWidth), `neutral at ${String(stop.width)}`).toBeLessThan(1.5)
-        expect(wide!.paddingLeft, `no lead at ${String(stop.width)}`).toBeLessThan(1.5)
-      }
+      // Containment: the wide block never paints past the message column at any
+      // stop, and its scrollbar is visible without hover (overflow stays auto).
+      expect(wide!.clientWidth, `containment at ${String(stop.width)}`).toBeLessThanOrEqual(columnWidth + 1.5)
+      expect(wide!.overflowX, `visible scroll at ${String(stop.width)}`).toBe('auto')
     }
     // Wrap-first engaged for real: the filling tables grow taller as the
     // column narrows (the wide table only scrolls, so it is exempt).
@@ -413,31 +399,25 @@ describe('web e2e: markdown tables fill the column, wide ones break out and scro
     expect(touchConsole.pageErrors).toEqual([])
   })
 
-  it('reveals the wide table scrollbar on hover only', async () => {
+  it('keeps the wide table scrollbar visible without hover', async () => {
     onTestFailed(() => saveFailureShot(page, 'web-e2e-markdown-wide-table-scrollbar'))
     await sweep()
     await settleAt(1680)
     const wide = page.locator('[class*="tableScroll"]', { hasText: WIDE_MARKER })
-    // Chromium never repaints state-conditioned scrollbar STYLES, so the
-    // hover reveal toggles overflow-x itself; the resting padding matches
-    // the bar height so the swap does not move anything below. Both are
-    // ordinary properties whose computed values follow :hover.
-    const overflowState = () => wide.evaluate(element => [
-      getComputedStyle(element).overflowX,
-      getComputedStyle(element).paddingBottom,
-    ].join(' '))
-    // Park the pointer away and drop focus: the keyboard case above leaves
-    // the wrapper focused, and focus-visible also reveals the bar.
+    // The block scrolls visibly at rest: overflow stays auto with the pointer
+    // away and no focus, so the overflowing columns are discoverable without
+    // hovering, and the bar's presence does not shift the block's height.
+    const overflowState = () => wide.evaluate(element => getComputedStyle(element).overflowX)
     await page.mouse.move(4, 4)
     await wide.evaluate((element) => { element.blur() })
-    await expect.poll(overflowState, { timeout: 5_000 }).toBe('hidden 5px')
-    // Resting hidden overflow keeps the scroll position reachable and intact.
-    expect(await wide.evaluate(element => element.scrollLeft)).toBeGreaterThanOrEqual(0)
+    await expect.poll(overflowState, { timeout: 5_000 }).toBe('auto')
+    const restingHeight = await wide.evaluate(element => element.getBoundingClientRect().height)
+    expect(await wide.evaluate(element => element.scrollWidth - element.clientWidth)).toBeGreaterThan(1)
     await wide.hover()
-    await expect.poll(overflowState, { timeout: 5_000 }).toBe('scroll 0px')
-    // Pointer leaves: the bar rests hidden again.
+    await expect.poll(overflowState, { timeout: 5_000 }).toBe('auto')
+    expect(await wide.evaluate(element => element.getBoundingClientRect().height)).toBe(restingHeight)
     await page.mouse.move(4, 4)
-    await expect.poll(overflowState, { timeout: 5_000 }).toBe('hidden 5px')
+    await expect.poll(overflowState, { timeout: 5_000 }).toBe('auto')
     expect(tripwire.pageErrors).toEqual([])
   }, 120_000)
 
@@ -470,7 +450,7 @@ describe('web e2e: markdown tables fill the column, wide ones break out and scro
     expect(tripwire.pageErrors).toEqual([])
   }, 120_000)
 
-  it('gives the gutter to painted table content, not transparent breakout padding', async () => {
+  it('keeps the column width handle clickable beside every table', async () => {
     onTestFailed(() => saveFailureShot(page, 'web-e2e-markdown-width-handle-hit'))
     await settleAt(1680)
     const hitAtHandle = async (marker: string) => {
@@ -488,23 +468,18 @@ describe('web e2e: markdown tables fill the column, wide ones break out and scro
         const y = tableRect.top + tableRect.height / 2
         const hit = document.elementFromPoint(x, y)
         return {
-          tableCoversHandle: tableRect.left <= x && tableRect.right >= x,
           hitTable: hit !== null && table.contains(hit),
           hitHandle: hit !== null && handle.contains(hit),
         }
       }, marker)
     }
 
-    expect(await hitAtHandle(WIDE_MARKER)).toEqual({
-      tableCoversHandle: true,
-      hitTable: true,
-      hitHandle: false,
-    })
-    expect(await hitAtHandle(SHORT_MARKER)).toEqual({
-      tableCoversHandle: false,
-      hitTable: false,
-      hitHandle: true,
-    })
+    // Contained blocks clip their overflow, so the resize handle stays
+    // clickable beside both a scrolling wide table and a fitting one: the
+    // table never steals the hit even when its clipped layout box reaches
+    // into the gutter.
+    expect(await hitAtHandle(WIDE_MARKER)).toEqual({ hitTable: false, hitHandle: true })
+    expect(await hitAtHandle(SHORT_MARKER)).toEqual({ hitTable: false, hitHandle: true })
     expect(tripwire.pageErrors).toEqual([])
   }, 120_000)
 
@@ -549,13 +524,33 @@ describe('web e2e: markdown tables fill the column, wide ones break out and scro
       const relations = (tables: TableReading[]) => tables.map(table => ({
         marker: table.marker,
         fills: table.overflow <= 1,
-        breaksOut: table.clientWidth > tables[0]!.clientWidth + 8,
+        staysWithin: table.clientWidth <= tables[0]!.clientWidth + 8,
       }))
       expect(relations(readings)).toEqual(relations(baseline.tables))
       expect(hidpiTripwire.pageErrors).toEqual([])
     } finally {
       await hidpiPage.close()
     }
+  }, 120_000)
+
+  it('expands the wide table into the fullscreen lightbox and restores focus', async () => {
+    onTestFailed(() => saveFailureShot(page, 'web-e2e-markdown-wide-table-expand'))
+    await sweep()
+    await settleAt(1680)
+    const wide = page.locator('[class*="tableScroll"]', { hasText: WIDE_MARKER })
+    await wide.evaluate((element) => { element.scrollIntoView({ block: 'center', behavior: 'instant' }) })
+    const trigger = wide.locator('button[aria-label="Expand table"]')
+    await trigger.focus()
+    await trigger.click()
+    const dialog = page.getByRole('dialog', { name: 'Table preview' })
+    await dialog.waitFor({ timeout: 5_000 })
+    // The preview carries the same table, including its last column header.
+    expect(await dialog.locator('table').textContent()).toContain(WIDE_MARKER)
+    expect(await dialog.locator('table thead th').count()).toBe(12)
+    await page.keyboard.press('Escape')
+    await expect.poll(() => page.getByRole('dialog', { name: 'Table preview' }).count()).toBe(0)
+    expect(await trigger.evaluate(element => document.activeElement === element)).toBe(true)
+    expect(tripwire.pageErrors).toEqual([])
   }, 120_000)
 
   it('matches the committed geometry golden', async () => {

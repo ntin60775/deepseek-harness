@@ -39,6 +39,7 @@
 - blockquote:
   - paragraph: Quoted reasoning.
 - separator
+- button "Expand table"
 - table:
   - rowgroup:
     - row "First Second Third Fourth Fifth Sixth":

@@ -33,6 +33,8 @@ import { HoverCard } from '../HoverCard.tsx'
 import { DraggableImage } from '../DraggableImage.tsx'
 import { ImageLightbox } from '../ImageLightbox.tsx'
 import { ImagePreview } from '../ImagePreview.tsx'
+import { TableLightbox } from '../TableLightbox.tsx'
+import { IconFullscreenOutlineRegular } from '../icons/index.tsx'
 import type { PositionedBlock } from './incremental.ts'
 import css from './MarkdownText.module.css'
 
@@ -46,10 +48,22 @@ export interface MarkdownCodeLabels {
   toolbarLabels?: CodeToolbarLabels | undefined
 }
 
+/** Localized chrome for the wide-table fullscreen preview. */
+export interface MarkdownTableLabels {
+  /** Accessible label of the expand control. */
+  expand: string
+  /** Accessible name of the preview dialog. */
+  dialog: string
+  /** Accessible label of the close control. */
+  close: string
+}
+
 /** Localized chrome for a Markdown document. */
 export interface MarkdownLabels {
   code: MarkdownCodeLabels
   footnotes: string
+  /** Wide-table preview chrome; absent leaves wide tables without an expand control. */
+  table?: MarkdownTableLabels | undefined
 }
 
 function sanitizeUrl(url: string): string {
@@ -532,28 +546,58 @@ function renderTable(node: Md.Table, key: Key, context: MarkdownRenderContext): 
   const columns = align === null ? headRow?.children.length ?? 0 : align.length
   // Four or more columns read as a comparison matrix: the block keeps the
   // table at natural width and exposes the stable `md-table-wide` hook so a
-  // hosting layout (the chat transcript) can widen it past the message
-  // column. Narrower tables — and any table inside a blockquote — fill the
-  // column and wrap instead (deepsuite chat TableWrapper parity).
+  // hosting layout can style it as a bounded, scrolling block. Narrower tables
+  // — and any table inside a blockquote — fill the column and wrap instead.
   const wide = columns >= 4 && context.inBlockquote !== true
+  const table = (
+    <table>
+      {headRow !== undefined && <thead>{renderTableRow(headRow, 'th', align, 0, context)}</thead>}
+      {bodyRows.length > 0 && (
+        <tbody>
+          {bodyRows.map((row, index) => renderTableRow(row, 'td', align, index + 1, context))}
+        </tbody>
+      )}
+    </table>
+  )
+  return <MarkdownTable key={key} wide={wide} streaming={context.streaming} labels={context.labels.table}>{table}</MarkdownTable>
+}
+
+/**
+ * One rendered table as a bounded scroll block. Wide tables keep their natural
+ * width and scroll inside the wrapper; when the owner supplies table preview
+ * labels and the document is settled, an expand control opens the same table in
+ * the shared fullscreen lightbox. The wrapper stays the table's parent element
+ * so the no-label DOM matches the pinned Markdown fixtures.
+ * @param props.wide - whether the table takes the natural-width md-table-wide arm.
+ * @param props.streaming - whether the document is still streaming (no expand control yet).
+ * @param props.labels - owner-resolved preview chrome, or undefined for no expand control.
+ * @param props.children - the rendered table element.
+ * @returns the table scroll block and its optional fullscreen preview.
+ */
+function MarkdownTable({ wide, streaming, labels, children }: {
+  wide: boolean
+  streaming: boolean
+  labels: MarkdownTableLabels | undefined
+  children: ReactNode
+}): ReactNode {
+  const [open, setOpen] = useState(false)
+  const close = useCallback(() => { setOpen(false) }, [])
+  const expandLabels = wide && !streaming ? labels : undefined
   return (
-    // On hover-capable inputs, wide tables rest with overflow-x hidden (the
-    // hover-revealed bar in MarkdownText.module.css), dropping Chromium's implicit scroller
-    // focusability — the explicit tabindex keeps them keyboard-reachable,
-    // and :focus-visible restores scrolling.
     <div
-      key={key}
-      className={clsx(css.tableScroll, wide ? 'md-table-wide' : css.tableFill)}
+      className={clsx(css.tableScroll, wide ? 'md-table-wide' : css.tableFill, expandLabels !== undefined && css.tableExpandable)}
       tabIndex={wide ? 0 : undefined}
     >
-      <table>
-        {headRow !== undefined && <thead>{renderTableRow(headRow, 'th', align, 0, context)}</thead>}
-        {bodyRows.length > 0 && (
-          <tbody>
-            {bodyRows.map((row, index) => renderTableRow(row, 'td', align, index + 1, context))}
-          </tbody>
-        )}
-      </table>
+      {expandLabels !== undefined && (
+        <button type="button" className={css.tableExpand} title={expandLabels.expand} aria-label={expandLabels.expand}
+          onClick={() => { setOpen(true) }}>
+          <IconFullscreenOutlineRegular size={14} />
+        </button>
+      )}
+      {children}
+      {open && expandLabels !== undefined && (
+        <TableLightbox labels={{ dialog: expandLabels.dialog, close: expandLabels.close }} onClose={close}>{children}</TableLightbox>
+      )}
     </div>
   )
 }

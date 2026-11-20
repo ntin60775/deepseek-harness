@@ -1,0 +1,29 @@
+/* Scrolling stage content: auto margins center smaller tables and collapse to
+   zero on the overflowing sides so the scroll start stays reachable. */
+.viewport {
+  position: relative;
+  display: flex;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+}
+
+.inner {
+  margin: auto;
+}
+
+/* The preview sits over the dimmed transcript, so the table needs its own
+   opaque surface. Width and height cap at the stage box (viewport minus the
+   lightbox's 40px padding and the platform caption clearance); a larger table
+   scrolls inside the card instead of painting past the stage. */
+.preview {
+  width: max-content;
+  max-width: calc(100vw - 80px);
+  max-height: calc(100vh - var(--dsh-frame-chrome-top, 0px) - 80px);
+  overflow: auto;
+  padding: 8px 16px;
+  border: 0.5px solid var(--dsw-alias-border-l2);
+  border-radius: var(--dsw-radius-lg);
+  background: var(--dsw-specific-input-major);
+  box-shadow: var(--dsw-elevation-prominent);
+}

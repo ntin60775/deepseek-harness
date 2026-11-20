@@ -6,11 +6,12 @@ import type { ChatViewSlotProps } from './contract/slots.ts'
 /**
  * Build the complete Markdown chrome copy for one locale revision.
  * @param t - Chat locale seat.
- * @returns Labels for code fences and footnotes.
+ * @returns Labels for code fences, footnotes, and the wide-table preview.
  */
 export function markdownLabels(t: ChatViewSlotProps['t']): MarkdownLabels {
   return {
     code: { copyLabel: t('copy'), copiedLabel: t('copied'), toolbarLabels: { codeLabel: t('codeBlock.title'), wrapLabel: t('codeBlock.wrap'), unwrapLabel: t('codeBlock.unwrap') } },
     footnotes: t('markdown.footnotes'),
+    table: { expand: t('table.expand'), dialog: t('table.dialog'), close: t('table.close') },
   }
 }

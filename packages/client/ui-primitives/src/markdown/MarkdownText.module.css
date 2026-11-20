@@ -203,31 +203,51 @@
   overscroll-behavior-x: contain;
 }
 
-/* Hover-capable inputs reveal a wide table's bar on hover or keyboard focus.
-   Other inputs keep native horizontal scrolling. Chromium never repaints state-conditioned
-   scrollbar STYLES (neither hover-conditioned `::-webkit-scrollbar*` rules
-   nor a :hover `scrollbar-color` change reaches the painted bar), so the
-   toggle is `overflow-x` itself — a layout change repaints reliably. The
-   resting padding matches the themed bar's height on the WebKit scrollbar
-   path. There, `scroll` reserves that height even when the table fits.
-   Other engines and overlay scrollbars may reserve a different height.
-   Wheel and trackpad scrolling need the pointer over the table, which is
-   already the hover that re-enables scrolling. */
-.tableScroll:global(.md-table-wide):focus-visible {
-  overflow-x: scroll;
-  padding-bottom: 0;
+/* Wide tables (the renderer's >=4-column md-table-wide hook) read as a bounded
+   block inside the hosting column: a code-block surface, hairline border, and
+   rounded corners, with the themed horizontal scrollbar appearing whenever the
+   natural width overflows. The block never paints past its column; the
+   fullscreen expand control (when the owner supplies table labels) is the way
+   to read a table wider than the column. */
+.tableScroll:global(.md-table-wide) {
+  position: relative;
+  box-sizing: border-box;
+  padding: 4px 12px;
+  border: 0.5px solid var(--dsw-alias-border-l2);
+  border-radius: var(--dsw-radius-md);
+  background: var(--dsw-alias-markdown-code-block);
 }
 
-@media (hover: hover) {
-  .tableScroll:global(.md-table-wide) {
-    overflow-x: hidden;
-    padding-bottom: var(--dsh-scrollbar-width, 5px);
-  }
+/* The expand control floats in the block's top-right corner over a reserved
+   gap in the last header cell, so it never covers header text at rest. */
+.tableExpand {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border: 0.5px solid var(--dsw-alias-border-l2);
+  border-radius: var(--dsw-radius-sm);
+  background: var(--dsw-alias-markdown-code-block);
+  color: var(--dsw-alias-label-tertiary);
+  cursor: pointer;
+}
 
-  .tableScroll:global(.md-table-wide):hover {
-    overflow-x: scroll;
-    padding-bottom: 0;
-  }
+.tableExpand:hover {
+  background: var(--dsw-alias-interactive-bg-hover);
+  color: var(--dsw-alias-label-primary);
+}
+
+.tableExpand:focus-visible {
+  outline: var(--dsw-focus-ring-width) solid var(--dsw-focus-ring-color, var(--dsw-alias-state-business-primary));
+  outline-offset: 2px;
+}
+
+.tableExpandable thead th:last-child {
+  padding-right: 36px;
 }
 
 /* Chromium keyboard-focuses scrollable containers by default; the ring uses
