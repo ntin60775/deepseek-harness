@@ -99,11 +99,53 @@ describe('dsh-tool-subagent', () => {
     }
   })
 
+  it('starts the child in the requested absolute working directory', async () => {
+    let childCwd: string | undefined
+    const ctx = await setup({ provider: 'mock' }, {
+      onStart: (request) => { childCwd = request.cwd },
+    })
+    const parent = modelSelectionSetupAgent(ctx)
+    const target = mkdtempSync(path.join(tmpdir(), 'subagent-cwd-'))
+    try {
+      const result = await callSubagent(ctx, {
+        description: 'work in project',
+        prompt: 'deploy the project',
+        cwd: target,
+      }, { agent: parent })
+      expect(result.isError).toBe(false)
+      expect(childCwd).toBe(target)
+    } finally {
+      await ctx.fiber.dispose()
+      rmSync(target, { recursive: true, force: true })
+    }
+  })
+
+  it('resolves a relative child directory against the parent directory', async () => {
+    let childCwd: string | undefined
+    const ctx = await setup({ provider: 'mock' }, {
+      onStart: (request) => { childCwd = request.cwd },
+    })
+    const parent = modelSelectionSetupAgent(ctx)
+    const parentCwd = ctx.workingDirectory.get(parent.session)
+    try {
+      const result = await callSubagent(ctx, {
+        description: 'work in child project',
+        prompt: 'deploy the project',
+        cwd: 'child-project',
+      }, { agent: parent })
+      expect(result.isError).toBe(false)
+      expect(childCwd).toBe(path.resolve(parentCwd, 'child-project'))
+    } finally {
+      await ctx.fiber.dispose()
+    }
+  })
+
   it('exposes only task inputs without scheduling controls', async () => {
     const ctx = await setup({ provider: 'mock' })
     const schema = ctx.tools.schemas().find(s => s.name === 'subagent')
     const props = (schema!.parameters as { properties?: Record<string, unknown> }).properties ?? {}
     expect(Object.keys(props).sort()).toEqual([
+      'cwd',
       'description',
       'name',
       'prompt',

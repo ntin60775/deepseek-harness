@@ -232,6 +232,12 @@ export function apply(ctx: Context, config: Config): void {
           required: true,
           description: wording.promptDescription,
         },
+        cwd: {
+          type: 'string',
+          description: 'Working directory for the subagent session: an absolute path, or a path relative to the parent '
+            + "session's directory. Omit to inherit the parent directory. Project-scoped tool and skill delivery "
+            + 'resolves from this directory, so set it when the child works in a different project.',
+        },
         ...presets.choices === undefined ? {} : {
           agent_preset: {
             type: 'string' as const,
@@ -320,6 +326,7 @@ export function apply(ctx: Context, config: Config): void {
         const request = {
           prompt: [{ type: 'text', text: args.prompt }] as ContentBlock[],
           parent,
+          ...args.cwd === undefined ? {} : { cwd: args.cwd },
           ...agentPreset === undefined ? {} : { agentPreset },
           ...requestedChildAgentOptions !== undefined ? { agentOptions: requestedChildAgentOptions } : {},
           ...maxDepth !== undefined ? { maxDepth } : {},
