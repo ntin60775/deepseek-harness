@@ -3,8 +3,8 @@ node_type: runbook
 title: Pin a per-model reasoning default on a pi-ai provider route
 service: ops
 status: active
-updated: 2026-11-10
-tags: [llm, pi-ai, reasoning-effort, provider-config, alibaba, qwen]
+updated: 2026-11-20
+tags: [llm, pi-ai, reasoning-effort, provider-config, alibaba, qwen, glm]
 links:
   part_of: [README.md]
   depends_on: [../user/guide/providers.md]
@@ -27,15 +27,16 @@ A route's reasoning default is one route-level field, so the models sharing that
 
 ## Alibaba Qwen Token Plan on this machine
 
-`$DSH_HOME/profiles/web/cordis.patch.yml` serves `qwen3.8-flash`, `qwen3.8-max`, and `deepseek-v4.1-flash-1017` from one endpoint across three routes under the same `QWEN_TOKEN_PLAN_API_KEY` credential reference and the same `https://token-plan.maas.qwencloudapi.com/compatible-mode/v1` base URL. Each model excludes `low` through its declared levels, and each route names a default its own model declares:
+`$DSH_HOME/profiles/web/cordis.patch.yml` serves `qwen3.8-flash`, `qwen4-max-preview`, `deepseek-v4.1-flash-1017`, and `glm-5.3` from one endpoint across four routes under the same `QWEN_TOKEN_PLAN_API_KEY` credential reference and the same `https://token-plan.maas.qwencloudapi.com/compatible-mode/v1` base URL. Each model excludes `low` through its declared levels, and each route names a default its own model declares:
 
 | Route | Model | Offered levels | Route `reasoning` |
 |---|---|---|---|
 | `qwen-token-plan` | `qwen3.8-flash` | `medium`, `xhigh` | `xhigh` |
-| `qwen-token-plan-max` | `qwen3.8-max` | `medium`, `xhigh` | `medium` |
+| `qwen-token-plan-glm` | `glm-5.3` | `high`, `max` | `high` |
+| `qwen-token-plan-max` | `qwen4-max-preview` | `medium`, `xhigh` | `medium` |
 | `qwen-token-plan-deepseek` | `deepseek-v4.1-flash-1017` | `high`, `max` | `high` |
 
-`qwen-token-plan` is the catalog route and inherits `compat`; the other two declare `api: openai-completions` and repeat the catalog `compat` block (`thinkingFormat: qwen`, `supportsReasoningEffort: true`, `supportsStrictMode: true`, `supportsStore: false`, `supportsDeveloperRole: false`). `agent-default-model` names `qwen-token-plan` / `qwen3.8-flash`, and `subagent-model-selection-settings.allowedModels` names `qwen-token-plan-max` for `qwen3.8-max`.
+`qwen-token-plan` is the catalog route and inherits `compat`; the other three declare `api: openai-completions` and repeat the catalog `compat` block (`thinkingFormat: qwen`, `supportsReasoningEffort: true`, `supportsStrictMode: true`, `supportsStore: false`, `supportsDeveloperRole: false`). `agent-default-model` names `qwen-token-plan-max` / `qwen4-max-preview`, and `subagent-model-selection-settings.allowedModels` names all four routes plus `deepseek-account` / `deepseek-flash`.
 
 ## Consequences
 
