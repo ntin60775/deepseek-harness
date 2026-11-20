@@ -730,7 +730,9 @@ describe('web e2e: long Chat scroll contract', () => {
             }, 0) }
         })
         expect(before.groupHeight).toBeGreaterThan(before.visibleHeight * 3)
-        if (scenario.bodyParagraphs === 32) expect(before.visibleSteps).toBe(0)
+        // body-only fills the view with prose; large-input's tall composer plus the
+        // reply-card body likewise leave no process group inside the visible window.
+        if (scenario.bodyParagraphs === 32 || scenario.name === 'large-input') expect(before.visibleSteps).toBe(0)
         else expect(before.visibleSteps).toBeGreaterThan(0)
         if (scenario.name === 'cancel-all-during-fold') {
           await openSettings(page, 'en')

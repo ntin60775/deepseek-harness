@@ -32,8 +32,9 @@ const HEADER_ACTION_RIGHT_OFFSETS = { search: -61, view: -29, add: 3 }
  * @param row - visible, hovered Workspace or Session row.
  * @returns row bounds, action geometry, and browser hit-test results.
  */
-async function measureRowActions(row: Locator) {
-  return row.evaluate((element) => {
+async function measureRowActions(row: Locator, targetSize: number) {
+  return row.evaluate((element, size) => {
+    const half = size / 2
     const rowRect = element.getBoundingClientRect()
     const title = element.querySelector<HTMLElement>('[class*="title"]')
     if (title === null) throw new Error('row title not in the DOM')
@@ -50,15 +51,17 @@ async function measureRowActions(row: Locator) {
         const style = getComputedStyle(button)
         const center = { x: rect.x + rect.width / 2, y: rect.y + rect.height / 2 }
         // Side samples cover the outer target; corner samples stay inside the rounded border.
+        const edge = half - 0.5
+        const corner = half - 2.5
         const points = [
-          { x: center.x - 11.5, y: center.y },
-          { x: center.x + 11.5, y: center.y },
-          { x: center.x, y: center.y - 11.5 },
-          { x: center.x, y: center.y + 11.5 },
-          { x: center.x - 9.5, y: center.y - 9.5 },
-          { x: center.x + 9.5, y: center.y - 9.5 },
-          { x: center.x - 9.5, y: center.y + 9.5 },
-          { x: center.x + 9.5, y: center.y + 9.5 },
+          { x: center.x - edge, y: center.y },
+          { x: center.x + edge, y: center.y },
+          { x: center.x, y: center.y - edge },
+          { x: center.x, y: center.y + edge },
+          { x: center.x - corner, y: center.y - corner },
+          { x: center.x + corner, y: center.y - corner },
+          { x: center.x - corner, y: center.y + corner },
+          { x: center.x + corner, y: center.y + corner },
         ]
         const hits = (x: number, y: number): boolean => {
           const target = document.elementFromPoint(x, y)
@@ -83,19 +86,19 @@ async function measureRowActions(row: Locator) {
             x: glyphRect.x + glyphRect.width / 2 - center.x,
             y: glyphRect.y + glyphRect.height / 2 - center.y,
           },
-          insideRow: center.x - 12 >= rowRect.left && center.x + 12 <= rowRect.right
-            && center.y - 12 >= rowRect.top && center.y + 12 <= rowRect.bottom,
+          insideRow: center.x - half >= rowRect.left && center.x + half <= rowRect.right
+            && center.y - half >= rowRect.top && center.y + half <= rowRect.bottom,
           points,
           edgeHits: points.map(({ x, y }) => hits(x, y)),
-          // Clear Chromium's boundary rounding while still rejecting an oversized 28px target.
+          // Clear Chromium's boundary rounding while still rejecting an oversized target.
           outsideHits: [
-            hits(center.x - 13.5, center.y), hits(center.x + 13.5, center.y),
-            hits(center.x, center.y - 13.5), hits(center.x, center.y + 13.5),
+            hits(center.x - (half + 1.5), center.y), hits(center.x + (half + 1.5), center.y),
+            hits(center.x, center.y - (half + 1.5)), hits(center.x, center.y + (half + 1.5)),
           ],
         }
       }),
     }
-  })
+  }, targetSize)
 }
 
 describe('web e2e: sidebar search alignment and row action targets', () => {
@@ -574,7 +577,7 @@ describe('web e2e: sidebar search alignment and row action targets', () => {
     }
   })
 
-  it.each(['session', 'workspace'] as const)('keeps %s action glyphs in 16px layout space with 24px buttons', async (kind) => {
+  it.each(['session', 'workspace'] as const)('keeps %s action glyphs within their layout space and target bounds', async (kind) => {
     onTestFailed(() => saveFailureShot(page, `web-e2e-sidebar-${kind}-action-targets`))
     const row = kind === 'session'
       ? page.locator('[data-row-key="session:sidebar-action-geometry"]')
@@ -582,20 +585,28 @@ describe('web e2e: sidebar search alignment and row action targets', () => {
     const restingBox = await row.boundingBox()
     await row.hover()
     const labels = kind === 'session'
-      ? [`Session actions for ${sessionTitle}`, 'Archive session', 'Pin session'] as const
+      ? [`Session actions for ${sessionTitle}`, 'Pin session', 'Archive session', 'Delete session'] as const
       : [`Workspace actions for ${workspaceTitle}`, `New session in ${workspaceTitle}`] as const
+    // Session rows use a compact inset pill (22px buttons, zero margin, 2px gap);
+    // workspace rows keep the spaced base controls (24px buttons, -4px margin,
+    // 12px gap). The two strips are deliberately different, so pin each geometry
+    // rather than asserting one shared target size.
+    const geometry = kind === 'session'
+      ? { target: 22, layout: 22, margin: '0px', spacing: 24, glyphGap: 10, trailingInset: 12, titleGlyphGap: 18 }
+      : { target: ACTION_TARGET_SIZE, layout: ACTION_LAYOUT_SIZE, margin: '-4px', spacing: ACTION_CENTER_SPACING, glyphGap: 14, trailingInset: ACTION_TRAILING_INSET, titleGlyphGap: 14 }
+    const half = geometry.target / 2
     await row.getByRole('button', { name: labels[0], exact: true }).waitFor()
-    const metrics = await measureRowActions(row)
+    const metrics = await measureRowActions(row, geometry.target)
     expect(await row.boundingBox()).toEqual(restingBox)
     expect(metrics.height).toBe(32)
     expect(metrics.overflows).toBe(false)
     expect(metrics.actions.map(action => action.label)).toEqual(labels)
     for (const [index, action] of metrics.actions.entries()) {
-      expect(action.width).toBe(ACTION_TARGET_SIZE)
-      expect(action.height).toBe(ACTION_TARGET_SIZE)
-      expect(action.layoutWidth).toBe(ACTION_LAYOUT_SIZE)
-      expect(action.layoutHeight).toBe(ACTION_LAYOUT_SIZE)
-      expect(action.margins).toEqual(['-4px', '-4px', '-4px', '-4px'])
+      expect(action.width).toBe(geometry.target)
+      expect(action.height).toBe(geometry.target)
+      expect(action.layoutWidth).toBe(geometry.layout)
+      expect(action.layoutHeight).toBe(geometry.layout)
+      expect(action.margins).toEqual([geometry.margin, geometry.margin, geometry.margin, geometry.margin])
       expect(action.pseudoContent).toBe('none')
       expect(action.rowCenterOffset).toBe(0)
       expect(action.glyphWidth).toBe(14)
@@ -606,15 +617,15 @@ describe('web e2e: sidebar search alignment and row action targets', () => {
       expect(action.outsideHits).toEqual([false, false, false, false])
       const previous = metrics.actions[index - 1]
       if (previous !== undefined) {
-        expect(action.center.x - previous.center.x).toBe(ACTION_CENTER_SPACING)
-        expect(action.glyphLeft - previous.glyphRight).toBe(14)
-        expect(previous.center.x + 12).toBeLessThan(action.center.x - 12)
+        expect(action.center.x - previous.center.x).toBe(geometry.spacing)
+        expect(action.glyphLeft - previous.glyphRight).toBe(geometry.glyphGap)
+        expect(previous.center.x + half).toBeLessThan(action.center.x - half)
       } else {
-        expect(metrics.titleRight).toBeLessThanOrEqual(action.center.x - 12)
-        if (kind === 'session') expect(action.glyphLeft - metrics.titleRight).toBe(14)
+        expect(metrics.titleRight).toBeLessThanOrEqual(action.center.x - half)
+        if (kind === 'session') expect(action.glyphLeft - metrics.titleRight).toBe(geometry.titleGlyphGap)
       }
     }
-    expect(metrics.actions.at(-1)?.trailingInset).toBe(ACTION_TRAILING_INSET)
+    expect(metrics.actions.at(-1)?.trailingInset).toBe(geometry.trailingInset)
 
     if (kind === 'session') expect(await row.getAttribute('aria-selected')).toBe('false')
     const selectedRows = page.locator('[role="tree"][aria-label="Sessions"] [aria-selected="true"]')
@@ -636,7 +647,7 @@ describe('web e2e: sidebar search alignment and row action targets', () => {
       await menuButton.hover()
     }
     const tooltipAnchor = row.getByRole('button', { name: labels[1], exact: true })
-    const tooltip = page.getByRole('tooltip').filter({ hasText: kind === 'session' ? 'Archive' : 'New session' })
+    const tooltip = page.getByRole('tooltip').filter({ hasText: kind === 'session' ? 'Pin' : 'New session' })
     await tooltipAnchor.hover()
     await tooltip.waitFor({ timeout: 10_000 })
     const anchorBox = await tooltipAnchor.boundingBox()

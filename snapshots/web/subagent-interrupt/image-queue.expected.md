@@ -31,7 +31,7 @@
 - paragraph: partial
 - status: Deep diving
 - text: Deep diving for {{duration}} ···
-- button "3 queued messages" [expanded]
+- button "3 queued messages" [expanded]: Queued
 - list:
   - listitem:
     - text: Start that queued work now.
@@ -48,7 +48,7 @@
     - button "Edit queued message" [disabled]
     - button "Remove queued message"
     - button "Steer queued message"
-- textbox "Cmd/Ctrl+Enter steers all queued messages"
+- textbox "Message or run a task, / commands, @ files or sessions"
 - button "Add files or run commands"
 - 'button "Access mode, current: Custom"': Custom
 - button "Stop generating"

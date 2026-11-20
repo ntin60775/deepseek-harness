@@ -15,7 +15,7 @@
 - button "Context injection time-context"
 - paragraph: partial
 - status: Deep diving
-- text: Deep diving for {{duration}} ···
+- text: Deep diving for {{duration}} ··· Queued
 - list:
   - listitem:
     - img "Queued message image"
@@ -23,7 +23,7 @@
     - button "Edit queued message" [disabled]
     - button "Remove queued message"
     - button "Steer queued message"
-- textbox "Cmd/Ctrl+Enter steers all queued messages"
+- textbox "Message or run a task, / commands, @ files or sessions"
 - button "Add files or run commands"
 - 'button "Access mode, current: Workspace Write"': Workspace Write
 - button "Select model, current DeepSeek-V4-Flash": DeepSeek-V4-Flash

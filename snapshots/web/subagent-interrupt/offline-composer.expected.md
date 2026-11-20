@@ -19,14 +19,14 @@
 - button "Context injection time-context"
 - paragraph: partial
 - status: Deep diving
-- text: Deep diving for {{duration}} ···
+- text: Deep diving for {{duration}} ··· Queued
 - list:
   - listitem:
     - text: Keep working until I stop you again.
     - button "Edit queued message"
     - button "Remove queued message"
     - button "Steer queued message"
-- textbox "Cmd/Ctrl+Enter steers all queued messages"
+- textbox "Message or run a task, / commands, @ files or sessions"
 - button "Add files or run commands"
 - 'button "Access mode, current: Custom"': Custom
 - button "Stop generating"

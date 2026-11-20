@@ -16,8 +16,8 @@
 - paragraph: partial
 - status: Deep diving
 - text: Deep diving for {{duration}} ···
-- button "2 queued messages"
-- textbox "Cmd/Ctrl+Enter steers all queued messages"
+- button "2 queued messages": Queued
+- textbox "Message or run a task, / commands, @ files or sessions"
 - button "Add files or run commands"
 - 'button "Access mode, current: Workspace Write"': Workspace Write
 - button "Select model, current DeepSeek-V4-Flash": DeepSeek-V4-Flash

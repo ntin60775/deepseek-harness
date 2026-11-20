@@ -23,7 +23,7 @@
 - button "Bad response"
 - button "Branch into a new conversation"
 - text: {{clock}}
-- button "2 queued messages" [expanded]
+- button "2 queued messages" [expanded]: Queued
 - list:
   - listitem:
     - text: Edited queue item

@@ -6,11 +6,12 @@
   - treeitem "Untitled 1min"
   - treeitem "Untitled 1min"
   - treeitem "Untitled 1min"
-  - treeitem "Untitled Session actions for Untitled Archive session Pin session":
+  - treeitem "Untitled Session actions for Untitled Pin session Archive session Delete session":
     - text: Untitled
     - button "Session actions for Untitled"
-    - button "Archive session"
     - button "Pin session"
+    - button "Archive session"
+    - button "Delete session"
   - treeitem "Untitled 1min"
   - treeitem "Untitled 1min"
   - treeitem "Untitled 1min"

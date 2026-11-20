@@ -248,8 +248,13 @@ describe('web e2e: secondary Thinking Markdown', () => {
       const tableRect = table.getBoundingClientRect()
       const x = buttonRect.left + buttonRect.width / 2
       const y = buttonRect.top + buttonRect.height / 2
+      // The sticky header pins at the scroll host's content top. The process-group
+      // body carries inner padding (ChatGroupSeat .body), so the pinned edge sits
+      // paddingTop below the host's border-box top; measure against the content top.
+      const hostContentTop = host.getBoundingClientRect().top
+        + Number.parseFloat(getComputedStyle(host).paddingTop)
       return {
-        pinned: Math.abs(buttonRect.top - host.getBoundingClientRect().top) <= 1,
+        pinned: Math.abs(buttonRect.top - hostContentTop) <= 1,
         tableUnderHeader: tableRect.top < y && tableRect.bottom > y,
         headerReceivesPointer: button.contains(document.elementFromPoint(x, y)),
       }

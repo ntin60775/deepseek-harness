@@ -14,6 +14,8 @@
 - tree "会话":
   - treeitem "workspace" [expanded]
   - treeitem "新会话" [selected]
+- button "向上滚动" [disabled]
+- button "向下滚动" [disabled]
 - button "账号菜单": 更多
 - banner:
   - button "打开右侧边栏"

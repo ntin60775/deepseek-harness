@@ -20,6 +20,7 @@
 - term: Which color do you prefer?
 - definition: Green Answered after the timeout
 - button "Inspect"
+- text: Queued
 - list:
   - listitem:
     - text: "{\"kind\":\"answer_to_pending_question\",\"tool\":\"ask_user_question\",\"callId\":\"call_00_Cijldc88LYmVPCXYUsRq1617\",\"questions\":[{\"id\":\"color\",\"question\":\"Which color do you prefer?\",\"header\":\"Pick one\",\"multi_select\":true,\"options\":[{\"label\":\"Blue\",\"description\":\"A cool recessive hue that reads as calm and trustworthy in long reading sessions and dense dashboards.\"},{\"label\":\"Green\",\"description\":\"A restful mid-spectrum hue with the highest perceived brightness, easiest on the eye over long sessions.\"}]}],\"answers\":[{\"id\":\"color\",\"selected\":[\"Green\"],\"custom\":\"Answered after the timeout\"}]}"

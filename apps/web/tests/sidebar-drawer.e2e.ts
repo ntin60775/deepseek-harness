@@ -342,7 +342,12 @@ it('overlays the conversation and closes after navigation without losing its sid
       const moreBox = (await more.boundingBox())!
       const folderMoreBox = (await workspaceButtons.nth(0).boundingBox())!
       const folderNewBox = (await workspaceButtons.nth(1).boundingBox())!
-      expect(moreBox.x - unpinBox.x).toBeCloseTo(folderNewBox.x - folderMoreBox.x, 1)
+      // The session-row action strip is a compact inset pill (22px buttons, 2px
+      // gap → 24px between button origins); the workspace row keeps the spaced
+      // base controls (24px buttons, -4px margin, 12px gap → 28px). The two strips
+      // are deliberately different, so pin each spacing rather than assert equality.
+      expect(moreBox.x - unpinBox.x).toBeCloseTo(24, 1)
+      expect(folderNewBox.x - folderMoreBox.x).toBeCloseTo(28, 1)
       await unpin.tap()
       await expect.poll(() => selectedRow.getByLabel('Pinned', { exact: true }).count()).toBe(0)
       expect(await drawer.isVisible()).toBe(true)

@@ -269,11 +269,11 @@ describe.skipIf(MODE === 'record')('web e2e: composer interrupt for a running co
     await page.getByRole('navigation', { name: 'Session hierarchy' })
       .getByRole('button').first().click()
     await (await showSessionPanel(page)).getByRole('treeitem', { name: new RegExp(LABEL) }).press('Enter')
-    // A live continuable child advertises the ordinary steer-all gesture, so
-    // that placeholder is the composer's accessible name in this window. It
-    // changes back as the queue drains, so later interactions address the
-    // stable composer node instead.
-    await page.getByRole('textbox', { name: 'Cmd/Ctrl+Enter steers all queued messages' })
+    // Queue state lives in the queue dock above the card, so the composer
+    // placeholder keeps describing typing (placeholder.default) rather than
+    // claiming to be the queue's control surface. Wait for the settled composer
+    // in this window; later interactions address the stable composer node.
+    await page.getByRole('textbox', { name: 'Message or run a task, / commands, @ files or sessions' })
       .waitFor({ timeout: 15_000 })
     const input = page.locator('[data-composer-input]').first()
     expect(await input.isDisabled()).toBe(false)
