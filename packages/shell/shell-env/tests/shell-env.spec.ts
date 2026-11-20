@@ -132,6 +132,16 @@ describe('ShellEnvRegistry', () => {
     ])
   })
 
+  it('accepts established keys whose suffix starts with a digit', () => {
+    const registry = new ShellEnvRegistry(new Context(), { dshHome: './test-dsh-home' })
+    registry.register({
+      name: 'contour-root',
+      variables: { DSH_1C_ROOT: { description: 'Contour package root.' } },
+      resolve: () => ({ DSH_1C_ROOT: '/pkg/1C-DSH' }),
+    })
+    expect(registry.collect(execution()).DSH_1C_ROOT).toBe('/pkg/1C-DSH')
+  })
+
   it('rejects duplicate variable ownership at registration time', () => {
     const ctx = new Context()
     const registry = new ShellEnvRegistry(ctx, { dshHome: './test-dsh-home' })

@@ -88,7 +88,10 @@ const RESERVED_BASH_ENV_KEYS = new Set<DshEnvironmentKey>([
   DSH_INSTALL_DIR_KEY,
   DSH_NODE_EXECUTABLE_KEY,
 ])
-const BASH_ENV_KEY_SUFFIX = /^[A-Z][A-Z0-9_]*$/
+// Suffix after DSH_: uppercase env-name characters; a leading digit is
+// legal in an environment variable name (the full key starts with DSH_)
+// — established keys like DSH_1C_ROOT must register.
+const BASH_ENV_KEY_SUFFIX = /^[A-Z0-9][A-Z0-9_]*$/
 
 /**
  * Registry (`ctx.shellEnv`) for trusted, per-execution `DSH_*` variables.
