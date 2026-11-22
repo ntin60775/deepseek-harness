@@ -682,6 +682,10 @@
             "type": "string",
             "description": "The complete, self-contained task for the subagent. It does not share this conversation's context, so include everything it needs."
           },
+          "cwd": {
+            "type": "string",
+            "description": "Working directory for the subagent session: an absolute path, or a path relative to the parent session's directory. Omit to inherit the parent directory. Project-scoped tool and skill delivery resolves from this directory, so set it when the child works in a different project."
+          },
           "provider": {
             "type": "string",
             "description": "LLM provider id for the subagent; requires `model`. Set only when the task needs a different model; omit `provider`, `model`, and `reasoning_effort` to run the subagent on your current model and reasoning effort. Use a provider id listed by `list_subagent_models`."
@@ -718,6 +722,10 @@
           "prompt": {
             "type": "string",
             "description": "The task for the subagent. It already sees this conversation's completed turns, so build on them freely and state only what is new."
+          },
+          "cwd": {
+            "type": "string",
+            "description": "Working directory for the subagent session: an absolute path, or a path relative to the parent session's directory. Omit to inherit the parent directory. Project-scoped tool and skill delivery resolves from this directory, so set it when the child works in a different project."
           }
         },
         "required": [

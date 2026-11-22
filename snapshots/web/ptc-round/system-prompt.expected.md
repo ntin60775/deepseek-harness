@@ -248,6 +248,8 @@ interface ToolArgsMap {
     name?: string;
     /** The complete, self-contained task for the subagent. It does not share this conversation's context, so include everything it needs. */
     prompt: string;
+    /** Working directory for the subagent session: an absolute path, or a path relative to the parent session's directory. Omit to inherit the parent directory. Project-scoped tool and skill delivery resolves from this directory, so set it when the child works in a different project. */
+    cwd?: string;
     /** LLM provider id for the subagent; requires `model`. Set only when the task needs a different model; omit `provider`, `model`, and `reasoning_effort` to run the subagent on your current model and reasoning effort. Use a provider id listed by `list_subagent_models`. */
     provider?: string;
     /** Model id within that provider; requires `provider`. */
@@ -263,6 +265,8 @@ interface ToolArgsMap {
     name?: string;
     /** The task for the subagent. It already sees this conversation's completed turns, so build on them freely and state only what is new. */
     prompt: string;
+    /** Working directory for the subagent session: an absolute path, or a path relative to the parent session's directory. Omit to inherit the parent directory. Project-scoped tool and skill delivery resolves from this directory, so set it when the child works in a different project. */
+    cwd?: string;
   } & Record<string, JsonValue>;
   /** Record and update a task list to plan multi-step work and show progress; skip it for trivial single-step tasks. Add one todo per concrete step before you start. While work remains, keep the todos being worked on `in_progress`, several only when work runs in parallel. Mark each todo `completed` as soon as it is done. */
   todo_write: {

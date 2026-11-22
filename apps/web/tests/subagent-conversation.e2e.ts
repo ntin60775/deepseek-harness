@@ -540,8 +540,9 @@ describe('web e2e: persisted subagent conversation and human continuation', () =
       await primary.hover()
       const card = page.locator('[data-session-panel-details]')
       await card.waitFor()
-      expect(await card.evaluate(element => [...element.children].map(child => child.textContent).slice(0, 3)))
-        .toEqual([LABEL, `Owner: ${CHILD_NAME}`, 'completed · continuable'])
+      // The card carries the recorded route after the owner line and before the state.
+      expect(await card.evaluate(element => [...element.children].map(child => child.textContent).slice(0, 4)))
+        .toEqual([LABEL, `Owner: ${CHILD_NAME}`, 'Model route: deepseek-official/deepseek-v4-flash · reasoning: Default', 'completed · continuable'])
       // The panel sits at the window's end, so the stylesheet opens the card on the row's start side:
       // 8px before the row, its top on the row's top, inside the viewport.
       const placement = await card.evaluate((element) => {

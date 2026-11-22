@@ -1,7 +1,7 @@
 - tree "Subagent sessions":
   - 'treeitem "event-sourcing researcher agent-1 · continuable · completed 7.9K tok · {{duration}} Model route: deepseek-official/deepseek-v4-flash Default" [expanded] [level=1]':
     - button "Collapse event-sourcing researcher descendants"
-    - text: event-sourcing researcher agent-1 deepseek-official deepseek-v4-flash Default 7.9K tok {{duration}}
+    - text: event-sourcing researcher {{duration}}
     - button "Open event-sourcing researcher in sidebar"
   - group:
     - treeitem "example editor recorded-grandchild · continuable · completed 0 tok · {{duration}}" [level=2]:
