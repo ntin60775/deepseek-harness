@@ -191,10 +191,18 @@ CI апстрима/форка обходит это сам: `echo "TMPDIR=${{ r
 Побочное условие, найденное тем же прогоном: `TMPDIR` не должен лежать **внутри репозитория**.
 С `TMPDIR=<repo>/.artifacts/tmp` мир e2e наследует корневой `AGENTS.md` (контекст-инъекция
 `上下文注入 AGENTS.md` в `present-svg`) — рабочий каталог получает родительские инструкции,
-которых у него быть не должно. Годный `TMPDIR`: `/var/tmp/<dir>` (вне `/tmp` и вне репо).
+которых у него быть не должно: Session резолвит все `AGENTS.md` вверх по дереву, и для мира
+внутри чекаута это корректное поведение продукта, а не дефект.
 
-Правило для локального прогона: на Linux web-лейн запускать с `TMPDIR` вне `/tmp` и вне репо —
-записано в `docs/ops/continue.md`.
+Вылечено в харнессе, а не инструкцией в голове: `webWorldRoot()` в `apps/web/tests/support.ts`
+отдаёт OS-temp, только если тот вне чекаута и не `/tmp` на Linux; иначе миры живут в
+`/var/tmp/dsh-web-worlds-<uid>`. `launchWebScaffold` создаёт там и рабочий мир, и root
+персистентности. Доказательства: `present-svg` с `TMPDIR=<repo>/.artifacts/tmp2` — 3/3 зелёных
+(утечки `AGENTS.md` нет); `forge-panel` worktree с дефолтным `TMPDIR=/tmp` — 1/1 зелёный
+(песочница больше не прячет репозиторий). Инвариант закреплён спекой
+`apps/web/tests/world-root.spec.ts` (2/2) и записан в регламент web-лейна —
+`.agents/notes/implemented/testing/2026-07-24-web-gui-browser-e2e-lane.md` (+ zh-пара, пейринг
+перезаписан); `docs/testing.md` ссылается на эту ноту и в бюджет не раздувается.
 
 ## 10. `forge-panel` — горизонтальные стрелки: дрейф scroll anchoring
 
@@ -232,10 +240,11 @@ scroll anchoring, а не дефект панели.
 
 ## Финальный прогон
 
-`TMPDIR=/var/tmp/dsh-e2e-lead DSH_SNAPSHOT=replay DSH_WEB_SNAPSHOT_WORKERS=3 pnpm run test:web:ci`
+`DSH_SNAPSHOT=replay DSH_WEB_SNAPSHOT_WORKERS=3 pnpm run test:web:ci` с дефолтным `TMPDIR`
 (CI-порядок: serial-владельцы по одному, затем пул `--fileParallelism --maxWorkers=3`), лог
-`/tmp/lead-weblane4.log`: serial — `hmr-live` 1/1, `client-plugin-live` 6/6, `present-svg` 3/3;
-пул — **253 passed / 3 skipped (256 файлов), 1101 passed / 26 skipped, 0 failed**, 27 мин; serial-стадия 3/3. Гейты вокруг правок: `build` 10/10 (`build:artifacts` + `build:check`), `build:check`
+`/tmp/lead-weblane5.log`: serial — `hmr-live` 1/1, `client-plugin-live` 6/6, `present-svg` 3/3;
+пул — **253 passed / 3 skipped (256 файлов), 1101 passed / 26 skipped, 0 failed**, 26 мин; serial-стадия 3/3.
+Этот прогон идёт уже после правки `webWorldRoot`, то есть без ручного `TMPDIR`.. Гейты вокруг правок: `build` 10/10 (`build:artifacts` + `build:check`), `build:check`
 после последних правок 2/2, `test:docs` 21/21, `pnpm run rescope-vendor:check` — verified,
 `scripts/rescope-vendor.spec.ts` 81/81, oxlint по тронутым файлам — 0.
 
@@ -255,8 +264,9 @@ environmental названа причина и условие прогона.
   (не только `fresh-round-trip`), критерий тот же: дифф только ожидаемое свойство.
 - `bonus-notice`: ассерт держится на fork-зоне футера (`.footArea`: hairline + 6px). Смена
   геометрии футера → новый замер, не подгонка.
-- `forge-panel`: красный только при `TMPDIR` под `/tmp` на Linux (bwrap `--tmpfs /tmp`). Локальный
-  web-лейн запускается с `TMPDIR` вне `/tmp` и вне репо (`/var/tmp/<dir>`); при возврате красного —
-  сначала проверить `TMPDIR`, не код панели.
+- `forge-panel`: мирам нужен репозиторий за пределами cwd сессии, поэтому любое возвращение мира
+  под `/tmp` на Linux или внутрь чекаута снова покраснит сценарий. Держит `webWorldRoot`
+  (`apps/web/tests/support.ts`, спека `world-root.spec.ts`); ручной `TMPDIR` такого вида
+  игнорируется.
 - `session-drag-scroll`: теста нет (удалён 2026-11-22). Если форк когда-нибудь вернёт
   upstream-скролл-модель, тест приезжает снова вместе с `scroll-handoff.ts`.
