@@ -1,8 +1,9 @@
 // Shared plumbing for the web smoke tests (dist location, free port, failure shots).
-import { existsSync, mkdirSync, readFileSync } from 'node:fs'
+import { existsSync, mkdirSync, readFileSync, realpathSync } from 'node:fs'
 import { createServer } from 'node:net'
 import { createRequire } from 'node:module'
-import { join } from 'node:path'
+import { homedir, tmpdir } from 'node:os'
+import { join, sep } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import type { Browser, Locator, Page } from 'playwright'
 import { expect, vi, type MockInstance } from 'vitest'
@@ -12,6 +13,31 @@ import type { RegionRect } from '@deepseek-ai/dsh-client-web/src/window-drag/reg
 export const DIST_INDEX = fileURLToPath(new URL('../dist/index.html', import.meta.url))
 
 export const REPO_ROOT = fileURLToPath(new URL('../../..', import.meta.url))
+
+/** Whether `path` is `root` or lies below it, ignoring a trailing separator on either side. */
+function withinPath(path: string, root: string): boolean {
+  const normalized = root.replace(/[\\/]+$/u, '')
+  return path === normalized || path.startsWith(`${normalized}${sep}`)
+}
+
+/**
+ * Root for browser-scenario worlds. A scenario Session resolves every ancestor `AGENTS.md`, so a
+ * world inside this checkout would receive the repository's instructions, and the Linux sandbox
+ * replaces `/tmp` with an empty tmpfs, where a worktree Session cannot read the repository's shared
+ * Git directory. The OS temp directory serves while it is outside both; otherwise worlds live under
+ * `/var/tmp` (`%USERPROFILE%\.dsh-web-worlds` on Windows).
+ * @returns an existing absolute directory.
+ */
+export function webWorldRoot(): string {
+  const osTemp = realpathSync(tmpdir())
+  const masked = process.platform === 'linux' && (osTemp === '/tmp' || osTemp.startsWith(`/tmp${sep}`))
+  if (!withinPath(osTemp, REPO_ROOT) && !masked) return osTemp
+  const root = process.platform === 'win32'
+    ? join(homedir(), '.dsh-web-worlds')
+    : join('/var/tmp', `dsh-web-worlds-${String(process.getuid?.() ?? 0)}`)
+  mkdirSync(root, { recursive: true })
+  return realpathSync(root)
+}
 
 /** A visible control, including controls that declare no native window region. */
 interface WindowControlBox extends Omit<RegionRect, 'draggable'> {

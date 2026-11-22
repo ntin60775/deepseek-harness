@@ -25,7 +25,6 @@
 import { existsSync, readFileSync } from 'node:fs'
 import { createHash } from 'node:crypto'
 import { mkdir, mkdtemp, readFile, readdir, realpath, rm, symlink, writeFile } from 'node:fs/promises'
-import { tmpdir } from 'node:os'
 import { basename, dirname, join, resolve } from 'node:path'
 import { pathToFileURL } from 'node:url'
 import type { Page } from 'playwright'
@@ -85,7 +84,7 @@ import type {} from '@deepseek-ai/dsh-host-webserver'
 import type {} from '@deepseek-ai/dsh-agent'
 import { provideCmdline } from '@deepseek-ai/dsh-cmdline'
 import { startPrefixProxy, type PrefixProxy } from './prefix-proxy.ts'
-import { REPO_ROOT, requireBuilt, requireDist } from './support.ts'
+import { REPO_ROOT, requireBuilt, requireDist, webWorldRoot } from './support.ts'
 import { brandString } from '@deepseek-ai/dsh-brand'
 
 type AppBoot = typeof import('@deepseek-ai/dsh-app-boot')
@@ -514,7 +513,9 @@ export async function launchWebScaffold(options: LaunchOptions = {}): Promise<We
       process.env.DEEPSEEK_API_KEY = originalDeepSeekCredential
     }
   }
-  const workspaceParent = await realpath(tmpdir())
+  // One world root per run rules out both a borrowed ancestor AGENTS.md and the Linux sandbox's
+  // empty /tmp; the worlds themselves are unique directories below it.
+  const workspaceParent = webWorldRoot()
   let workspacePrefix = 'dsh-web-e2e-ws-'
   if (options.workspacePathLength !== undefined) {
     // mkdtemp appends six characters; JSON quoting is part of the runtime-context text.
@@ -559,7 +560,7 @@ export async function launchWebScaffold(options: LaunchOptions = {}): Promise<We
   Object.assign(process.env, skillRootEnvironment)
   let persistenceRoot: string
   try {
-    persistenceRoot = await mkdtemp(join(tmpdir(), 'dsh-web-e2e-sessions-'))
+    persistenceRoot = await mkdtemp(join(workspaceParent, 'dsh-web-e2e-sessions-'))
   } catch (error) {
     const failures: unknown[] = [error]
     await rm(workspaceCwd, { recursive: true, force: true }).catch((cleanupError: unknown) => failures.push(cleanupError))
