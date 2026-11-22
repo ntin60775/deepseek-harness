@@ -85,6 +85,9 @@ const GENERIC_SKIPS: readonly GenericSkip[] = [
   // Native schema detection and its fixture share the vendored runtime's Symbol.for identifier.
   { file: 'packages/boot/app-boot/src/config-schema/native.ts', upstream: ['schemastery'] },
   { file: 'packages/boot/app-boot/tests/config-schema.spec.ts', upstream: ['schemastery'] },
+  // The fixture links the scoped package's install directory; the scope is the
+  // previous path segment, and the bare name is that directory's own name.
+  { file: 'apps/web/tests/client-config-sync.e2e.ts', upstream: ['schemastery'] },
   // The codemod's positive and negative fixtures contain both package spellings.
   { file: 'scripts/rescope-vendor.spec.ts', upstream: RENAMES.map(rename => rename.upstream), fixture: true },
   // Asserts the vendored-manifest table, which gains an upstream-name column.
@@ -113,6 +116,8 @@ const GENERIC_SKIPS: readonly GenericSkip[] = [
   { file: 'apps/web/tests/developer-tools-settings.e2e.ts', upstream: ['cordis'] },
   { file: 'docs/tool-catalog.md', upstream: ['cordis'] },
   { file: 'docs/tool-catalog.zh.md', upstream: ['cordis'] },
+  // Lists the preset ids that stayed pending, one of which is the `cordis` preset.
+  { file: 'docs/reference/fork-profile-config-validation.md', upstream: ['cordis'] },
   { file: 'docs/upgrade-guide/v0.2.2-alpha.2/fs-observation-policy-default-off/guide.md', upstream: ['cordis'] },
   { file: 'docs/upgrade-guide/v0.2.2-alpha.2/fs-observation-policy-default-off/guide.zh.md', upstream: ['cordis'] },
   { file: 'docs/upgrade-guide/v0.2.2-rc.1/subagent-interrupt-default/guide.md', upstream: ['cordis'] },
