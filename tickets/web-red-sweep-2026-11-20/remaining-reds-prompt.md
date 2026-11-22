@@ -4,7 +4,7 @@
 
 ---
 
-Продолжай расследование красных тестов DSH после sweep-refresh 2026-11-20. Контекст: sweep закрыл 30 базовых красных web pool-сценариев (post-rc3) до зелёного — отчёт-доказательство `tickets/web-red-sweep-2026-11-20/report.md`, ops-состояние `docs/ops/continue.md` (раздел «Что осталось», строка про базовые красные web). Ветка `master`, remote SSH `git@github.com:ntin60775/deepseek-harness.git`, sweep закоммичен и запушен (`70405aa9cd` table-фича, `b487a5245e` sweep). WebKit установлен (`webkit-2311`, playwright 1.61.1) + системная `libwoff1`; WebKit-arms прогоняются.
+Продолжай расследование красных тестов DSH после sweep-refresh 2026-11-20. Контекст: sweep закрыл 30 базовых красных web pool-сценариев (post-rc3) до зелёного — отчёт-доказательство `tickets/web-red-sweep-2026-11-20/report.md`, ops-состояние `docs/ops/continue.md` (раздел «Что осталось», строка про базовые красные web). Ветка `master`, remote SSH `git@github.com:ntin60775/deepseek-harness.git`, sweep закоммичен и запушен (коммит table-фичи и коммит sweep). WebKit установлен (`webkit-2311`, playwright 1.61.1) + системная `libwoff1`; WebKit-arms прогоняются.
 
 Твоя задача — расследовать ОСТАВШИЕСЯ красные (вне скоупа web pool sweep), классифицировать каждый: environmental / load-flake / stale expected под намеренное изменение / РЕАЛЬНЫЙ баг. Реальные баги — корневая причина + фикс; stale expected — обновлять только по механическому критерию (дифф = только намеренное изменение), НЕ маскировать баги. Решение оператора по скоупу: чинить или осознанно пропускать с пометкой в KB — спорное выноси ask'ом, молча не решай.
 
