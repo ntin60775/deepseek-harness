@@ -698,9 +698,11 @@ describe.skipIf(MODE === 'record')('web e2e: bonus notice', () => {
     expect(taggedBox!.y + taggedBox!.height).toBeLessThanOrEqual(accountBox!.y)
     expect(tagBox!.y).toBeGreaterThanOrEqual(accountBox!.y)
     expect(tagBox!.y + tagBox!.height).toBeLessThanOrEqual(accountBox!.y + accountBox!.height)
-    // The card floats over the session list: the list still reaches down to the card's bottom edge.
+    // The card floats over the session list and covers the footer's hairline: the list stops at that
+    // zone separator (the footer's 6px top padding), while the card ends above the account row.
     const listBottom = await stackPage.locator('[class*="scrollRegion"]').first().evaluate(element => element.getBoundingClientRect().bottom)
-    expect(listBottom).toBeGreaterThanOrEqual(taggedBox!.y + taggedBox!.height - 1)
+    expect(listBottom).toBeLessThan(taggedBox!.y + taggedBox!.height)
+    expect(taggedBox!.y + taggedBox!.height).toBeLessThan(accountBox!.y)
     observations.push('stack.update-tag card=260 left-inset=10 card-above-account-row=true tag-in-account-row=true floats-over-list=true')
     await publishUpdate({ phase: 'idle' })
     await updateTag.waitFor({ state: 'detached' })

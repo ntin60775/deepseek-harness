@@ -1525,6 +1525,9 @@ it.skipIf(MODE === 'record')('retains a wrapped code line and tree width across 
   expect(tripwire.warnings).toEqual([])
 })
 
+/** Scroll-anchoring drift tolerated when switching files, in pixels: one diff pair (two 22px rows). */
+const ANCHORING_DRIFT_PX = 44
+
 it.skipIf(MODE === 'record')('uses horizontal arrows to navigate files while preserving vertical scrolling and comment editing', async () => {
   const { scaffold, page, project, tripwire } = await launchPanel('web-e2e-forge-file-keys')
   await git(project, 'update-ref', 'refs/remotes/origin/main', 'HEAD')
@@ -1576,7 +1579,11 @@ it.skipIf(MODE === 'record')('uses horizontal arrows to navigate files while pre
   expect(lastBox.y).toBeGreaterThan(viewport.y)
   expect(lastBox.y).toBeLessThan(viewport.y + viewport.height)
   await page.keyboard.press('ArrowRight')
-  expect(await scroll.evaluate(element => element.scrollTop)).toBe(lastPosition)
+  // Wrapping back to the first file replaces the node scroll anchoring holds, so the browser may
+  // move the reader's place; the position must stay there, not return to the top.
+  await expect.poll(async () => Math.abs(await scroll.evaluate(element => element.scrollTop) - lastPosition))
+    .toBeLessThanOrEqual(ANCHORING_DRIFT_PX)
+  expect(await scroll.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
   await page.keyboard.press('ArrowLeft')
   await expect.poll(() => tree.getByRole('button', { name: 'src/b.txt', exact: true }).getAttribute('aria-current')).toBe('true')
   await page.keyboard.press('ArrowLeft')
