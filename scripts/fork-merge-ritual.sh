@@ -147,6 +147,15 @@ git fetch "$UPSTREAM_REMOTE" "$UPSTREAM_BRANCH"
 # merge-base(HEAD, target) is the target itself and the post-merge audit would
 # lose the range it exists to show. A target whose tip moved starts a new range.
 TARGET_TIP="$(git rev-parse "$UPSTREAM_REMOTE/$UPSTREAM_BRANCH")"
+# Alphas are not releases this fork follows: wait for the rc of the same line.
+TARGET_TAG="$(git describe --tags --abbrev=0 "$TARGET_TIP" 2>/dev/null || true)"
+case "$TARGET_TAG" in
+  *-alpha.*)
+    [[ "${FORK_ALLOW_ALPHA:-0}" == 1 ]] \
+      || die "цель $TARGET_TAG — альфа; форк идёт от -rc и стабильных, жди rc той же линии (обход только FORK_ALLOW_ALPHA=1 по решению оператора)"
+    echo "внимание: цель $TARGET_TAG — альфа, продолжаю по FORK_ALLOW_ALPHA=1"
+    ;;
+esac
 MERGE_BASE=""
 if [ -f "$BASE_STATE" ]; then
   STORED_BASE="$(sed -n '1p' "$BASE_STATE")"

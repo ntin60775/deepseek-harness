@@ -323,7 +323,17 @@ export function startConnection(
       capabilities: {}, versionNegotiation: { mode: 'auto' },
       listChanged: { tools: { autoRefresh: false, debounceMs: 0, onChanged: () => { void refreshTools() } } },
     })
-    const record: Generation = { wire: new McpGeneration(client, config.closeTimeoutMs, error => diagnostic(error, 'cleanup')) }
+    const record: Generation = {
+      wire: new McpGeneration(client, config.closeTimeoutMs, error => diagnostic(error, 'cleanup'), (error) => {
+        // A 404 means the server no longer knows this session (Streamable HTTP
+        // servers answer an unknown Mcp-Session-Id that way). Close the dead
+        // generation and reconnect through the outage path, which starts a new
+        // session, re-syncs tools and reports status. Recover on the next tick:
+        // the request that observed the loss must reach its caller first.
+        const timer = setTimeout(() => { lost(record, `session lost: ${diagnostic(error, 'session recovery')}`) }, 0)
+        timer.unref()
+      }),
+    }
     current = record
     status.opened()
     status.update({ state: 'connecting', attempt: failedAttempts })

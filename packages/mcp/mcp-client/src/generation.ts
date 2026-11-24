@@ -2,7 +2,7 @@
 
 import type { AuthProvider, Client, FetchLike, Transport } from '@modelcontextprotocol/client'
 import { withDeadline } from './deadline.ts'
-import { McpLocalError } from './diagnostic.ts'
+import { isSessionLost, McpLocalError } from './diagnostic.ts'
 import { createTransport } from './transport.ts'
 import type { Config } from './index.ts'
 import type { McpCloseResult } from './types.ts'
@@ -16,12 +16,19 @@ export class McpGeneration {
   private transport: Transport | undefined
   private started = false
   private closeObserved = false
+  private sessionLossReported = false
   private closing: Promise<McpCloseResult> | undefined
 
   constructor(
     readonly client: Client,
     private readonly closeTimeoutMs: number,
     private readonly diagnostic: (error: unknown) => string,
+    /**
+     * Consumer of the first request that reports a lost session (HTTP 404).
+     * The generation keeps failing its own requests; the consumer decides how
+     * to replace it. Called at most once per generation.
+     */
+    private readonly onSessionLost?: (error: unknown) => void,
   ) {}
 
   /**
@@ -46,6 +53,22 @@ export class McpGeneration {
       this.lifetime.signal.throwIfAborted()
       this.started = true
       return start()
+    }
+    // A Streamable HTTP server drops sessions on restart and answers the next
+    // request with HTTP 404 while the transport itself stays open: report the
+    // loss here, at the only seam every request crosses, so the owner can start
+    // a new session instead of failing every later call.
+    const send = transport.send.bind(transport)
+    transport.send = async (message, options) => {
+      try {
+        await send(message, options)
+      } catch (error) {
+        if (!this.sessionLossReported && isSessionLost(error)) {
+          this.sessionLossReported = true
+          this.onSessionLost?.(error)
+        }
+        throw error
+      }
     }
     transport.onclose = () => {
       this.closeObserved = true

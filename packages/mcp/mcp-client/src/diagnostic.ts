@@ -87,6 +87,19 @@ export class McpToolError extends HarnessError {
   }
 }
 
+/**
+ * Whether an SDK failure reports that the MCP endpoint no longer knows this
+ * session. Streamable HTTP servers answer a request carrying an unrecognized
+ * `Mcp-Session-Id` with HTTP 404, which the SDK surfaces as an
+ * {@link SdkHttpError} carrying that status; the response body is
+ * server-defined, so the status is the only portable signal.
+ * @param error - one failed transport send.
+ * @returns true for an HTTP 404 response.
+ */
+export function isSessionLost(error: unknown): boolean {
+  return SdkHttpError.isInstance(error) && error.status === 404
+}
+
 /** Codes for SDK-local failures whose consumer action differs from a generic request failure. */
 const SDK_ERROR_CODES: Partial<Record<SdkErrorCode, McpToolErrorCode>> = {
   [SdkErrorCode.ConnectionClosed]: 'MCP_CONNECTION_CLOSED',
