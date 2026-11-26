@@ -149,13 +149,18 @@
 .pickerContent {
   min-height: 0;
   max-height: min(64vh, 560px);
+  /* The list scrolls above the footer; without clipping the last row paints
+     under the footer bar. */
+  overflow: hidden;
 }
 
 .body {
   display: flex;
+  flex: 1;
   flex-direction: column;
   gap: 6px;
   min-height: 0;
+  overflow: hidden;
 }
 
 .searchRow {
@@ -352,13 +357,20 @@
     background: var(--dsw-alias-interactive-bg-hover);
   }
 }
-/* Dialog footer: plugin options on the leading edge, key hints on the trailing. */
+/* Dialog footer: its own bar under the scrolling list — plugin options on the
+   leading edge, key hints on the trailing. The bar spans the card: the Modal
+   footer pads 24px on the sides and the picker card drops its bottom padding,
+   so the negative inset reaches both edges and the rounded corners clip it. */
 .foot {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  width: 100%;
+  width: auto;
+  margin: 12px -24px 0;
+  padding: 10px 24px 12px;
+  border-top: 0.5px solid var(--dsw-alias-border-l1);
+  background: var(--dsw-alias-bg-layer-1, var(--dsw-alias-interactive-bg-hover));
 }
 
 .options {
