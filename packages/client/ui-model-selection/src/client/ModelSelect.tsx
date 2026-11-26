@@ -17,8 +17,9 @@
  * closes and backs out of a plugin pane first.
  *
  * Plugin-owned panes keep their contract: the footer's `options` entries call
- * `openPane`, which swaps the dialog body for `conversation.input.model.pane`
- * without a second, deeper menu.
+ * `openPane`, which unfolds `conversation.input.model.pane` inside the same
+ * card below its entry; the model list stays visible and one Escape collapses
+ * the pane without dismissing the picker.
  */
 import {
   Input, Modal, StateDot, Tag, Toast,
@@ -38,7 +39,7 @@ import css from './ModelSelect.module.css'
 import { TextSearchIndex } from '@deepseek-ai/dsh-util-text-search'
 import { orderModelProviders } from './provider-order.ts'
 
-/** One dialog body: the model list, or a plugin-owned detail pane. */
+/** The plugin-owned detail pane unfolded below its footer entry, if any. */
 type Pane = { kind: 'list' } | { kind: 'detail'; pane: ModelMenuPaneRef }
 
 const LIST_PANE: Pane = { kind: 'list' }
@@ -199,15 +200,16 @@ export function ModelSelect({
   if (!available) return null
 
   /**
-   * Return from a plugin pane to the model list, handing the keyboard back to
-   * the footer entry that opened it (the contract's data-model-menu-pane key).
+   * Fold a plugin pane away, handing the keyboard back to the footer entry that
+   * opened it (the contract's data-model-menu-pane key). The model list never
+   * leaves the card, so nothing else has to be restored.
    */
-  function backToList(): void {
+  function collapsePane(): void {
     const key = pane.kind === 'detail' ? pane.pane.key : undefined
     setPane(LIST_PANE)
     if (key === undefined) return
-    // The footer entry stays mounted while the body swaps, so the keyboard can
-    // move before React commits the list back.
+    // The entry stays mounted, so the keyboard can move before React commits
+    // the collapsed card back.
     optionsRef.current?.querySelector<HTMLElement>(`[data-model-menu-pane="${key}"]`)?.focus()
   }
 
@@ -297,11 +299,11 @@ export function ModelSelect({
   const onKeyDownCapture = (event: KeyboardEvent<HTMLDivElement>): void => {
     if (event.nativeEvent.isComposing) return
     if (event.key === 'Escape') {
-      // Escape backs out of a plugin pane first, then closes the dialog; the
-      // modal's own document listener must not also fire.
+      // Escape folds a plugin pane first, then closes the dialog; the modal's
+      // own document listener must not also fire.
       event.preventDefault()
       event.stopPropagation()
-      if (pane.kind === 'detail') backToList()
+      if (pane.kind === 'detail') collapsePane()
       else closeDialog()
       return
     }
@@ -408,141 +410,141 @@ export function ModelSelect({
         onKeyDownCapture={onKeyDownCapture}
         footer={(
           <div className={clsx(css.foot)}>
-            <div ref={optionsRef} className={clsx(css.options)}>
-              {renderSlot('conversation.input.model.options', {
-                ...menuControls,
-                openPane: (ref: ModelMenuPaneRef) => { setPane({ kind: 'detail', pane: ref }) },
-              })}
+            <div className={clsx(css.footBar)}>
+              <div ref={optionsRef} className={clsx(css.options)}>
+                {renderSlot('conversation.input.model.options', {
+                  ...menuControls,
+                  openPaneKey: pane.kind === 'detail' ? pane.pane.key : null,
+                  openPane: (ref: ModelMenuPaneRef) => {
+                    // An entry toggles its own pane: clicking it again folds it.
+                    setPane(current => current.kind === 'detail' && current.pane.key === ref.key
+                      ? LIST_PANE
+                      : { kind: 'detail', pane: ref })
+                  },
+                })}
+              </div>
+              <div className={clsx(css.hints)}>
+                <span className={clsx(css.hint)}><span className={css.kbd}>↑↓</span>{t('menu.model')}</span>
+                <span className={clsx(css.hint)}><span className={css.kbd}>←→</span>{t('menu.effort')}</span>
+                <span className={clsx(css.hint)}><span className={css.kbd}>{t('menu.keyApply')}</span></span>
+                <span className={clsx(css.hint)}><span className={css.kbd}>{t('menu.keyClose')}</span></span>
+              </div>
             </div>
-            <div className={clsx(css.hints)}>
-              <span className={clsx(css.hint)}><span className={css.kbd}>↑↓</span>{t('menu.model')}</span>
-              <span className={clsx(css.hint)}><span className={css.kbd}>←→</span>{t('menu.effort')}</span>
-              <span className={clsx(css.hint)}><span className={css.kbd}>{t('menu.keyApply')}</span></span>
-              <span className={clsx(css.hint)}><span className={css.kbd}>{t('menu.keyClose')}</span></span>
-            </div>
+            {pane.kind === 'detail' && (
+              <div className={clsx(css.pane)}>
+                {renderSlot('conversation.input.model.pane', menuControls, { entryKey: pane.pane.key })}
+              </div>
+            )}
           </div>
         )}
       >
         <div ref={menuRef} className={css.body}>
-          {pane.kind === 'list'
-            ? (
-              <>
-                {showSearch && (
-                  <div className={css.searchRow}>
-                    <Input
-                      ref={searchRef}
-                      data-modal-autofocus={query === '' ? '' : undefined}
-                      className={clsx(css.search)}
-                      type="text"
-                      role="searchbox"
-                      aria-label={t('search.placeholder')}
-                      placeholder={t('search.placeholder')}
-                      value={query}
-                      readOnly={busy}
-                      onChange={(event) => { setQuery(event.target.value); setHighlighted(0); setDraft(null) }}
-                    />
-                  </div>
-                )}
-                {state.status === 'loading' && <div className={css.status}>{t('status.loading')}</div>}
-                {state.error !== null && (
-                  <div className={css.error}>
-                    <span>{t('error.action', { message: state.error })}</span>
-                    <button type="button" className={css.retry} onClick={() => { load() }}>{t('action.reload')}</button>
-                  </div>
-                )}
-                {state.failures.map(failure => (
-                  <div className={css.warning} key={failure.id}>
-                    <span>{t('warning.groupLoad', {
-                      name: failure.id === 'deepseek-account' ? t('provider.account') : failure.name,
-                      message: failure.message,
-                    })}</span>
-                    <button type="button" className={css.retry} onClick={() => { load() }}>{t('action.reload')}</button>
-                  </div>
-                ))}
-                <div className={css.rows} role="listbox" aria-label={t('menu.model')} id={`${id}-picker-list`}>
-                  {filteredGroups.map(group => (
-                    <div key={group.provider.id} className={css.group}>
-                      <div className={css.groupLabel}>{group.provider.name}</div>
-                      {group.models.map((model) => {
-                        const rowKey = `${group.provider.id}/${model.id}`
-                        const index = visibleModels.findIndex(row => row.key === rowKey)
-                        const selected = rowKey === currentKey
-                        const shownEffort = rowEffort(rowKey, model)
-                        const levels: EffortChoice[] = model.reasoning === undefined
-                          ? []
-                          : [
-                            ...model.reasoning.defaultEffort === undefined
-                              ? [{ key: 'provider-default', effort: undefined, label: t('effort.providerDefault') }]
-                              : [],
-                            ...model.reasoning.efforts.map((effort: ModelReasoningEffort) => ({
-                              key: `effort:${effort.id}`,
-                              effort: effort.id as string | undefined,
-                              label: effort.name,
-                            })),
-                          ]
-                        return (
-                          <div
-                            key={rowKey}
-                            ref={selected ? selectedRowRef : undefined}
-                            role="option"
-                            aria-selected={selected}
-                            tabIndex={-1}
-                            data-highlighted={index === highlightedIndex ? '' : undefined}
-                            className={clsx(css.row, selected && css.rowSelected, index === highlightedIndex && css.rowActive)}
-                            {...(index === highlightedIndex && !showSearch ? { 'data-modal-autofocus': '' } : {})}
-                            onMouseMove={() => { if (index !== highlightedIndex) { setHighlighted(index); setDraft(null) } }}
-                            onClick={() => { choose(rowKey, group.provider.id, model.id, shownEffort) }}
-                          >
-                            <span className={css.rowMain}>
-                              <span className={css.rowName}>
-                                {renderModelLabel(group.provider, model, 'option', selected)}
-                              </span>
-                              {model.description !== undefined && <span className={css.rowDesc}>{model.description}</span>}
-                            </span>
-                            {levels.length > 0 && (
-                              <span className={css.rowChips} role="group" aria-label={t('menu.effort')}>
-                                {levels.map(level => (
-                                  <button
-                                    key={level.key}
-                                    type="button"
-                                    tabIndex={-1}
-                                    className={clsx(css.rowChip, shownEffort === level.effort && css.rowChipSelected)}
-                                    aria-pressed={shownEffort === level.effort}
-                                    disabled={locked || busy}
-                                    onClick={(event) => {
-                                      event.stopPropagation()
-                                      choose(rowKey, group.provider.id, model.id, level.effort)
-                                    }}
-                                  >
-                                    {level.label}
-                                  </button>
-                                ))}
-                              </span>
-                            )}
-                            <span className={css.check}>
-                              {pending?.provider === group.provider.id && pending.model === model.id
-                                ? <StateDot state="ongoing" />
-                                : selected ? <IconCheckOutlineRegular /> : null}
-                            </span>
-                          </div>
-                        )
-                      })}
+          {showSearch && (
+            <div className={css.searchRow}>
+              <Input
+                ref={searchRef}
+                data-modal-autofocus={query === '' ? '' : undefined}
+                className={clsx(css.search)}
+                type="text"
+                role="searchbox"
+                aria-label={t('search.placeholder')}
+                placeholder={t('search.placeholder')}
+                value={query}
+                readOnly={busy}
+                onChange={(event) => { setQuery(event.target.value); setHighlighted(0); setDraft(null) }}
+              />
+            </div>
+          )}
+          {state.status === 'loading' && <div className={css.status}>{t('status.loading')}</div>}
+          {state.error !== null && (
+            <div className={css.error}>
+              <span>{t('error.action', { message: state.error })}</span>
+              <button type="button" className={css.retry} onClick={() => { load() }}>{t('action.reload')}</button>
+            </div>
+          )}
+          {state.failures.map(failure => (
+            <div className={css.warning} key={failure.id}>
+              <span>{t('warning.groupLoad', {
+                name: failure.id === 'deepseek-account' ? t('provider.account') : failure.name,
+                message: failure.message,
+              })}</span>
+              <button type="button" className={css.retry} onClick={() => { load() }}>{t('action.reload')}</button>
+            </div>
+          ))}
+          <div className={css.rows} role="listbox" aria-label={t('menu.model')} id={`${id}-picker-list`}>
+            {filteredGroups.map(group => (
+              <div key={group.provider.id} className={css.group}>
+                <div className={css.groupLabel}>{group.provider.name}</div>
+                {group.models.map((model) => {
+                  const rowKey = `${group.provider.id}/${model.id}`
+                  const index = visibleModels.findIndex(row => row.key === rowKey)
+                  const selected = rowKey === currentKey
+                  const shownEffort = rowEffort(rowKey, model)
+                  const levels: EffortChoice[] = model.reasoning === undefined
+                    ? []
+                    : [
+                      ...model.reasoning.defaultEffort === undefined
+                        ? [{ key: 'provider-default', effort: undefined, label: t('effort.providerDefault') }]
+                        : [],
+                      ...model.reasoning.efforts.map((effort: ModelReasoningEffort) => ({
+                        key: `effort:${effort.id}`,
+                        effort: effort.id as string | undefined,
+                        label: effort.name,
+                      })),
+                    ]
+                  return (
+                    <div
+                      key={rowKey}
+                      ref={selected ? selectedRowRef : undefined}
+                      role="option"
+                      aria-selected={selected}
+                      tabIndex={-1}
+                      data-highlighted={index === highlightedIndex ? '' : undefined}
+                      className={clsx(css.row, selected && css.rowSelected, index === highlightedIndex && css.rowActive)}
+                      {...(index === highlightedIndex && !showSearch ? { 'data-modal-autofocus': '' } : {})}
+                      onMouseMove={() => { if (index !== highlightedIndex) { setHighlighted(index); setDraft(null) } }}
+                      onClick={() => { choose(rowKey, group.provider.id, model.id, shownEffort) }}
+                    >
+                      <span className={css.rowMain}>
+                        <span className={css.rowName}>
+                          {renderModelLabel(group.provider, model, 'option', selected)}
+                        </span>
+                        {model.description !== undefined && <span className={css.rowDesc}>{model.description}</span>}
+                      </span>
+                      {levels.length > 0 && (
+                        <span className={css.rowChips} role="group" aria-label={t('menu.effort')}>
+                          {levels.map(level => (
+                            <button
+                              key={level.key}
+                              type="button"
+                              tabIndex={-1}
+                              className={clsx(css.rowChip, shownEffort === level.effort && css.rowChipSelected)}
+                              aria-pressed={shownEffort === level.effort}
+                              disabled={locked || busy}
+                              onClick={(event) => {
+                                event.stopPropagation()
+                                choose(rowKey, group.provider.id, model.id, level.effort)
+                              }}
+                            >
+                              {level.label}
+                            </button>
+                          ))}
+                        </span>
+                      )}
+                      <span className={css.check}>
+                        {pending?.provider === group.provider.id && pending.model === model.id
+                          ? <StateDot state="ongoing" />
+                          : selected ? <IconCheckOutlineRegular /> : null}
+                      </span>
                     </div>
-                  ))}
-                </div>
-                {state.status === 'ready' && filteredGroups.length === 0 && (
-                  <div className={css.empty} role="status">{t(choices.length === 0 ? 'empty.models' : 'search.empty')}</div>
-                )}
-              </>
-            )
-            : (
-              <div className={css.pane}>
-                <button type="button" className={css.paneBack} onClick={() => { backToList() }}>
-                  {t('menu.back')}
-                </button>
-                {renderSlot('conversation.input.model.pane', menuControls, { entryKey: pane.pane.key })}
+                  )
+                })}
               </div>
-            )}
+            ))}
+          </div>
+          {state.status === 'ready' && filteredGroups.length === 0 && (
+            <div className={css.empty} role="status">{t(choices.length === 0 ? 'empty.models' : 'search.empty')}</div>
+          )}
         </div>
       </Modal>
 

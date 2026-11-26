@@ -41,8 +41,12 @@ export interface ModelMenuControls {
 
 /** Root-menu controls for opening plugin-owned settings panes. */
 export type ModelMenuOptions = ModelMenuControls & {
+  /** Key of the pane currently unfolded below the entry, or null when every pane is folded. */
+  openPaneKey: string | null
   /**
-   * Open pane.key in conversation.input.model.pane with pane.title as its localized accessible name.
+   * Unfold pane.key in conversation.input.model.pane below this entry, or fold it
+   * again when it is already open. The pane appears inside the same card; the
+   * model list above it stays visible.
    * The root button's data-model-menu-pane must match pane.key for focus return.
    */
   openPane: (pane: ModelMenuPaneRef) => void
@@ -50,16 +54,16 @@ export type ModelMenuOptions = ModelMenuControls & {
 
 declare module '@deepseek-ai/dsh-client-ui-slots' {
   interface SlotMap {
-    /** Session options appended after model and reasoning controls in the root menu. */
+    /** Session options shown in the picker's footer, each able to unfold its own pane. */
     'conversation.input.model.options': {
       kind: 'list'
       scope: 'session'
       owner: ModelMenuOptions
     }
     /**
-     * Plugin-owned content displayed as a model-menu detail pane.
+     * Plugin-owned content unfolded below its entry in the picker's footer.
      * The pane places its own initial focus, for example with `autoFocus`; without one,
-     * focus stays on the menu surface, where Escape and Shift+Tab still return to the root menu.
+     * focus stays on the picker surfaces, where Escape folds the pane back.
      */
     'conversation.input.model.pane': {
       kind: 'keyed'

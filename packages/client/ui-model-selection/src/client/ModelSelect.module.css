@@ -144,10 +144,14 @@
   width: min(720px, 100%);
   gap: 0;
   padding: 0;
+  /* An unfolded pane grows the card; it stays inside the window and the list
+     gives up the height instead of pushing the card off-screen. */
+  max-height: calc(100vh - 24px);
 }
 
 .pickerContent {
   min-height: 0;
+  flex: 0 1 auto;
   max-height: min(84vh, 728px);
   /* The list scrolls above the footer; without clipping the last row paints
      under the footer bar. */
@@ -333,31 +337,17 @@
   height: 14px;
 }
 
-/* Plugin pane: the footer entry swaps the list for its own content. */
+/* Plugin pane: unfolds under the footer entry that opened it. The list above
+   stays in place, so the pane is bounded and scrolls on its own. */
 .pane {
   display: flex;
   flex-direction: column;
   gap: 8px;
   min-height: 0;
-}
-
-.paneBack {
-  align-self: flex-start;
-  height: 26px;
-  padding: 0 8px;
-  border: none;
-  border-radius: var(--dsw-radius-sm);
-  background: transparent;
-  color: var(--dsw-alias-label-secondary);
-  font: inherit;
-  font-size: 12px;
-  cursor: pointer;
-}
-
-@media (hover: hover) {
-  .paneBack:hover {
-    background: var(--dsw-alias-interactive-bg-hover);
-  }
+  max-height: min(38vh, 320px);
+  overflow-y: auto;
+  padding-top: 10px;
+  border-top: 0.5px solid var(--dsw-alias-border-l1);
 }
 /* Dialog footer: its own bar under the scrolling list — plugin options on the
    leading edge, key hints on the trailing. The bar spans the card: the Modal
@@ -365,9 +355,8 @@
    so the negative inset reaches both edges and the rounded corners clip it. */
 .foot {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
+  flex-direction: column;
+  gap: 0;
   /* The Modal footer row is flex-end; without growing, the bar shrinks to its
      content and the negative inset only shifts it. */
   flex: 1 1 auto;
@@ -375,6 +364,14 @@
   padding: 10px 24px 12px;
   border-top: 0.5px solid var(--dsw-alias-border-l1);
   background: var(--dsw-alias-bg-layer-1, var(--dsw-alias-interactive-bg-hover));
+}
+
+/* Leading options and trailing key hints share one row above the folded pane. */
+.footBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
 }
 
 .options {

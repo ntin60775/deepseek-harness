@@ -36,21 +36,23 @@ export function TeamModeToggle(props: TeamModeToggleProps) {
   return <RootTeamModeSummary {...props} />
 }
 
-function RootTeamModeSummary({ useProjection, locked, openPane, t }: TeamModeToggleProps) {
+function RootTeamModeSummary({ useProjection, locked, openPane, openPaneKey, t }: TeamModeToggleProps) {
   const mode = useProjection('agentTeam')
   if (mode === undefined) return null
+  const expanded = openPaneKey === 'agent-team'
   return (
     <button
       type="button"
       role="menuitem"
       className={css.summary}
       data-model-menu-pane="agent-team"
+      aria-expanded={expanded}
       disabled={locked}
       onClick={() => { openPane({ key: 'agent-team', title: t('command.title') }) }}
     >
       <span className={css.summaryLabel}>{t('command.title')}</span>
       <span className={css.state}>{t(mode.enabled ? 'mode.on' : 'mode.off')}</span>
-      <IconChevronRightOutlineRegular className={css.chevron} aria-hidden="true" />
+      <IconChevronRightOutlineRegular className={`${css.chevron}${expanded ? ` ${css.chevronExpanded}` : ''}`} aria-hidden="true" />
     </button>
   )
 }

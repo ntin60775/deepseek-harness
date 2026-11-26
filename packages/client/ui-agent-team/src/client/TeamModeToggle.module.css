@@ -45,6 +45,12 @@
 .chevron {
   width: 12px;
   height: 12px;
+  transition: transform var(--ds-transition-duration) var(--ds-ease-in-out);
+}
+
+/* The entry unfolds its pane below rather than navigating to a second view. */
+.chevronExpanded {
+  transform: rotate(90deg);
 }
 
 .pane {

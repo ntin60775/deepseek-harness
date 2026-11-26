@@ -61,7 +61,7 @@ composer 菜单中的模型名称和推理等级均使用 400（regular）字重
 
 当会话被其他写句柄占用时，模型选择失败提示用户退出其他正在运行的 DSH 后重试。
 
-会话级列表 slot `conversation.input.model.options` 在弹窗页脚渲染条目，位于快捷键提示旁。贡献项调用 `openPane({ key, title })`，以注册到会话级 keyed slot `conversation.input.model.pane` 的内容替换列表；入口按钮的 `data-model-menu-pane` 必须与注册键一致。页脚与面板贡献项均收到 `locked`、`reportFailure(message)` 和 `dismiss()`：锁定包含模型或推理强度保存中状态，失败由模型位的 toast 提示，关闭时同步聚焦触发按钮，供贡献方随后打开其他浮层。设置与确认逻辑由贡献插件负责。面板保持弹窗宽度并自行设置初始焦点；一次 Escape 回到模型列表，并聚焦打开它的条目。
+会话级列表 slot `conversation.input.model.options` 在弹窗页脚渲染条目，位于快捷键提示旁。贡献项调用 `openPane({ key, title })`，在入口自身下方展开注册到会话级 keyed slot `conversation.input.model.pane` 的内容：面板出现在同一张卡片内，上方的模型列表保持可见可选，再次以相同键调用 `openPane` 会收起面板。入口按钮的 `data-model-menu-pane` 必须与注册键一致，其 `openPaneKey` 所有者字段指明当前展开的面板。页脚与面板贡献项均收到 `locked`、`reportFailure(message)` 和 `dismiss()`：锁定包含模型或推理强度保存中状态，失败由模型位的 toast 提示，关闭时同步聚焦触发按钮，供贡献方随后打开其他浮层。设置与确认逻辑由贡献插件负责。面板保持弹窗宽度并在自身高度上限内滚动，同时自行设置初始焦点；一次 Escape 收起面板，并聚焦打开它的条目。
 
 -----
 

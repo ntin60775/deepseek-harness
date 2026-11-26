@@ -25,14 +25,14 @@ This page records the one fork-local change that replaces an upstream interface 
 
 ## What the patch touches
 
-- [ModelSelect.tsx](../../packages/client/ui-model-selection/src/client/ModelSelect.tsx) — the seat renders the effort chips and the model chip, and the picker is a `Modal` dialog instead of the `MenuSurface` drill-down. The dialog centres over the conversation column: the seat reads the composer card's rectangle once per opening and shifts the card with a translate.
+- [ModelSelect.tsx](../../packages/client/ui-model-selection/src/client/ModelSelect.tsx) — the seat renders the effort chips and the model chip, and the picker is a `Modal` dialog instead of the `MenuSurface` drill-down. The dialog centres over the conversation column: the seat reads the composer card's rectangle once per opening and shifts the card with a translate. A plugin pane unfolds below its footer entry instead of replacing the model list, and the card caps its own height so the taller footer cannot push it off-screen.
 - [index.ts](../../packages/client/ui-model-selection/src/client/index.ts) — registers three application commands (`model.picker` on Ctrl/Cmd+Alt+M, `model.effortNext` and `model.effortPrevious` on Ctrl/Cmd+Alt+E) matched on `event.code`, and publishes picker requests through a plugin-owned observable the seat binds as `usePickerRequest`.
 - [slots.ts](../../packages/client/ui-model-selection/src/client/slots.ts) — `ModelLabelOwner.placement` drops the dead `'menu'` member, and the injected face carries `sessionId`, `hooks.pickerRequest`, and `clearPickerRequest`.
 - [Model.tsx](../../packages/client/ui-primitives/src/Modal.tsx) — `Modal` accepts an inline `style` for the dialog card, so a caller can place it over a panel rather than the viewport.
 - [binding.ts](../../packages/client/shortcuts/src/binding.ts) — `fork-patch: web-alt-shortcuts` admits Ctrl/Cmd+Alt and any three-modifier gesture to the browser allowlist, so the same chords work in a tab and in the desktop shell; plain Alt stays rejected and the adapter's AltGraph guard still drops layout-composed input. [configuration.client.spec.ts](../../packages/client/shortcuts/tests/configuration.client.spec.ts) records the fork's expectation there.
 - [locale dictionaries](../../packages/client/ui-model-selection/src/client/locales.ts) — `menu.close`, `menu.current`, `menu.keyApply`, `menu.keyClose`, `menu.back`, and the `shortcut.*` labels, in every shipped language.
 
-The plugin slots keep their contracts: `conversation.input.model.options` now renders in the dialog footer (the agent-team switch moved there), and `conversation.input.model.pane` still replaces the body and returns focus to the entry that opened it.
+The plugin slots keep their contracts: `conversation.input.model.options` now renders in the dialog footer (the agent-team switch moved there), and `conversation.input.model.pane` unfolds inside that footer, keeping the model list visible and returning focus to the entry that folded it. The options owner also carries `openPaneKey` so an entry can mark itself expanded.
 
 ## Design record
 
@@ -44,7 +44,7 @@ The session that produced this patch started from the stock seat: a 240px card w
 - **Chips in the composer.** The current model's levels are visible at all times next to the model chip, so a common change costs one click. They sit to the right of the chip, matching the composer's trailing control cluster.
 - **A dialog, not a menu.** The card centres over the conversation column: a side panel moves that column's centre away from the window's, so a viewport-centred card reads as belonging to the wrong surface.
 - **Keyboard first, layout second.** The gesture matches `event.code`, so it survives a Cyrillic layout, and the fork admits `primary+alt` to the browser allowlist: the stock policy left three gestures usable in a tab, none of them the ones this seat needs.
-- **Plugin settings move to the footer.** The agent-team switch used to be the third router row; it reads better as a footer entry beside the key hints than as a nested menu.
+- **Plugin settings move to the footer.** The agent-team switch used to be the third router row; it reads better as a footer entry beside the key hints than as a nested menu. Selecting it unfolds the settings under that entry — the model list stays on screen, so the entry reads as an accordion rather than a second view.
 
 Two defects surfaced while the change was under test and are fixed here: the `conversation.input.model.options` slot was declared but never rendered (the agent-team switch would have vanished), and closing one seat's picker retired a picker request belonging to another Session in a split view.
 

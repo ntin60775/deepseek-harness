@@ -37,6 +37,7 @@
     "docs/plans/verify-md-wrap-kb-scope.md",
     "docs/reference/README.md",
     "docs/reference/fork-build-and-gate-adaptations.md",
+    "docs/reference/fork-composer-model-picker.md",
     "docs/reference/fork-gui-test-loop.md",
     "docs/reference/fork-merge-ritual.md",
     "docs/reference/fork-package-adaptations.md",

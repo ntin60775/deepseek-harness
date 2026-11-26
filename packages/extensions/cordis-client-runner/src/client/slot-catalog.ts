@@ -1628,10 +1628,10 @@ export const CLIENT_SLOT_API: readonly ClientSlotEntry[] = [
     kind: 'single',
     scope: 'session',
     summary: 'Non-interactive inline model label; selection controls remain owner-managed.',
-    doc: 'Non-interactive inline model label; selection controls remain owner-managed.\nWithout a contribution, the badge precedes the catalog name in the trigger\nand follows it in menus.',
+    doc: 'Non-interactive inline model label; selection controls remain owner-managed.\nWithout a contribution, the badge follows the catalog name in both the\ncomposer chip and the picker rows.',
     registerOptions: [],
     ownerProps: [
-      '/** Catalog data for a model name inside the composer\'s existing controls. */\nexport interface ModelLabelOwner {\n  /** Provider identity and localized display name; contains no connection configuration. */\n  provider: Pick<ModelProviderGroup, \'id\' | \'name\'>\n  /** The exact provider\'s model catalog entry. */\n  model: ModelCatalogModel\n  /** Trigger caption, root-menu current value, or selectable model row. */\n  placement: \'trigger\' | \'menu\' | \'option\'\n  /** Whether this provider/model pair is the current selection. */\n  selected: boolean\n}',
+      '/** Catalog data for a model name inside the composer\'s existing controls. */\nexport interface ModelLabelOwner {\n  /** Provider identity and localized display name; contains no connection configuration. */\n  provider: Pick<ModelProviderGroup, \'id\' | \'name\'>\n  /** The exact provider\'s model catalog entry. */\n  model: ModelCatalogModel\n  /** Composer chip caption or a selectable model row in the picker. */\n  placement: \'trigger\' | \'option\'\n  /** Whether this provider/model pair is the current selection. */\n  selected: boolean\n}',
     ],
     ownerPropsReferences: [
       'ModelCatalogModel',
@@ -1665,14 +1665,14 @@ export const CLIENT_SLOT_API: readonly ClientSlotEntry[] = [
     occupants: [],
     replaceRisk: 'none',
     example: 'return {\n  inject: [\'slots\'],\n  apply(ctx) {\n    ctx.slots.inject(\'conversation.input.model.label\', () => ctx.slots.register(\n      { name: \'conversation.input.model.label\' },\n      ({ provider, model }) => React.createElement(\'span\', { title: provider.name }, model.name),\n    ))\n  },\n}',
-    source: 'packages/client/ui-model-selection/src/client/slots.ts:80',
+    source: 'packages/client/ui-model-selection/src/client/slots.ts:88',
   },
   {
     key: 'conversation.input.model.options',
     kind: 'list',
     scope: 'session',
-    summary: 'Session options appended after model and reasoning controls in the root menu.',
-    doc: 'Session options appended after model and reasoning controls in the root menu.',
+    summary: 'Session options shown in the picker\'s footer, each able to unfold its own pane.',
+    doc: 'Session options shown in the picker\'s footer, each able to unfold its own pane.',
     registerOptions: [
       {
         name: 'id',
@@ -1695,7 +1695,7 @@ export const CLIENT_SLOT_API: readonly ClientSlotEntry[] = [
     ],
     ownerProps: [
       '/** Selection state and feedback shared by menu option entries and detail panes. */\nexport interface ModelMenuControls {\n  /** Whether the composer refuses changes, including while a model selection is saving. */\n  locked: boolean\n  /** Close the menu and focus its trigger synchronously before opening another overlay. */\n  dismiss: () => void\n  /** Report a failed selection through the menu owner\'s persistent toast. */\n  reportFailure: (message: string) => void\n}',
-      '/** Root-menu controls for opening plugin-owned settings panes. */\nexport type ModelMenuOptions = ModelMenuControls & {\n  /**\n   * Open pane.key in conversation.input.model.pane with pane.title as its localized accessible name.\n   * The root button\'s data-model-menu-pane must match pane.key for focus return.\n   */\n  openPane: (pane: ModelMenuPaneRef) => void\n}',
+      '/** Root-menu controls for opening plugin-owned settings panes. */\nexport type ModelMenuOptions = ModelMenuControls & {\n  /** Key of the pane currently unfolded below the entry, or null when every pane is folded. */\n  openPaneKey: string | null\n  /**\n   * Unfold pane.key in conversation.input.model.pane below this entry, or fold it\n   * again when it is already open. The pane appears inside the same card; the\n   * model list above it stays visible.\n   * The root button\'s data-model-menu-pane must match pane.key for focus return.\n   */\n  openPane: (pane: ModelMenuPaneRef) => void\n}',
     ],
     ownerPropsReferences: [
       'ModelMenuPaneRef',
@@ -1730,14 +1730,14 @@ export const CLIENT_SLOT_API: readonly ClientSlotEntry[] = [
     ],
     replaceRisk: 'none',
     example: 'return {\n  inject: [\'slots\'],\n  apply(ctx) {\n    ctx.slots.inject(\'conversation.input.model.options\', () => ctx.slots.register(\n      { name: \'conversation.input.model.options\', id: \'my-entry\', order: 100, label: \'My entry\' },\n      () => React.createElement(\'div\', null, \'hello\'),\n    ))\n  },\n}',
-    source: 'packages/client/ui-model-selection/src/client/slots.ts:50',
+    source: 'packages/client/ui-model-selection/src/client/slots.ts:58',
   },
   {
     key: 'conversation.input.model.pane',
     kind: 'keyed',
     scope: 'session',
-    summary: 'Plugin-owned content displayed as a model-menu detail pane.',
-    doc: 'Plugin-owned content displayed as a model-menu detail pane.\nThe pane places its own initial focus, for example with `autoFocus`; without one,\nfocus stays on the menu surface, where Escape and Shift+Tab still return to the root menu.',
+    summary: 'Plugin-owned content unfolded below its entry in the picker\'s footer.',
+    doc: 'Plugin-owned content unfolded below its entry in the picker\'s footer.\nThe pane places its own initial focus, for example with `autoFocus`; without one,\nfocus stays on the picker surfaces, where Escape folds the pane back.',
     registerOptions: [
       {
         name: 'key',
@@ -1780,7 +1780,7 @@ export const CLIENT_SLOT_API: readonly ClientSlotEntry[] = [
     ],
     replaceRisk: 'shadows-shipped-ui',
     example: 'return {\n  inject: [\'slots\'],\n  apply(ctx) {\n    ctx.slots.inject(\'conversation.input.model.pane\', () => ctx.slots.register(\n      { name: \'conversation.input.model.pane\', key: \'<one key the owner dispatches>\' },\n      () => React.createElement(\'div\', null, \'hello\'),\n    ))\n  },\n}',
-    source: 'packages/client/ui-model-selection/src/client/slots.ts:60',
+    source: 'packages/client/ui-model-selection/src/client/slots.ts:68',
   },
   {
     key: 'conversation.input.overlay',

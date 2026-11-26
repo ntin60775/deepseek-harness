@@ -1,16 +1,11 @@
 // @vitest-environment jsdom
 /**
  * The composer picker hosts plugin-owned settings panes. An entry contributed
- * to `conversation.input.model.options` calls `openPane`, the dialog body
- * becomes the keyed `conversation.input.model.pane`, and Escape backs out to
- * the model list before it closes the dialog. The pane returns focus to the
- * entry that opened it, marked by `data-model-menu-pane`.
- *
- * The specs below encode that contract as EXPECTED behaviour and are marked
- * Regression guard over the fix: ModelSelect renders
- * `conversation.input.model.options` (src/client/ModelSelect.tsx renders the
- * label and pane slots only), so `openPane` is unreachable and the pane body
- * never shows. Drop the `.fails` markers together with the fix.
+ * to `conversation.input.model.options` calls `openPane`, and the keyed
+ * `conversation.input.model.pane` unfolds below that entry inside the same
+ * card: the model list stays visible, the entry reports `aria-expanded`, and
+ * clicking it again or pressing Escape folds the pane without closing the
+ * picker. Folding returns focus to the entry, marked by `data-model-menu-pane`.
  */
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { afterEach, onTestFinished, expect, it, vi, beforeEach } from 'vitest'
@@ -63,6 +58,7 @@ function setup() {
       const controls = owner as object as ModelMenuOptions
       // The key matches the pane it opens: that is how focus returns.
       return <button type="button" data-model-menu-pane="fixture" disabled={controls.locked}
+        aria-expanded={controls.openPaneKey === 'fixture'}
         onClick={() => { controls.openPane({ key: 'fixture', title: 'Fixture settings' }) }}>
         Fixture settings
       </button>
@@ -90,24 +86,38 @@ function setup() {
   return { trigger, change, select, directory }
 }
 
-it('opens the keyed pane from an options entry and backs out to the model list on Escape', () => {
+it('unfolds the keyed pane below its entry, keeps the model list, and folds it on Escape', () => {
   const { trigger, select } = setup()
-  fireEvent.click(screen.getByRole('button', { name: 'Fixture settings' }))
-  // The pane replaces the list instead of drilling into a second menu.
+  const entry = screen.getByRole('button', { name: 'Fixture settings' })
+  fireEvent.click(entry)
+  // The pane opens inside the same card: the rows above never leave.
   expect(screen.getByText('Fixture explanation')).toBeTruthy()
-  expect(screen.queryAllByRole('option')).toHaveLength(0)
+  expect(screen.getAllByRole('option')).toHaveLength(1)
+  expect(entry.getAttribute('aria-expanded')).toBe('true')
   expect(document.activeElement).toBe(screen.getByRole('switch'))
 
   fireEvent.keyDown(screen.getByRole('switch'), { key: 'Escape' })
-  // One Escape backs out to the list; it does not dismiss the picker.
+  // One Escape folds the pane; it does not dismiss the picker.
   expect(screen.queryByText('Fixture explanation')).toBeNull()
   expect(screen.getByRole('option')).toBeTruthy()
-  expect(document.activeElement).toBe(screen.getByRole('button', { name: 'Fixture settings' }))
+  expect(entry.getAttribute('aria-expanded')).toBe('false')
+  expect(document.activeElement).toBe(entry)
 
   fireEvent.keyDown(screen.getByRole('option'), { key: 'Escape' })
   expect(screen.queryByRole('dialog')).toBeNull()
   expect(select).not.toHaveBeenCalled()
   expect(document.activeElement).toBe(trigger)
+})
+
+it('folds an open pane when its entry is clicked again', () => {
+  setup()
+  const entry = screen.getByRole('button', { name: 'Fixture settings' })
+  fireEvent.click(entry)
+  expect(screen.getByText('Fixture explanation')).toBeTruthy()
+  fireEvent.click(entry)
+  expect(screen.queryByText('Fixture explanation')).toBeNull()
+  expect(entry.getAttribute('aria-expanded')).toBe('false')
+  expect(screen.getByRole('option')).toBeTruthy()
 })
 
 it('keeps the model-save lock on both the options entry and the pane controls', () => {
