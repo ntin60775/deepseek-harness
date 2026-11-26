@@ -7,6 +7,7 @@ updated: 2026-11-26
 tags: [fork, web-client, model-selection, ui]
 links:
   documents:
+    - assets/fork-composer-model-picker-mockup.png
     - ../../packages/client/ui-model-selection/src/client/ModelSelect.tsx
     - ../../packages/client/ui-model-selection/src/client/index.ts
     - ../../packages/client/ui-model-selection/src/client/slots.ts
@@ -32,6 +33,20 @@ This page records the one fork-local change that replaces an upstream interface 
 - [locale dictionaries](../../packages/client/ui-model-selection/src/client/locales.ts) — `menu.close`, `menu.current`, `menu.keyApply`, `menu.keyClose`, `menu.back`, and the `shortcut.*` labels, in every shipped language.
 
 The plugin slots keep their contracts: `conversation.input.model.options` now renders in the dialog footer (the agent-team switch moved there), and `conversation.input.model.pane` still replaces the body and returns focus to the entry that opened it.
+
+## Design record
+
+The session that produced this patch started from the stock seat: a 240px card whose first level is a router (`Model ›`, `Effort ›`, plugin rows), where the effort level therefore sits three clicks away and every value ellipsizes. The recording below is the shorthand of what was decided, so the reasoning survives without the transcript.
+
+![Composer strip with effort chips and the picker dialog over the conversation column](assets/fork-composer-model-picker-mockup.png)
+
+- **One screen, one decision.** The picker opens on the model list; every row carries its own levels. The router level is gone because it conveyed nothing the two rows did not already say.
+- **Chips in the composer.** The current model's levels are visible at all times next to the model chip, so a common change costs one click. They sit to the right of the chip, matching the composer's trailing control cluster.
+- **A dialog, not a menu.** The card centres over the conversation column: a side panel moves that column's centre away from the window's, so a viewport-centred card reads as belonging to the wrong surface.
+- **Keyboard first, layout second.** The gesture matches `event.code`, so it survives a Cyrillic layout, and the fork admits `primary+alt` to the browser allowlist: the stock policy left three gestures usable in a tab, none of them the ones this seat needs.
+- **Plugin settings move to the footer.** The agent-team switch used to be the third router row; it reads better as a footer entry beside the key hints than as a nested menu.
+
+Two defects surfaced while the change was under test and are fixed here: the `conversation.input.model.options` slot was declared but never rendered (the agent-team switch would have vanished), and closing one seat's picker retired a picker request belonging to another Session in a split view.
 
 ## Merge control
 

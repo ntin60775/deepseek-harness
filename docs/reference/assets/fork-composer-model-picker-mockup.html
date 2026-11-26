@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<style>
+  /* Палитра снята с экрана оператора (gruvbox-подобная тема, моно-шрифт).
+     Размеры — реальные CSS-метрики компонентов: чип 28px 13/20, ячейка меню
+     34px, рут-меню 240px, радиусы 8/12/16/28, карточка 800px. Страница
+     рендерится с device-scale 1.25 — как его браузерный зум. */
+  :root{
+    --bg:#2c2c2c; --surface:#353333; --raised:#43403d; --raised2:#4c4844;
+    --line:rgba(235,219,178,.14); --line-soft:rgba(235,219,178,.09);
+    --fg0:#fbf1c7; --fg1:#ebdbb2; --fg2:#d5c4a1; --fg3:#bdae93; --fg4:#a89984;
+    --accent:#fe8019; --accent-soft:rgba(254,128,25,.16); --accent-line:rgba(254,128,25,.55);
+    --mono:"DejaVu Sans Mono","JetBrainsMono Nerd Font Mono",monospace;
+    --r-sm:8px; --r-md:12px; --r-lg:16px; --r-panel:28px;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;background:#242424;font-family:var(--mono);color:var(--fg1)}
+  .page{width:1000px;padding:18px 0 22px}
+
+  .fig{width:100%;margin:0 auto 22px;position:relative}
+  .cap{display:flex;align-items:baseline;gap:9px;margin:0 0 8px 1px;color:var(--fg4);font-size:12px;line-height:18px}
+  .cap b{color:var(--accent);font-weight:400}
+  .cap i{font-style:normal;color:#6b665e}
+
+  .panel{position:relative;background:var(--bg);border:1px solid var(--line-soft);border-radius:12px;overflow:hidden}
+
+  /* hero: заголовок + бейдж + строка воркспейса */
+  .hero{display:flex;flex-direction:column;align-items:center;gap:10px;padding:64px 0 4px}
+  .titleRow{display:flex;align-items:center;gap:10px;font-size:26px;line-height:32px;color:var(--fg1)}
+  .titleRow .whale{color:var(--fg3);display:flex}
+  .preview{font-size:12px;line-height:18px;padding:1px 8px 0;border-radius:999px;
+    border:.5px solid var(--accent-line);color:var(--fg3);background:rgba(254,128,25,.07)}
+  .wsRow{display:flex;align-items:center;gap:10px;width:800px;padding:0 2px;font-size:13px;line-height:20px;color:var(--fg3)}
+  .wsRow .g{display:flex;align-items:center;gap:5px}
+  .wsRow .chev{color:var(--fg4);display:flex}
+  .wsRow .right{margin-left:auto;display:flex;align-items:center;gap:12px;color:var(--fg4)}
+  .wsRow .branch{display:flex;align-items:center;gap:5px}
+  .wsRow .tree{display:flex;align-items:center;gap:6px}
+  .wsRow .box{width:12px;height:12px;border:.5px solid var(--line);border-radius:3px}
+
+  /* композер */
+  .card{position:relative;width:800px;margin:0 auto;display:flex;flex-direction:column;gap:12px;
+    padding:8px 2px 5px;background:var(--bg);border:1px solid var(--accent-line);
+    border-radius:var(--r-panel);box-shadow:0 0 0 .5px rgba(254,128,25,.22)}
+  .draft{padding:4px 14px 0;font-size:14px;line-height:24px;color:var(--fg4)}
+  .row{display:flex;align-items:center;gap:12px;padding:4px 8px 8px;min-width:0}
+  .add{width:32px;height:32px;border-radius:999px;background:#4a4744;color:var(--fg2);display:grid;place-items:center;flex:none}
+  .access{display:flex;align-items:center;gap:5px;height:28px;padding:0 6px;border-radius:var(--r-sm);font-size:13px;line-height:20px;color:var(--fg3)}
+  .access .chev{color:var(--fg4);display:flex}
+  .grow{flex:1}
+
+  /* правый кластер: чипсы усилия + чип модели + отправка */
+  .trailing{display:flex;align-items:center;gap:8px;flex:none}
+  .seat{display:flex;align-items:center;gap:4px;height:28px;padding:0 4px 0 8px;border-radius:var(--r-sm);
+    color:var(--fg2);font-size:13px;line-height:20px;background:transparent}
+  .seat.on{background:var(--raised)}
+  .seat .name{white-space:nowrap}
+  .seat .eff{color:var(--fg4);margin-left:2px}
+  .seat .chev{color:var(--fg4);display:flex;margin-left:1px}
+  .send{width:28px;height:28px;color:var(--fg3);display:grid;place-items:center;flex:none}
+
+  .chips{display:flex;align-items:center;gap:2px;flex:none}
+  .chip{height:26px;min-width:34px;padding:0 7px;display:flex;align-items:center;justify-content:center;
+    border-radius:var(--r-sm);font-size:12.5px;line-height:18px;color:var(--fg3);border:.5px solid transparent}
+  .chip.sel{background:var(--accent-soft);border-color:var(--accent-line);color:var(--accent)}
+  .chip.hov{background:rgba(235,219,178,.06);color:var(--fg1);border-color:var(--line-soft)}
+  .kbd{display:inline-flex;align-items:center;height:17px;padding:0 5px;border-radius:4px;
+    border:.5px solid var(--line);color:var(--fg4);font-size:10.5px}
+
+  /* меню «как сейчас»: 240px, ячейки 34px, прижато правым краем к триггеру */
+  .popup{position:absolute;right:0;bottom:calc(100% + 8px);width:240px;padding:4px;background:var(--surface);
+    border-radius:var(--r-md);box-shadow:0 0 0 .5px rgba(235,219,178,.13), 0 3px 8px rgba(0,0,0,.05), 0 0 20px rgba(0,0,0,.08)}
+  .cell{display:flex;align-items:center;gap:6px;height:34px;padding:0 8px;border-radius:var(--r-md);font-size:13px;line-height:20px;color:var(--fg1)}
+  .cell.hovered{background:rgba(235,219,178,.05)}
+  .cell .label{flex:none;white-space:nowrap}
+  .cell .value{flex:1;min-width:0;text-align:right;color:var(--fg4);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .cell .chev{flex:none;color:var(--fg4);display:flex}
+
+  /* модалка */
+  .modal{position:absolute;left:50%;transform:translateX(-50%);top:18px;width:700px;background:var(--surface);
+    border-radius:var(--r-lg);box-shadow:0 0 0 .5px rgba(235,219,178,.16), 0 6px 20px rgba(0,0,0,.22), 0 0 28px rgba(0,0,0,.16);overflow:hidden}
+  .mhead{display:flex;align-items:center;gap:12px;padding:13px 14px 11px;border-bottom:1px solid var(--line-soft)}
+  .mtitle{font-size:13px;color:var(--fg1)}
+  .msub{font-size:11.5px;line-height:16px;color:var(--fg4);margin-top:3px}
+  .search{margin-left:auto;display:flex;align-items:center;gap:6px;height:28px;width:200px;padding:0 8px;
+    background:rgba(235,219,178,.05);border:.5px solid var(--line);border-radius:var(--r-sm);font-size:12px;color:var(--fg4)}
+  .search svg{flex:none}
+  .mbody{padding:5px 7px 7px}
+  .grp{font-size:11px;line-height:16px;color:#7a756c;padding:7px 8px 3px}
+  .mrow{display:flex;align-items:center;gap:14px;padding:8px 9px;border-radius:var(--r-md);border:.5px solid transparent}
+  .mrow+.mrow{margin-top:2px}
+  .mrow.sel{background:rgba(235,219,178,.05);border-color:var(--line-soft)}
+  .mrow.hov{background:rgba(235,219,178,.028)}
+  .mmain{min-width:0;flex:1}
+  .mname{display:flex;align-items:center;gap:7px;font-size:13px;line-height:19px;color:var(--fg1);white-space:nowrap}
+  .tag{height:17px;padding:0 5px;border-radius:5px;display:flex;align-items:center;font-size:10px;
+    background:var(--accent-soft);color:var(--accent);border:.5px solid var(--accent-line)}
+  .tag.grey{background:rgba(235,219,178,.06);color:var(--fg4);border-color:var(--line-soft)}
+  .mdesc{margin-top:2px;font-size:11.5px;line-height:17px;color:var(--fg4);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .mchips{display:flex;align-items:center;gap:2px;flex:none}
+  .mchips .chip{height:24px;min-width:32px;font-size:12px}
+  .check{width:14px;flex:none;color:var(--accent);display:flex;justify-content:center}
+  .mfoot{display:flex;align-items:center;gap:12px;padding:8px 11px;border-top:1px solid var(--line-soft)}
+  .team{display:flex;align-items:center;gap:6px;height:26px;padding:0 8px;border-radius:var(--r-sm);
+    border:.5px solid var(--line-soft);color:var(--fg3);font-size:11.5px}
+  .team .state{color:var(--fg4)}
+  .hints{margin-left:auto;display:flex;align-items:center;gap:9px;color:var(--fg4);font-size:11px}
+  .hints span{display:flex;align-items:center;gap:4px}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- 1. СЕЙЧАС -->
+  <div class="fig">
+    <div class="cap"><b>1</b> сейчас <i>— чип модели справа, усилие внутри, меню 240px режет всё</i></div>
+    <div class="panel" style="height:265px">
+      <div class="hero">
+        <div class="titleRow">
+          <span class="whale"><svg width="20" height="20" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M2 9c0-3 2.6-5.4 6-5.4 2.6 0 5 1.6 5.6 4h.6c.5 0 .8.4.8.8 0 1-1.2 1.6-2.4 1.6H3.4C2.6 10 2 9.6 2 9Z"/><path d="M5 12.6c1.4.9 3.4 1.1 5 .4"/></svg></span>
+          В неизвестность
+          <span class="preview">Предварительный просмотр</span>
+        </div>
+        <div class="wsRow">
+          <span class="g">1C-DSH <span class="chev"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6.4 8 10.4l4-4"/></svg></span></span>
+          <span class="g">Стандартный режим <span class="chev"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6.4 8 10.4l4-4"/></svg></span></span>
+          <span class="right">
+            <span class="branch"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M4 3v10"/><circle cx="4" cy="3.2" r="1.6"/><circle cx="4" cy="12.8" r="1.6"/><circle cx="11.5" cy="6" r="1.6"/><path d="M11.5 7.6c0 2-1.4 3.1-3.6 3.6"/></svg>main</span>
+            <span class="tree"><span class="box"></span>Новое рабочее дерево</span>
+          </span>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="draft">Опишите, что вы хотите построить: /команды, @файлы или сеансы.</div>
+        <div class="row">
+          <div class="add"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M8 3.4v9.2M3.4 8h9.2"/></svg></div>
+          <div class="access">
+            <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M1.6 8S4 3.8 8 3.8 14.4 8 14.4 8 12 12.2 8 12.2 1.6 8 1.6 8Z"/><circle cx="8" cy="8" r="1.9"/></svg>
+            Полный доступ
+            <span class="chev"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6.4 8 10.4l4-4"/></svg></span>
+          </div>
+          <div class="grow"></div>
+          <div class="trailing">
+            <div class="seat on">
+              <span class="name">DeepSeek V4.1 Flash 1017</span><span class="eff">Max</span>
+              <span class="chev" style="transform:rotate(180deg)"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6.4 8 10.4l4-4"/></svg></span>
+              <div class="popup">
+                <div class="cell hovered"><span class="label">Модель</span><span class="value">DeepSeek V4.1.m…</span>
+                  <span class="chev"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6.4 4 10.4 8l-4 4"/></svg></span></div>
+                <div class="cell"><span class="label">Усилие</span><span class="value">Max</span>
+                  <span class="chev"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6.4 4 10.4 8l-4 4"/></svg></span></div>
+                <div class="cell"><span class="label">Совместная раб…</span><span class="value">Выкл.</span>
+                  <span class="chev"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6.4 4 10.4 8l-4 4"/></svg></span></div>
+              </div>
+            </div>
+            <div class="send"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M8 13V3.6M8 3.6 4.4 7.2M8 3.6l3.6 3.6"/></svg></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. ПРЕДЛАГАЮ -->
+  <div class="fig">
+    <div class="cap"><b>2</b> предлагаю <i>— чипсы усилия слева от чипа модели, модалка по центру панели чата</i></div>
+    <div class="panel" style="height:470px">
+      <div class="modal">
+        <div class="mhead">
+          <div>
+            <div class="mtitle">Модель и усилие</div>
+            <div class="msub">DeepSeek · личный аккаунт · 1 048 576 токенов</div>
+          </div>
+          <div class="search">
+            <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="6.9" cy="6.9" r="4.3"/><path d="M10.2 10.2 14 14"/></svg>
+            Поиск модели
+          </div>
+        </div>
+        <div class="mbody">
+          <div class="grp">DeepSeek</div>
+          <div class="mrow sel">
+            <div class="mmain">
+              <div class="mname">DeepSeek V4.1 Flash 1017 <span class="tag">FLASH</span></div>
+              <div class="mdesc">Быстрая и дешёвая: рутина, правки, поиск по контуру</div>
+            </div>
+            <div class="mchips"><div class="chip">Off</div><div class="chip">Low</div><div class="chip sel">High</div><div class="chip">Max</div></div>
+            <div class="check"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.6 6.2 11.8 13 5"/></svg></div>
+          </div>
+          <div class="mrow hov">
+            <div class="mmain">
+              <div class="mname">DeepSeek V4 Pro 1017 <span class="tag grey">PRO</span></div>
+              <div class="mdesc">Сильнее в коде и трудных рассуждениях, дороже за токен</div>
+            </div>
+            <div class="mchips"><div class="chip">Off</div><div class="chip hov">Low</div><div class="chip">High</div><div class="chip sel">Max</div></div>
+            <div class="check"></div>
+          </div>
+          <div class="grp">Другие провайдеры</div>
+          <div class="mrow">
+            <div class="mmain">
+              <div class="mname">deepseek-v4-flash-preview <span class="tag grey">API</span></div>
+              <div class="mdesc">Ключ из ~/.env · только текст</div>
+            </div>
+            <div class="mchips"><div class="chip">Off</div><div class="chip">Low</div><div class="chip">High</div><div class="chip sel">Max</div></div>
+            <div class="check"></div>
+          </div>
+        </div>
+        <div class="mfoot">
+          <div class="team">
+            <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3"><circle cx="6" cy="5.6" r="2.4"/><path d="M1.8 13.2c0-2.3 1.9-3.8 4.2-3.8s4.2 1.5 4.2 3.8"/><circle cx="11.6" cy="6.4" r="1.9"/><path d="M11.2 9.7c1.7.1 3 1.4 3 3.5"/></svg>
+            Совместная работа <span class="state">Выкл</span>
+            <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6.4 8 10.4l4-4"/></svg>
+          </div>
+          <div class="hints">
+            <span><span class="kbd">↑↓</span>модель</span>
+            <span><span class="kbd">←→</span>усилие</span>
+            <span><span class="kbd">Enter</span>применить</span>
+            <span><span class="kbd">Esc</span>закрыть</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="position:absolute;left:50%;transform:translateX(-50%);bottom:14px">
+        <div class="draft">Опишите, что вы хотите построить: /команды, @файлы или сеансы.</div>
+        <div class="row">
+          <div class="add"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M8 3.4v9.2M3.4 8h9.2"/></svg></div>
+          <div class="access">
+            <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M1.6 8S4 3.8 8 3.8 14.4 8 14.4 8 12 12.2 8 12.2 1.6 8 1.6 8Z"/><circle cx="8" cy="8" r="1.9"/></svg>
+            Полный доступ
+            <span class="chev"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6.4 8 10.4l4-4"/></svg></span>
+          </div>
+          <div class="grow"></div>
+          <div class="trailing">
+            <div class="chips">
+              <div class="chip">Off</div>
+              <div class="chip">Low</div>
+              <div class="chip sel">High</div>
+              <div class="chip">Max</div>
+            </div>
+            <div class="seat on">
+              <span class="name">DeepSeek V4.1 Flash 1017</span>
+              <span class="chev"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6.4 8 10.4l4-4"/></svg></span>
+            </div>
+            <div class="send"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M8 13V3.6M8 3.6 4.4 7.2M8 3.6l3.6 3.6"/></svg></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>
