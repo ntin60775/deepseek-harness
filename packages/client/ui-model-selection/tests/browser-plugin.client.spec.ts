@@ -149,7 +149,12 @@ async function bench(locale: 'zh' | 'en' = 'zh') {
     ctx: Context
   }>()
   const addressed = new Set<SessionId>()
+  // Retained-row projection the keyboard commands resolve their target from.
+  const sessionRows = createSnapshotStore<{
+    byId: Record<string, { id: SessionId; retainedBy: Record<string, number> }>
+  }>({ byId: {} })
   ctx.provide('sessions', {
+    list: sessionRows,
     scope: (id: SessionId) => scopes.get(id),
     binding: (id: SessionId) => bindings.get(id),
     subagentAddress: (id: SessionId) => addressed.has(id)
@@ -158,6 +163,23 @@ async function bench(locale: 'zh' | 'en' = 'zh') {
   })
   const track = vi.fn()
   ctx.provide('productAnalytics', { enabled: true, track } as never)
+  // The seat registers its keyboard entries through the application registry;
+  // this lane only needs the registration record, not dispatch.
+  const shortcutCommands = new Map<string, {
+    id: string
+    defaults: Record<string, { code: string; modifiers: readonly string[] }>
+    resolve: (context: unknown) => unknown
+  }>()
+  ctx.provide('shortcuts', {
+    register(options: {
+      id: string
+      defaults: Record<string, { code: string; modifiers: readonly string[] }>
+      resolve: (context: unknown) => unknown
+    }) {
+      shortcutCommands.set(options.id, options)
+      return () => { shortcutCommands.delete(options.id) }
+    },
+  })
   const fiber = ctx.plugin({ inject: [...inject], apply })
   await fiber.await()
   await ctx.plugin(function probe() {}).await()
@@ -165,6 +187,7 @@ async function bench(locale: 'zh' | 'en' = 'zh') {
     const id = sid(key)
     const handle = createScope(ctx, id)
     scopes.set(id, handle.ctx)
+    sessionRows.update((rows) => { rows.byId[id] = { id, retainedBy: { mainView: 1 } } })
     const projection = createSnapshotStore<ModelSelectionProjection | undefined>({
       lastUsed: null,
       next: null,
@@ -190,6 +213,8 @@ async function bench(locale: 'zh' | 'en' = 'zh') {
       return ui
     },
     seat: () => seats.get('conversation.input.model')!,
+    shortcut: (id: string) => shortcutCommands.get(id),
+    sessions: sessionRows,
     hostCurrent: () => selected,
     rejectSelection: () => {
       selectionFailure = new RemoteError('session/writer-held', 'writer held', { sessionId: sid('owned') })
@@ -587,4 +612,44 @@ it.each([false, true])('reports accepted switches with blank=%s and no refused s
     await face.select({ provider: 'deepseek-official', model: 'deepseek-v4-flash' })
     expect(b.track).not.toHaveBeenCalled()
   } finally { await scope.fiber.dispose(); await b.ctx.fiber.dispose() }
+})
+
+describe('composer model seat keyboard entries', () => {
+  it('binds the picker and both effort directions on layout-independent codes', async () => {
+    const b = await bench()
+    try {
+      expect(b.shortcut('model.picker')?.defaults['web:windows']).toEqual({ code: 'KeyM', modifiers: ['primary', 'alt'] })
+      expect(b.shortcut('model.picker')?.defaults['desktop:macos']).toEqual({ code: 'KeyM', modifiers: ['primary', 'alt'] })
+      expect(b.shortcut('model.effortNext')?.defaults['web:windows']).toEqual({ code: 'KeyE', modifiers: ['primary', 'alt'] })
+      expect(b.shortcut('model.effortPrevious')?.defaults['web:windows'])
+        .toEqual({ code: 'KeyE', modifiers: ['primary', 'alt', 'shift'] })
+    } finally { await b.ctx.fiber.dispose() }
+  })
+
+  it('hands the picker request to the retained session\'s seat and retires it on close', async () => {
+    const b = await bench()
+    try {
+      b.mint('main')
+      const face = b.seat().inject!(sid('main'))
+      const verdict = b.shortcut('model.picker')!.resolve({}) as { status: string; run: () => void }
+      expect(verdict.status).toBe('handled')
+      verdict.run()
+      const request = face.hooks.pickerRequest.getSnapshot()
+      expect(request).toMatchObject({ sessionId: sid('main') })
+      face.clearPickerRequest(request!.seq)
+      expect(face.hooks.pickerRequest.getSnapshot()).toBeNull()
+    } finally { await b.ctx.fiber.dispose() }
+  })
+
+  it('moves the current model to its next effort level without a dialog', async () => {
+    const b = await bench()
+    try {
+      b.mint('main')
+      // The host's current model declares Off → High → Max with High as default.
+      const verdict = b.shortcut('model.effortNext')!.resolve({}) as { status: string; run: () => void }
+      expect(verdict.status).toBe('handled')
+      verdict.run()
+      await vi.waitFor(() => { expect(b.hostCurrent()).toMatchObject({ reasoningEffort: 'max' }) })
+    } finally { await b.ctx.fiber.dispose() }
+  })
 })

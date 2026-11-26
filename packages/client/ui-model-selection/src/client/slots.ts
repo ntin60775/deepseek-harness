@@ -1,5 +1,7 @@
 /** Composer model selection injection and inline label extension. */
 import type { RemoteResult } from '@deepseek-ai/dsh-typert-protocol'
+import type { SessionId } from '@deepseek-ai/dsh-session/types'
+import type { HostObservable } from '@deepseek-ai/dsh-client-ui-slots'
 import type { ModelSelection } from '@deepseek-ai/dsh-api-remotes/client'
 import type { ModelCatalogModel, ModelProviderGroup } from '@deepseek-ai/dsh-api-session-controller/types'
 import type { SnapshotStore } from '@deepseek-ai/dsh-client-store'
@@ -11,8 +13,8 @@ export interface ModelLabelOwner {
   provider: Pick<ModelProviderGroup, 'id' | 'name'>
   /** The exact provider's model catalog entry. */
   model: ModelCatalogModel
-  /** Trigger caption, root-menu current value, or selectable model row. */
-  placement: 'trigger' | 'menu' | 'option'
+  /** Composer chip caption or a selectable model row in the picker. */
+  placement: 'trigger' | 'option'
   /** Whether this provider/model pair is the current selection. */
   selected: boolean
 }
@@ -64,8 +66,8 @@ declare module '@deepseek-ai/dsh-client-ui-slots' {
     }
     /**
      * Non-interactive inline model label; selection controls remain owner-managed.
-     * Without a contribution, the badge precedes the catalog name in the trigger
-     * and follows it in menus.
+     * Without a contribution, the badge follows the catalog name in both the
+     * composer chip and the picker rows.
      * @example
      * return {
      *   inject: ['slots'],
@@ -84,6 +86,12 @@ declare module '@deepseek-ai/dsh-client-ui-slots' {
       owner: ModelLabelOwner
     }
   }
+}
+
+/** A shortcut's request to open one Session's picker; `seq` distinguishes repeats of the same Session. */
+export interface ModelPickerRequest {
+  sessionId: SessionId
+  seq: number
 }
 
 /** Injected business face of the composer model seat. */
@@ -106,4 +114,13 @@ export interface ModelSelectInjected {
    * @returns the Host outcome, or undefined when this Session cannot select a model.
    */
   select: (selection: ModelSelection) => Promise<RemoteResult<void> | undefined>
+  /** Session owning this seat; scopes injected requests to the seat they target. */
+  sessionId: SessionId
+  /** Shortcut-owned open requests, bound as `usePickerRequest` by the renderer. */
+  hooks: { pickerRequest: HostObservable<ModelPickerRequest | null> }
+  /**
+   * Retire one consumed open request so a later remount does not reopen the picker.
+   * @param seq - the request's sequence number.
+   */
+  clearPickerRequest: (seq: number) => void
 }

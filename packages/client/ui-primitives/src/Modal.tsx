@@ -1,5 +1,5 @@
 import { useRef } from 'react'
-import type { KeyboardEventHandler, ReactNode } from 'react'
+import type { CSSProperties, KeyboardEventHandler, ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import clsx from 'clsx'
 import { IconCloseOutlineRegular, IconWarningOutlineRegular } from './icons/index.tsx'
@@ -16,6 +16,7 @@ interface ModalBaseProps {
   footer?: ReactNode
   className?: string
   contentClassName?: string
+  style?: CSSProperties
   shortcutModal?: string
   onKeyDownCapture?: KeyboardEventHandler<HTMLDivElement>
   backdropBlur?: boolean
@@ -39,6 +40,7 @@ type ModalProps = ModalBaseProps & (
  * data-modal-autofocus instead of React autoFocus to preserve return focus.
  * @param props.footer - action row (Cancel / Create).
  * @param props.contentClassName - optional class for a scrollable content region.
+ * @param props.style - optional inline style for the dialog card (placement over a panel rather than the viewport).
  * @param props.backdropBlur - disable when the caller already blurs the page; defaults to true.
  * @param props.shortcutModal - command scope allowed by shortcut owners; unnamed
  * dialogs block application commands unless their owner allows the "other" scope.
@@ -48,7 +50,7 @@ type ModalProps = ModalBaseProps & (
  * @returns null when closed; otherwise the overlay tree.
  */
 export function Modal({
-  open, onClose, title, closeLabel, description, children, footer, className, contentClassName,
+  open, onClose, title, closeLabel, description, children, footer, className, contentClassName, style,
   onKeyDownCapture, headless = false, backdropBlur = true, shortcutModal, tone,
 }: ModalProps) {
   const dialog = useRef<HTMLDivElement>(null)
@@ -64,6 +66,7 @@ export function Modal({
         tabIndex={-1}
         data-shortcut-modal={shortcutModal}
         className={clsx(css.dialog, !headless && tone === 'warning' && css.warning, className)}
+        style={style}
         role="dialog"
         aria-modal="true"
         aria-label={title}

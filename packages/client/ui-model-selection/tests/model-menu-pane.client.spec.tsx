@@ -1,97 +1,137 @@
 // @vitest-environment jsdom
+/**
+ * The composer picker hosts plugin-owned settings panes. An entry contributed
+ * to `conversation.input.model.options` calls `openPane`, the dialog body
+ * becomes the keyed `conversation.input.model.pane`, and Escape backs out to
+ * the model list before it closes the dialog. The pane returns focus to the
+ * entry that opened it, marked by `data-model-menu-pane`.
+ *
+ * The specs below encode that contract as EXPECTED behaviour and are marked
+ * Regression guard over the fix: ModelSelect renders
+ * `conversation.input.model.options` (src/client/ModelSelect.tsx renders the
+ * label and pane slots only), so `openPane` is unreachable and the pane body
+ * never shows. Drop the `.fails` markers together with the fix.
+ */
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { afterEach, expect, it, vi } from 'vitest'
-import type { ComponentProps } from 'react'
-import type { OwnerOf } from '@deepseek-ai/dsh-client-ui-slots'
+import { bindSnapshotSelector, makeTranslate } from '@deepseek-ai/dsh-client-test-runtime'
+import type { SessionId } from '@deepseek-ai/dsh-session/types'
+import type { ModelSelection } from '@deepseek-ai/dsh-api-remotes/client'
 import { createSnapshotStore } from '@deepseek-ai/dsh-client-store'
-import { makeTranslate } from '@deepseek-ai/dsh-client-test-runtime'
+import type { ComponentProps } from 'react'
 import type { ModelDirectoryState } from '../src/client/directory.ts'
+import type { ModelMenuControls, ModelMenuOptions, ModelPickerRequest } from '../src/client/slots.ts'
 import { ModelSelect } from '../src/client/ModelSelect.tsx'
 import { en } from '../src/client/locales.ts'
+import { brandString } from '@deepseek-ai/dsh-brand'
 
 afterEach(cleanup)
 
-function setup(autoFocus = true) {
+type SeatProps = ComponentProps<typeof ModelSelect>
+type SelectOutcome = Awaited<ReturnType<SeatProps['select']>>
+
+const t = makeTranslate(en)
+const SESSION = brandString<SessionId>('pane-seat')
+
+/** The picker over one plain model, with the plugin option and pane stubs. */
+function setup() {
   const directory = createSnapshotStore<ModelDirectoryState>({
-    current: { provider: 'fixture', model: 'fixture' }, routable: true,
+    current: { provider: 'fixture', model: 'fixture' },
+    routable: true,
     groups: [{ id: 'fixture', name: 'Fixture', models: [{ id: 'fixture', name: 'Fixture' }] }],
-    failures: [], status: 'ready', pending: null, error: null,
+    failures: [],
+    status: 'ready',
+    pending: null,
+    error: null,
   })
+  const select = vi.fn<(selection: ModelSelection) => Promise<SelectOutcome>>(
+    async () => ({ ok: true, value: undefined }),
+  )
   const change = vi.fn()
-  const select = vi.fn()
-  const renderSlot: ComponentProps<typeof ModelSelect>['renderSlot'] = (name, owner, options) => {
+  const renderSlot: SeatProps['renderSlot'] = (name, owner, options) => {
     if (name === 'conversation.input.model.options') {
-      const controls = owner as object as OwnerOf<'conversation.input.model.options'>
-      return <button type="button" role="menuitem" data-model-menu-pane="fixture" disabled={controls.locked}
-        onClick={() => { controls.openPane({ key: 'fixture', title: 'Fixture settings' }) }}>Fixture settings</button>
+      const controls = owner as object as ModelMenuOptions
+      // The key matches the pane it opens: that is how focus returns.
+      return <button type="button" data-model-menu-pane="fixture" disabled={controls.locked}
+        onClick={() => { controls.openPane({ key: 'fixture', title: 'Fixture settings' }) }}>
+        Fixture settings
+      </button>
     }
     if (name === 'conversation.input.model.pane') {
-      const controls = owner as object as OwnerOf<'conversation.input.model.pane'>
-      expect(options?.entryKey).toBe('fixture')
-      return <><button type="button" role="switch" aria-checked="false" disabled={controls.locked}
-        autoFocus={autoFocus} onClick={change}>Fixture setting</button><p>Fixture explanation</p></>
+      const controls = owner as object as ModelMenuControls
+      return <>
+        <button type="button" role="switch" aria-checked="false" disabled={controls.locked}
+          autoFocus onClick={change}>
+          Fixture setting
+        </button>
+        <p>Fixture explanation</p>
+      </>
     }
     return options?.fallback ?? null
   }
-  render(<ModelSelect locked={false} available directory={directory} load={vi.fn()} select={select}
-    resolveText={text => typeof text === 'string' ? text : text.en} t={makeTranslate(en)} renderSlot={renderSlot} />)
-  const trigger = screen.getByRole('button', { name: /^Select model/ })
+  render(<ModelSelect locked={false} available sessionId={SESSION} directory={directory}
+    load={vi.fn<() => void>()} resolveText={text => typeof text === 'string' ? text : text.en} select={select}
+    t={t} renderSlot={renderSlot}
+    usePickerRequest={bindSnapshotSelector(createSnapshotStore<ModelPickerRequest | null>(null))}
+    clearPickerRequest={vi.fn<(seq: number) => void>()} />)
+  const trigger = screen.getByRole('button', { name: t('trigger.aria', { model: 'Fixture' }) })
   fireEvent.click(trigger)
+  expect(screen.getByRole('dialog', { name: t('menu.aria') })).toBeTruthy()
   return { trigger, change, select, directory }
 }
 
-it('dispatches a keyed page and returns focus to its invoking summary on Escape', () => {
-  const { trigger, change, select } = setup()
-  fireEvent.click(screen.getByRole('menuitem', { name: 'Fixture settings' }))
-  const toggle = screen.getByRole('switch')
-  expect(document.activeElement).toBe(toggle)
-  expect(screen.getByRole('group', { name: 'Fixture settings' })).toBeTruthy()
-  fireEvent.blur(toggle, { relatedTarget: null })
+it('opens the keyed pane from an options entry and backs out to the model list on Escape', () => {
+  const { trigger, select } = setup()
+  fireEvent.click(screen.getByRole('button', { name: 'Fixture settings' }))
+  // The pane replaces the list instead of drilling into a second menu.
   expect(screen.getByText('Fixture explanation')).toBeTruthy()
-  fireEvent.keyDown(toggle, { key: 'Escape' })
-  expect(document.activeElement).toBe(screen.getByRole('menuitem', { name: 'Fixture settings' }))
-  expect(screen.queryByRole('switch')).toBeNull()
-  fireEvent.keyDown(document.activeElement!, { key: 'Escape' })
-  expect(trigger.getAttribute('aria-expanded')).toBe('false')
-  expect(change).not.toHaveBeenCalled()
+  expect(screen.queryAllByRole('option')).toHaveLength(0)
+  expect(document.activeElement).toBe(screen.getByRole('switch'))
+
+  fireEvent.keyDown(screen.getByRole('switch'), { key: 'Escape' })
+  // One Escape backs out to the list; it does not dismiss the picker.
+  expect(screen.queryByText('Fixture explanation')).toBeNull()
+  expect(screen.getByRole('option')).toBeTruthy()
+  expect(document.activeElement).toBe(screen.getByRole('button', { name: 'Fixture settings' }))
+
+  fireEvent.keyDown(screen.getByRole('option'), { key: 'Escape' })
+  expect(screen.queryByRole('dialog')).toBeNull()
   expect(select).not.toHaveBeenCalled()
-})
-
-it('keeps focus on the page surface when the page places none, so Escape still returns', () => {
-  setup(false)
-  fireEvent.click(screen.getByRole('menuitem', { name: 'Fixture settings' }))
-  const surface = screen.getByRole('group', { name: 'Fixture settings' })
-  expect(document.activeElement).toBe(surface)
-  fireEvent.keyDown(surface, { key: 'Escape' })
-  expect(document.activeElement).toBe(screen.getByRole('menuitem', { name: 'Fixture settings' }))
-})
-
-it('closes a detail pane on an outside touch press that dispatches no mousedown', () => {
-  const { trigger } = setup()
-  fireEvent.click(screen.getByRole('menuitem', { name: 'Fixture settings' }))
-  fireEvent.blur(screen.getByRole('switch'), { relatedTarget: null })
-  fireEvent.pointerDown(screen.getByText('Fixture explanation'))
-  expect(trigger.getAttribute('aria-expanded')).toBe('true')
-  fireEvent.pointerDown(document.body)
-  expect(trigger.getAttribute('aria-expanded')).toBe('false')
-})
-
-it.each([false, true])('closes a detail pane on Tab without changing its setting (shift: %s)', async (shiftKey) => {
-  const { trigger, change } = setup()
-  fireEvent.click(screen.getByRole('menuitem', { name: 'Fixture settings' }))
-  fireEvent.keyDown(screen.getByRole('switch'), { key: 'Tab', shiftKey })
-  await act(async () => {})
-  expect(trigger.getAttribute('aria-expanded')).toBe('false')
   expect(document.activeElement).toBe(trigger)
-  expect(change).not.toHaveBeenCalled()
 })
 
-it('keeps the baseline model-save lock on both summary and detail controls', () => {
+it('keeps the model-save lock on both the options entry and the pane controls', () => {
   const { directory } = setup()
-  act(() => { directory.update((state) => { state.pending = { provider: 'fixture', model: 'fixture' } }) })
-  expect(screen.getByRole('menuitem', { name: 'Fixture settings' }).hasAttribute('disabled')).toBe(true)
-  act(() => { directory.update((state) => { state.pending = null }) })
-  fireEvent.click(screen.getByRole('menuitem', { name: 'Fixture settings' }))
-  act(() => { directory.update((state) => { state.pending = { provider: 'fixture', model: 'fixture' } }) })
+  act(() => { directory.update((snapshot) => { snapshot.pending = { provider: 'fixture', model: 'fixture' } }) })
+  expect(screen.getByRole('button', { name: 'Fixture settings' }).hasAttribute('disabled')).toBe(true)
+
+  act(() => { directory.update((snapshot) => { snapshot.pending = null }) })
+  fireEvent.click(screen.getByRole('button', { name: 'Fixture settings' }))
+  act(() => { directory.update((snapshot) => { snapshot.pending = { provider: 'fixture', model: 'fixture' } }) })
   expect(screen.getByRole('switch').hasAttribute('disabled')).toBe(true)
+})
+
+it('renders the plugin options the picker declares to the renderer', () => {
+  const dispatch: string[] = []
+  const renderSlot: SeatProps['renderSlot'] = (name, _owner, options) => {
+    dispatch.push(name)
+    return options?.fallback ?? null
+  }
+  const directory = createSnapshotStore<ModelDirectoryState>({
+    current: { provider: 'fixture', model: 'fixture' },
+    routable: true,
+    groups: [{ id: 'fixture', name: 'Fixture', models: [{ id: 'fixture', name: 'Fixture' }] }],
+    failures: [],
+    status: 'ready',
+    pending: null,
+    error: null,
+  })
+  render(<ModelSelect locked={false} available sessionId={SESSION} directory={directory}
+    load={vi.fn<() => void>()} resolveText={text => typeof text === 'string' ? text : text.en}
+    select={vi.fn()} t={t} renderSlot={renderSlot}
+    usePickerRequest={bindSnapshotSelector(createSnapshotStore<ModelPickerRequest | null>(null))}
+    clearPickerRequest={vi.fn<(seq: number) => void>()} />)
+  fireEvent.click(screen.getByRole('button', { name: t('trigger.aria', { model: 'Fixture' }) }))
+  // Declaring a child slot is claiming it: the open picker must dispatch it.
+  expect(dispatch).toContain('conversation.input.model.options')
 })

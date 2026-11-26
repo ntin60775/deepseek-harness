@@ -33,6 +33,16 @@ export const zh = {
   'search.empty': '没有匹配的模型。',
   'empty.models': '暂无可用模型',
   'empty.efforts': '当前模型未提供推理等级。',
+  'menu.close': '关闭',
+  'menu.current': '当前：{model}',
+  'menu.keyApply': 'Enter',
+  'menu.keyClose': 'Esc',
+  'menu.back': '返回',
+  'shortcut.picker': '打开模型选择',
+  'shortcut.effortNext': '下一个推理等级',
+  'shortcut.effortPrevious': '上一个推理等级',
+  'shortcut.noSession': '没有活动会话',
+  'shortcut.noEffort': '当前模型不提供推理等级',
 } satisfies Record<string, string>
 
 /** The model namespace key union. */
@@ -63,6 +73,16 @@ export const en = {
   'search.empty': 'No matching models.',
   'empty.models': 'No models available.',
   'empty.efforts': 'This model provides no reasoning effort levels.',
+  'menu.close': 'Close',
+  'menu.current': 'Current: {model}',
+  'menu.keyApply': 'Enter',
+  'menu.keyClose': 'Esc',
+  'menu.back': 'Back',
+  'shortcut.picker': 'Open model picker',
+  'shortcut.effortNext': 'Next reasoning level',
+  'shortcut.effortPrevious': 'Previous reasoning level',
+  'shortcut.noSession': 'No active session',
+  'shortcut.noEffort': 'The current model provides no reasoning levels',
 } satisfies Record<ModelKey, string>
 
 /** Japanese copy, checked against the English keys. */
@@ -90,6 +110,16 @@ export const ja = {
   'search.empty': '一致するモデルがありません。',
   'empty.models': '利用可能なモデルがありません。',
   'empty.efforts': 'このモデルには推論強度の設定がありません。',
+  'menu.close': '閉じる',
+  'menu.current': '現在: {model}',
+  'menu.keyApply': 'Enter',
+  'menu.keyClose': 'Esc',
+  'menu.back': '戻る',
+  'shortcut.picker': 'モデル選択を開く',
+  'shortcut.effortNext': '次の推論強度',
+  'shortcut.effortPrevious': '前の推論強度',
+  'shortcut.noSession': 'アクティブなセッションがありません',
+  'shortcut.noEffort': '現在のモデルは推論強度を提供しません',
 } satisfies Record<keyof typeof en, string>
 
 /** Spanish dictionary, checked against the English keys. */
@@ -117,6 +147,16 @@ export const es = {
   'search.empty': 'No hay modelos coincidentes.',
   'empty.models': 'No hay modelos disponibles.',
   'empty.efforts': 'Este modelo no proporciona niveles de esfuerzo de razonamiento.',
+  'menu.close': 'Cerrar',
+  'menu.current': 'Actual: {model}',
+  'menu.keyApply': 'Enter',
+  'menu.keyClose': 'Esc',
+  'menu.back': 'Volver',
+  'shortcut.picker': 'Abrir selector de modelo',
+  'shortcut.effortNext': 'Siguiente nivel de razonamiento',
+  'shortcut.effortPrevious': 'Nivel de razonamiento anterior',
+  'shortcut.noSession': 'No hay sesión activa',
+  'shortcut.noEffort': 'El modelo actual no ofrece niveles de razonamiento',
 } satisfies Record<keyof typeof en, string>
 
 /** French dictionary, checked against the English keys. */
@@ -144,6 +184,16 @@ export const fr = {
   'search.empty': 'Aucun modèle correspondant.',
   'empty.models': 'Aucun modèle disponible.',
   'empty.efforts': 'Ce modèle ne fournit aucun niveau d’effort de raisonnement.',
+  'menu.close': 'Fermer',
+  'menu.current': 'Actuel : {model}',
+  'menu.keyApply': 'Enter',
+  'menu.keyClose': 'Esc',
+  'menu.back': 'Retour',
+  'shortcut.picker': 'Ouvrir le sélecteur de modèle',
+  'shortcut.effortNext': 'Niveau de raisonnement suivant',
+  'shortcut.effortPrevious': 'Niveau de raisonnement précédent',
+  'shortcut.noSession': 'Aucune session active',
+  'shortcut.noEffort': 'Le modèle actuel n’offre aucun niveau de raisonnement',
 } satisfies Record<keyof typeof en, string>
 
 /** German dictionary, checked against the English keys. */
@@ -171,6 +221,16 @@ export const de = {
   'search.empty': 'Keine passenden Modelle.',
   'empty.models': 'Keine Modelle verfügbar.',
   'empty.efforts': 'Dieses Modell liefert keine Argumentationsaufwandsstufen.',
+  'menu.close': 'Schließen',
+  'menu.current': 'Aktuell: {model}',
+  'menu.keyApply': 'Enter',
+  'menu.keyClose': 'Esc',
+  'menu.back': 'Zurück',
+  'shortcut.picker': 'Modellauswahl öffnen',
+  'shortcut.effortNext': 'Nächste Denkstufe',
+  'shortcut.effortPrevious': 'Vorherige Denkstufe',
+  'shortcut.noSession': 'Keine aktive Sitzung',
+  'shortcut.noEffort': 'Das aktuelle Modell bietet keine Denkstufen',
 } satisfies Record<keyof typeof en, string>
 
 /** Russian dictionary, checked against the English keys. */
@@ -198,6 +258,16 @@ export const ru = {
   'search.empty': 'Нет подходящих моделей.',
   'empty.models': 'Нет доступных моделей.',
   'empty.efforts': 'Эта модель не обеспечивает обоснования уровней усилий.',
+  'menu.close': 'Закрыть',
+  'menu.current': 'Сейчас: {model}',
+  'menu.keyApply': 'Enter',
+  'menu.keyClose': 'Esc',
+  'menu.back': 'Назад',
+  'shortcut.picker': 'Открыть выбор модели',
+  'shortcut.effortNext': 'Следующий уровень усилия',
+  'shortcut.effortPrevious': 'Предыдущий уровень усилия',
+  'shortcut.noSession': 'Нет активного сеанса',
+  'shortcut.noEffort': 'Текущая модель не поддерживает уровни усилия',
 } satisfies Record<keyof typeof en, string>
 
 /** Portuguese dictionary, checked against the English keys. */
@@ -225,4 +295,14 @@ export const pt = {
   'search.empty': 'Não há modelos correspondentes.',
   'empty.models': 'Nenhum modelo disponível.',
   'empty.efforts': 'Este modelo não fornece níveis de esforço de raciocínio.',
+  'menu.close': 'Fechar',
+  'menu.current': 'Atual: {model}',
+  'menu.keyApply': 'Enter',
+  'menu.keyClose': 'Esc',
+  'menu.back': 'Voltar',
+  'shortcut.picker': 'Abrir seletor de modelo',
+  'shortcut.effortNext': 'Próximo nível de raciocínio',
+  'shortcut.effortPrevious': 'Nível de raciocínio anterior',
+  'shortcut.noSession': 'Nenhuma sessão ativa',
+  'shortcut.noEffort': 'O modelo atual não oferece níveis de raciocínio',
 } satisfies Record<keyof typeof en, string>

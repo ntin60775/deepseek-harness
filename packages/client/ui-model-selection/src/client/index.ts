@@ -15,6 +15,9 @@ import type { ModelSelection } from '@deepseek-ai/dsh-api-session-controller/typ
 import type {} from '@deepseek-ai/dsh-api-session-controller/client'
 import type { Context as ClientContext } from '@deepseek-ai/cordis'
 import type { CommandUiContract, SelectOption } from '@deepseek-ai/dsh-client-ui-commands/client'
+import type { ShortcutCommand, ShortcutCommandId } from '@deepseek-ai/dsh-client-shortcuts/client'
+import { createSnapshotStore } from '@deepseek-ai/dsh-client-store'
+import type { SessionId } from '@deepseek-ai/dsh-session/types'
 // Type-only: pulls the ui-conversation SlotMap merge (the input.model seat).
 import type {} from '@deepseek-ai/dsh-client-ui-conversation/client'
 // Type-only: pulls the locale plugin's Context merge (ctx.locale).
@@ -25,7 +28,7 @@ import type { TranslateNS } from '@deepseek-ai/dsh-client-ui-slots'
 import { IconDataOutlineRegular } from '@deepseek-ai/dsh-client-ui-primitives'
 import type { ModelDirectoryState } from './directory.ts'
 import { ModelDirectoryResolver } from './service.ts'
-import type { ModelSelectInjected } from './slots.ts'
+import type { ModelPickerRequest, ModelSelectInjected } from './slots.ts'
 import { ModelSelect } from './ModelSelect.tsx'
 import { en, ja, es, fr, de, ru, pt, zh, type ModelKey } from './locales.ts'
 import { orderModelProviders } from './provider-order.ts'
@@ -165,9 +168,70 @@ export function apply(ctx: ClientContext): void {
   })
 
   // Entry 2: the composer's named model seat over the SAME directory.
-  ctx.inject(['slots', 'modelDirectories'], (scope: ClientContext) => {
+  ctx.inject(['slots', 'modelDirectories', 'shortcuts'], (scope: ClientContext) => {
     const models = scope.modelDirectories
     const sessions = scope.sessions
+    // Shortcut requests ride a plugin-owned observable: the seat binds it as
+    // `usePickerRequest`, and a Session id keeps split-view seats apart.
+    const pickerRequests = createSnapshotStore<ModelPickerRequest | null>(null)
+    let requestSeq = 0
+    const clearPickerRequest = (seq: number): void => {
+      if (pickerRequests.getSnapshot()?.seq === seq) pickerRequests.set(null)
+    }
+    const mainSession = (): SessionId | undefined => Object.values(sessions.list.getSnapshot().byId)
+      .find(row => (row.retainedBy.mainView ?? 0) > 0)?.id
+    const shortcut = (id: string, label: () => string, aliases: string[], code: string,
+      modifiers: ('primary' | 'alt' | 'shift')[], resolve: ShortcutCommand['resolve']): void => {
+      scope.effect(() => scope.shortcuts.register({
+        id: id as ShortcutCommandId, label, aliases,
+        // Ctrl+Alt (Cmd+Alt on macOS) keeps the web shortcuts free of browser
+        // reservations; `code` makes the gesture layout-independent.
+        defaults: {
+          'desktop:macos': { code, modifiers },
+          'desktop:windows': { code, modifiers },
+          'desktop:linux': { code, modifiers },
+          'web:macos': { code, modifiers },
+          'web:windows': { code, modifiers },
+        },
+        regions: ['page', 'editable'], modals: [], resolve,
+      }), `ui-model-selection: ${id}`)
+    }
+    shortcut('model.picker', () => t('shortcut.picker'), ['choose model', 'model picker'], 'KeyM', ['primary', 'alt'], () => {
+      const sessionId = mainSession()
+      if (sessionId === undefined) return { status: 'blocked', reason: t('shortcut.noSession') }
+      if (sessions.subagentAddress(sessionId) !== undefined) return { status: 'blocked', reason: t('shortcut.noSession') }
+      return { status: 'handled', run: () => {
+        requestSeq += 1
+        pickerRequests.set({ sessionId, seq: requestSeq })
+      } }
+    })
+    const cycleEffort = (direction: 1 | -1): ReturnType<NonNullable<ShortcutCommand['resolve']>> => {
+      const sessionId = mainSession()
+      if (sessionId === undefined || sessions.subagentAddress(sessionId) !== undefined) {
+        return { status: 'blocked', reason: t('shortcut.noSession') }
+      }
+      const directory = models.directoryFor(sessionId)
+      const state = directory.store.getSnapshot()
+      const current = state.current
+      const model = current === null ? undefined
+        : state.groups.find(group => group.id === current.provider)?.models.find(entry => entry.id === current.model)
+      const reasoning = model?.reasoning
+      if (current === null || reasoning === undefined || reasoning.efforts.length === 0) {
+        return { status: 'blocked', reason: t('shortcut.noEffort') }
+      }
+      const active = current.reasoningEffort ?? reasoning.defaultEffort
+      const at = reasoning.efforts.findIndex(level => level.id === active)
+      const next = reasoning.efforts[(Math.max(at, 0) + direction + reasoning.efforts.length) % reasoning.efforts.length]
+      if (next === undefined) return { status: 'blocked', reason: t('shortcut.noEffort') }
+      return { status: 'handled', run: () => {
+        void directory.select({ provider: current.provider, model: current.model, reasoningEffort: next.id })
+          .catch(() => { /* surfaced on the shared directory */ })
+      } }
+    }
+    shortcut('model.effortNext', () => t('shortcut.effortNext'), ['next effort', 'raise reasoning'], 'KeyE',
+      ['primary', 'alt'], () => cycleEffort(1))
+    shortcut('model.effortPrevious', () => t('shortcut.effortPrevious'), ['previous effort', 'lower reasoning'], 'KeyE',
+      ['primary', 'alt', 'shift'], () => cycleEffort(-1))
     scope.slots.inject('conversation.input.model', () => scope.slots.register({
       name: 'conversation.input.model',
       locale: NS,
@@ -181,6 +245,9 @@ export function apply(ctx: ClientContext): void {
         const available = sessions.subagentAddress(sessionId) === undefined
         return {
           available,
+          sessionId,
+          hooks: { pickerRequest: pickerRequests },
+          clearPickerRequest,
           directory: directory.store,
           load: () => {
             if (available) directory.load().catch(() => { /* surfaced on the store */ })
