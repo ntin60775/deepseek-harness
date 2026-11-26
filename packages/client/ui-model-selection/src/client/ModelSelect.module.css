@@ -366,7 +366,9 @@
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  width: auto;
+  /* The Modal footer row is flex-end; without growing, the bar shrinks to its
+     content and the negative inset only shifts it. */
+  flex: 1 1 auto;
   margin: 12px -24px 0;
   padding: 10px 24px 12px;
   border-top: 0.5px solid var(--dsw-alias-border-l1);
