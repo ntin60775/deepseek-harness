@@ -183,18 +183,18 @@ export function apply(ctx: ClientContext): void {
       .find(row => (row.retainedBy.mainView ?? 0) > 0)?.id
     const shortcut = (id: string, label: () => string, aliases: string[], code: string,
       modifiers: ('primary' | 'alt' | 'shift')[],
-      webDefaults: Partial<Record<'web:macos' | 'web:windows' | 'web:linux', { code: string; modifiers: ('primary' | 'alt' | 'shift')[] }>>,
       resolve: ShortcutCommand['resolve']): void => {
       scope.effect(() => scope.shortcuts.register({
         id: id as ShortcutCommandId, label, aliases,
-        // Desktop takes the Alt pair; a browser tab may only claim the three
-        // gestures isWebBindingAllowed admits, so the web profiles carry those
-        // and `code` keeps every gesture layout-independent.
+        // Ctrl+Alt (Cmd+Alt on macOS) on every profile — the fork allows the pair
+        // for Web as well; `code` keeps the gesture layout-independent.
         defaults: {
           'desktop:macos': { code, modifiers },
           'desktop:windows': { code, modifiers },
           'desktop:linux': { code, modifiers },
-          ...webDefaults,
+          'web:macos': { code, modifiers },
+          'web:windows': { code, modifiers },
+          'web:linux': { code, modifiers },
         },
         regions: ['page', 'editable'], modals: [], resolve,
       }), `ui-model-selection: ${id}`)
@@ -227,7 +227,7 @@ export function apply(ctx: ClientContext): void {
       },
     }, ModelSelect))
 
-    shortcut('model.picker', () => t('shortcut.picker'), ['choose model', 'model picker'], 'KeyM', ['primary', 'alt'], {}, () => {
+    shortcut('model.picker', () => t('shortcut.picker'), ['choose model', 'model picker'], 'KeyM', ['primary', 'alt'], () => {
       const sessionId = mainSession()
       if (sessionId === undefined) return { status: 'blocked', reason: t('shortcut.noSession') }
       if (sessions.subagentAddress(sessionId) !== undefined) return { status: 'blocked', reason: t('shortcut.noSession') }
@@ -260,16 +260,8 @@ export function apply(ctx: ClientContext): void {
       } }
     }
     shortcut('model.effortNext', () => t('shortcut.effortNext'), ['next effort', 'raise reasoning'], 'KeyE',
-      ['primary', 'alt'],
-      { 'web:macos': { code: 'Period', modifiers: ['primary', 'shift'] },
-        'web:windows': { code: 'Period', modifiers: ['primary', 'shift'] },
-        'web:linux': { code: 'Period', modifiers: ['primary', 'shift'] } },
-      () => cycleEffort(1))
+      ['primary', 'alt'], () => cycleEffort(1))
     shortcut('model.effortPrevious', () => t('shortcut.effortPrevious'), ['previous effort', 'lower reasoning'], 'KeyE',
-      ['primary', 'alt', 'shift'],
-      { 'web:macos': { code: 'Comma', modifiers: ['primary', 'shift'] },
-        'web:windows': { code: 'Comma', modifiers: ['primary', 'shift'] },
-        'web:linux': { code: 'Comma', modifiers: ['primary', 'shift'] } },
-      () => cycleEffort(-1))
+      ['primary', 'alt', 'shift'], () => cycleEffort(-1))
   })
 }

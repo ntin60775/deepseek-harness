@@ -95,14 +95,25 @@ export function presentBinding(binding: NormalizedBinding | null, platform: Shor
  */
 export function isWebBindingAllowed(binding: NormalizedBinding, platform: ShortcutPlatform): boolean {
   if (binding.secondCode !== undefined) return false
+  // fork-patch: web-alt-shortcuts — a three-modifier gesture is never a
+  // browser or window-manager reservation, on any platform.
+  if (binding.modifiers.length >= 3) return true
   if (platform === 'windows' || platform === 'macos') {
-    if (binding.modifiers.length >= 3) return true
     const primary = platform === 'macos' ? 'meta' : 'control'
     if (binding.modifiers.length === 1
       && ((['Comma', 'Backslash'].includes(binding.code) && binding.modifiers[0] === primary)
         || (binding.code === 'Backquote' && binding.modifiers[0] === 'control'))) return true
     if (binding.modifiers.length === 2 && binding.modifiers.includes(primary)
       && (binding.modifiers.includes('alt') || binding.modifiers.includes('shift'))) return true
+  }
+  // fork-patch: web-alt-shortcuts — see docs/reference/fork-composer-model-picker.md
+  // A browser page on any platform receives Ctrl/Cmd+Alt+<key>; layout-composed
+  // AltGr input is already rejected by the adapter's AltGraph guard, and plain
+  // Alt stays off the allowlist.
+  {
+    const primary = platform === 'macos' ? 'meta' : 'control'
+    if (binding.modifiers.length === 2 && binding.modifiers.includes(primary)
+      && binding.modifiers.includes('alt')) return true
   }
   return [
     { code: 'Slash', modifiers: ['primary'] as const },

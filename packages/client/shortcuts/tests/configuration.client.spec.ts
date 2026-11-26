@@ -123,7 +123,11 @@ describe('preference document validation and conflict resolution', () => {
   it('counts expanded distinct modifiers and keeps Linux reservations', () => {
     expect(normalizeBinding({ code: 'KeyX', modifiers: ['primary', 'meta', 'shift'] }, 'macos').modifiers).toEqual(['shift', 'meta'])
     expect(bindingIssue(normalizeBinding({ code: 'KeyN', modifiers: ['primary', 'control', 'control'] }, 'windows'), 'web', 'windows')).toBe('unsupported-browser')
-    expect(bindingIssue(normalizeBinding({ code: 'KeyN', modifiers: ['control', 'alt', 'shift'] }, 'linux'), 'web', 'linux')).toBe('unsupported-browser')
+    // fork-patch: web-alt-shortcuts — this fork admits Ctrl/Cmd+Alt (and any
+    // three-modifier gesture) in the browser, because the page receives them and
+    // the adapter still rejects layout-composed AltGraph input.
+    expect(bindingIssue(normalizeBinding({ code: 'KeyN', modifiers: ['control', 'alt', 'shift'] }, 'linux'), 'web', 'linux')).toBeNull()
+    expect(bindingIssue(normalizeBinding({ code: 'KeyN', modifiers: ['alt'] }, 'linux'), 'web', 'linux')).toBe('unsupported-browser')
   })
 
   it('selects each owner-declared profile without inheriting or rewriting another profile', () => {

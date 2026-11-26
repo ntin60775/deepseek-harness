@@ -33,6 +33,16 @@ const PATCHES: readonly ForkPatch[] = [
     file: 'packages/client/ui-primitives/src/Modal.tsx',
     marker: 'fork-patch: composer-model-picker',
   },
+  {
+    id: 'web-alt-shortcuts',
+    file: 'packages/client/shortcuts/src/binding.ts',
+    marker: 'fork-patch: web-alt-shortcuts',
+  },
+  {
+    id: 'web-alt-shortcuts',
+    file: 'packages/client/shortcuts/tests/configuration.client.spec.ts',
+    marker: 'fork-patch: web-alt-shortcuts',
+  },
 ]
 
 const missing: string[] = []

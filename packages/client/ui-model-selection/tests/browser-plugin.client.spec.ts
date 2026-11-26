@@ -619,18 +619,15 @@ describe('composer model seat keyboard entries', () => {
     const b = await bench()
     try {
       expect(b.shortcut('model.picker')?.defaults['desktop:macos']).toEqual({ code: 'KeyM', modifiers: ['primary', 'alt'] })
-      // A browser tab may only claim the gestures isWebBindingAllowed admits, so
-      // the web profiles carry those while the desktop keeps the Alt pair; the
-      // picker stays unbound on the web and is opened from /model instead.
-      expect(b.shortcut('model.picker')?.defaults['web:linux']).toBeUndefined()
+      // The fork admits Ctrl/Cmd+Alt for Web, so every profile shares one pair.
+      expect(b.shortcut('model.picker')?.defaults['web:linux'])
+        .toEqual({ code: 'KeyM', modifiers: ['primary', 'alt'] })
       expect(b.shortcut('model.effortNext')?.defaults['web:linux'])
-        .toEqual({ code: 'Period', modifiers: ['primary', 'shift'] })
+        .toEqual({ code: 'KeyE', modifiers: ['primary', 'alt'] })
       expect(b.shortcut('model.effortPrevious')?.defaults['web:linux'])
-        .toEqual({ code: 'Comma', modifiers: ['primary', 'shift'] })
+        .toEqual({ code: 'KeyE', modifiers: ['primary', 'alt', 'shift'] })
       expect(b.shortcut('model.effortNext')?.defaults['web:windows'])
-        .toEqual({ code: 'Period', modifiers: ['primary', 'shift'] })
-      expect(b.shortcut('model.effortPrevious')?.defaults['web:windows'])
-        .toEqual({ code: 'Comma', modifiers: ['primary', 'shift'] })
+        .toEqual({ code: 'KeyE', modifiers: ['primary', 'alt'] })
     } finally { await b.ctx.fiber.dispose() }
   })
 
