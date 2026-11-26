@@ -1,4 +1,6 @@
-/** Composer model selection injection and inline label extension. */
+/**
+ * fork-patch: composer-model-picker — see docs/reference/fork-composer-model-picker.md
+ * and inline label extension. */
 import type { RemoteResult } from '@deepseek-ai/dsh-typert-protocol'
 import type { SessionId } from '@deepseek-ai/dsh-session/types'
 import type { HostObservable } from '@deepseek-ai/dsh-client-ui-slots'

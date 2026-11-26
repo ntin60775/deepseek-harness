@@ -1,5 +1,6 @@
 /**
- * ModelSelect: the composer's named model seat (`conversation.input.model`).
+ * fork-patch: composer-model-picker — see docs/reference/fork-composer-model-picker.md
+ * the composer's named model seat (`conversation.input.model`).
  *
  * The seat is ONE control — a model chip plus the reasoning chips of the
  * current model beside it — over the shared per-session directory. Clicking

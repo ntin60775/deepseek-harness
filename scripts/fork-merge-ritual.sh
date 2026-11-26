@@ -203,6 +203,9 @@ pnpm install
 # Upstream moves the surfaces the fork attaches to. The audit names the new
 # upgrade guides and the files both sides touched, and fails before the build
 # when a fork plugin slot or a profile row no longer fits the merged tree.
+log "audit: fork patch markers"
+pnpm run fork:patch-check
+
 log "audit: fork surfaces vs upstream"
 pnpm run fork:upgrade-audit --strict --target "$UPSTREAM_REMOTE/$UPSTREAM_BRANCH" --base "$MERGE_BASE"
 

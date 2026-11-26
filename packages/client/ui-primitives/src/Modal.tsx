@@ -16,6 +16,7 @@ interface ModalBaseProps {
   footer?: ReactNode
   className?: string
   contentClassName?: string
+  /** fork-patch: composer-model-picker — see docs/reference/fork-composer-model-picker.md */
   style?: CSSProperties
   shortcutModal?: string
   onKeyDownCapture?: KeyboardEventHandler<HTMLDivElement>

@@ -1,5 +1,6 @@
 /**
- * Model selection plugin, browser half — TWO entries over ONE per-session
+ * fork-patch: composer-model-picker — see docs/reference/fork-composer-model-picker.md
+ *, browser half — TWO entries over ONE per-session
  * directory owned by ModelDirectoryResolver (`ctx.modelDirectories`). The /model popupSelect
  * contribution and the composer's named `conversation.input.model` seat share
  * one Host-generation `session/modelCatalog` catalog, combine it with the Session's
