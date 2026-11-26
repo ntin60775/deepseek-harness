@@ -13,7 +13,7 @@
  * never shows. Drop the `.fails` markers together with the fix.
  */
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react'
-import { afterEach, expect, it, vi } from 'vitest'
+import { afterEach, onTestFinished, expect, it, vi, beforeEach } from 'vitest'
 import { bindSnapshotSelector, makeTranslate } from '@deepseek-ai/dsh-client-test-runtime'
 import type { SessionId } from '@deepseek-ai/dsh-session/types'
 import type { ModelSelection } from '@deepseek-ai/dsh-api-remotes/client'
@@ -26,6 +26,16 @@ import { en } from '../src/client/locales.ts'
 import { brandString } from '@deepseek-ai/dsh-brand'
 
 afterEach(cleanup)
+
+// jsdom has no scrollIntoView; the picker scrolls the checked row into view.
+beforeEach(() => {
+  const descriptor = Object.getOwnPropertyDescriptor(Element.prototype, 'scrollIntoView')
+  Object.defineProperty(Element.prototype, 'scrollIntoView', { configurable: true, writable: true, value: vi.fn() })
+  onTestFinished(() => {
+    if (descriptor === undefined) Reflect.deleteProperty(Element.prototype, 'scrollIntoView')
+    else Object.defineProperty(Element.prototype, 'scrollIntoView', descriptor)
+  })
+})
 
 type SeatProps = ComponentProps<typeof ModelSelect>
 type SelectOutcome = Awaited<ReturnType<SeatProps['select']>>

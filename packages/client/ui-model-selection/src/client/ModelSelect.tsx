@@ -91,6 +91,7 @@ export function ModelSelect({
   const searchRef = useRef<HTMLInputElement | null>(null)
   const menuRef = useRef<HTMLDivElement | null>(null)
   const optionsRef = useRef<HTMLDivElement | null>(null)
+  const selectedRowRef = useRef<HTMLDivElement | null>(null)
   const id = useId()
 
   // A shortcut request opens the same dialog the chip does; consuming it is
@@ -178,6 +179,13 @@ export function ModelSelect({
     const card = triggerRef.current?.closest('[data-composer-card]')
     const rect = card?.getBoundingClientRect()
     setShift(rect === undefined ? 0 : Math.round(rect.left + rect.width / 2 - window.innerWidth / 2))
+  }, [open])
+
+  // A long catalog can open scrolled past the model in use; the dialog brings
+  // the checked row into view instead of hiding it behind the footer.
+  useLayoutEffect(() => {
+    if (!open) return
+    selectedRowRef.current?.scrollIntoView({ block: 'nearest' })
   }, [open])
 
   const highlightedIndex = highlighted ?? visibleModels.findIndex(row => row.key === currentKey)
@@ -475,6 +483,7 @@ export function ModelSelect({
                         return (
                           <div
                             key={rowKey}
+                            ref={selected ? selectedRowRef : undefined}
                             role="option"
                             aria-selected={selected}
                             tabIndex={-1}

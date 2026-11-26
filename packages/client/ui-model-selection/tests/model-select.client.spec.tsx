@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { act, cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
-import { afterEach, describe, expect, it, onTestFinished, vi } from 'vitest'
+import { afterEach, describe, expect, it, onTestFinished, vi, beforeEach } from 'vitest'
 import {
   RemoteError, SlotTestRuntime, bindSnapshotSelector, makeTranslate,
 } from '@deepseek-ai/dsh-client-test-runtime'
@@ -18,6 +18,16 @@ import { zh as commonZh } from '@deepseek-ai/dsh-client-locale/src/locales/zh.ts
 import { brandString } from '@deepseek-ai/dsh-brand'
 
 afterEach(cleanup)
+
+// jsdom has no scrollIntoView; the picker scrolls the checked row into view.
+beforeEach(() => {
+  const descriptor = Object.getOwnPropertyDescriptor(Element.prototype, 'scrollIntoView')
+  Object.defineProperty(Element.prototype, 'scrollIntoView', { configurable: true, writable: true, value: vi.fn() })
+  onTestFinished(() => {
+    if (descriptor === undefined) Reflect.deleteProperty(Element.prototype, 'scrollIntoView')
+    else Object.defineProperty(Element.prototype, 'scrollIntoView', descriptor)
+  })
+})
 
 type SeatProps = ComponentProps<typeof ModelSelect>
 type SelectOutcome = Awaited<ReturnType<SeatProps['select']>>

@@ -148,7 +148,7 @@
 
 .pickerContent {
   min-height: 0;
-  max-height: min(64vh, 560px);
+  max-height: min(84vh, 728px);
   /* The list scrolls above the footer; without clipping the last row paints
      under the footer bar. */
   overflow: hidden;
@@ -212,8 +212,10 @@
   flex-direction: column;
   gap: 2px;
   min-height: 0;
+  padding-bottom: 4px;
   overflow-y: auto;
   overscroll-behavior: contain;
+  scroll-padding-block: 8px;
 }
 
 .group {
