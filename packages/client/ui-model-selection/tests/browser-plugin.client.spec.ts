@@ -620,6 +620,12 @@ describe('composer model seat keyboard entries', () => {
     try {
       expect(b.shortcut('model.picker')?.defaults['web:windows']).toEqual({ code: 'KeyM', modifiers: ['primary', 'alt'] })
       expect(b.shortcut('model.picker')?.defaults['desktop:macos']).toEqual({ code: 'KeyM', modifiers: ['primary', 'alt'] })
+      // A web client on Linux needs its own profile entry: defaults are keyed by
+      // runtime:platform and a missing one leaves the command unbound.
+      expect(b.shortcut('model.picker')?.defaults['web:linux']).toEqual({ code: 'KeyM', modifiers: ['primary', 'alt'] })
+      expect(b.shortcut('model.effortNext')?.defaults['web:linux']).toEqual({ code: 'KeyE', modifiers: ['primary', 'alt'] })
+      expect(b.shortcut('model.effortPrevious')?.defaults['web:linux'])
+        .toEqual({ code: 'KeyE', modifiers: ['primary', 'alt', 'shift'] })
       expect(b.shortcut('model.effortNext')?.defaults['web:windows']).toEqual({ code: 'KeyE', modifiers: ['primary', 'alt'] })
       expect(b.shortcut('model.effortPrevious')?.defaults['web:windows'])
         .toEqual({ code: 'KeyE', modifiers: ['primary', 'alt', 'shift'] })

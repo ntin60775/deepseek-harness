@@ -193,6 +193,7 @@ export function apply(ctx: ClientContext): void {
           'desktop:linux': { code, modifiers },
           'web:macos': { code, modifiers },
           'web:windows': { code, modifiers },
+          'web:linux': { code, modifiers },
         },
         regions: ['page', 'editable'], modals: [], resolve,
       }), `ui-model-selection: ${id}`)
