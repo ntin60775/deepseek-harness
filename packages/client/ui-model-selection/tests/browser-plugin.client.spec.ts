@@ -618,17 +618,19 @@ describe('composer model seat keyboard entries', () => {
   it('binds the picker and both effort directions on layout-independent codes', async () => {
     const b = await bench()
     try {
-      expect(b.shortcut('model.picker')?.defaults['web:windows']).toEqual({ code: 'KeyM', modifiers: ['primary', 'alt'] })
       expect(b.shortcut('model.picker')?.defaults['desktop:macos']).toEqual({ code: 'KeyM', modifiers: ['primary', 'alt'] })
-      // A web client on Linux needs its own profile entry: defaults are keyed by
-      // runtime:platform and a missing one leaves the command unbound.
-      expect(b.shortcut('model.picker')?.defaults['web:linux']).toEqual({ code: 'KeyM', modifiers: ['primary', 'alt'] })
-      expect(b.shortcut('model.effortNext')?.defaults['web:linux']).toEqual({ code: 'KeyE', modifiers: ['primary', 'alt'] })
+      // A browser tab may only claim the gestures isWebBindingAllowed admits, so
+      // the web profiles carry those while the desktop keeps the Alt pair; the
+      // picker stays unbound on the web and is opened from /model instead.
+      expect(b.shortcut('model.picker')?.defaults['web:linux']).toBeUndefined()
+      expect(b.shortcut('model.effortNext')?.defaults['web:linux'])
+        .toEqual({ code: 'Period', modifiers: ['primary', 'shift'] })
       expect(b.shortcut('model.effortPrevious')?.defaults['web:linux'])
-        .toEqual({ code: 'KeyE', modifiers: ['primary', 'alt', 'shift'] })
-      expect(b.shortcut('model.effortNext')?.defaults['web:windows']).toEqual({ code: 'KeyE', modifiers: ['primary', 'alt'] })
+        .toEqual({ code: 'Comma', modifiers: ['primary', 'shift'] })
+      expect(b.shortcut('model.effortNext')?.defaults['web:windows'])
+        .toEqual({ code: 'Period', modifiers: ['primary', 'shift'] })
       expect(b.shortcut('model.effortPrevious')?.defaults['web:windows'])
-        .toEqual({ code: 'KeyE', modifiers: ['primary', 'alt', 'shift'] })
+        .toEqual({ code: 'Comma', modifiers: ['primary', 'shift'] })
     } finally { await b.ctx.fiber.dispose() }
   })
 

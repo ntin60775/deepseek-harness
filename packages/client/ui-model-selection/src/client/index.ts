@@ -182,23 +182,52 @@ export function apply(ctx: ClientContext): void {
     const mainSession = (): SessionId | undefined => Object.values(sessions.list.getSnapshot().byId)
       .find(row => (row.retainedBy.mainView ?? 0) > 0)?.id
     const shortcut = (id: string, label: () => string, aliases: string[], code: string,
-      modifiers: ('primary' | 'alt' | 'shift')[], resolve: ShortcutCommand['resolve']): void => {
+      modifiers: ('primary' | 'alt' | 'shift')[],
+      webDefaults: Partial<Record<'web:macos' | 'web:windows' | 'web:linux', { code: string; modifiers: ('primary' | 'alt' | 'shift')[] }>>,
+      resolve: ShortcutCommand['resolve']): void => {
       scope.effect(() => scope.shortcuts.register({
         id: id as ShortcutCommandId, label, aliases,
-        // Ctrl+Alt (Cmd+Alt on macOS) keeps the web shortcuts free of browser
-        // reservations; `code` makes the gesture layout-independent.
+        // Desktop takes the Alt pair; a browser tab may only claim the three
+        // gestures isWebBindingAllowed admits, so the web profiles carry those
+        // and `code` keeps every gesture layout-independent.
         defaults: {
           'desktop:macos': { code, modifiers },
           'desktop:windows': { code, modifiers },
           'desktop:linux': { code, modifiers },
-          'web:macos': { code, modifiers },
-          'web:windows': { code, modifiers },
-          'web:linux': { code, modifiers },
+          ...webDefaults,
         },
         regions: ['page', 'editable'], modals: [], resolve,
       }), `ui-model-selection: ${id}`)
     }
-    shortcut('model.picker', () => t('shortcut.picker'), ['choose model', 'model picker'], 'KeyM', ['primary', 'alt'], () => {
+    scope.slots.inject('conversation.input.model', () => scope.slots.register({
+      name: 'conversation.input.model',
+      locale: NS,
+      children: {
+        'conversation.input.model.label': { kind: 'single', scope: 'session', inline: true },
+        'conversation.input.model.options': { kind: 'list', scope: 'session' },
+        'conversation.input.model.pane': { kind: 'keyed', scope: 'session' },
+      },
+      inject: (sessionId): ModelSelectInjected => {
+        const directory = models.directoryFor(sessionId)
+        const available = sessions.subagentAddress(sessionId) === undefined
+        return {
+          available,
+          sessionId,
+          hooks: { pickerRequest: pickerRequests },
+          clearPickerRequest,
+          directory: directory.store,
+          load: () => {
+            if (available) directory.load().catch(() => { /* surfaced on the store */ })
+          },
+          resolveText: text => ctx.locale.resolveText(text),
+          select: (selection: ModelSelection) => available
+            ? directory.select(selection)
+            : Promise.resolve(undefined),
+        }
+      },
+    }, ModelSelect))
+
+    shortcut('model.picker', () => t('shortcut.picker'), ['choose model', 'model picker'], 'KeyM', ['primary', 'alt'], {}, () => {
       const sessionId = mainSession()
       if (sessionId === undefined) return { status: 'blocked', reason: t('shortcut.noSession') }
       if (sessions.subagentAddress(sessionId) !== undefined) return { status: 'blocked', reason: t('shortcut.noSession') }
@@ -231,35 +260,16 @@ export function apply(ctx: ClientContext): void {
       } }
     }
     shortcut('model.effortNext', () => t('shortcut.effortNext'), ['next effort', 'raise reasoning'], 'KeyE',
-      ['primary', 'alt'], () => cycleEffort(1))
+      ['primary', 'alt'],
+      { 'web:macos': { code: 'Period', modifiers: ['primary', 'shift'] },
+        'web:windows': { code: 'Period', modifiers: ['primary', 'shift'] },
+        'web:linux': { code: 'Period', modifiers: ['primary', 'shift'] } },
+      () => cycleEffort(1))
     shortcut('model.effortPrevious', () => t('shortcut.effortPrevious'), ['previous effort', 'lower reasoning'], 'KeyE',
-      ['primary', 'alt', 'shift'], () => cycleEffort(-1))
-    scope.slots.inject('conversation.input.model', () => scope.slots.register({
-      name: 'conversation.input.model',
-      locale: NS,
-      children: {
-        'conversation.input.model.label': { kind: 'single', scope: 'session', inline: true },
-        'conversation.input.model.options': { kind: 'list', scope: 'session' },
-        'conversation.input.model.pane': { kind: 'keyed', scope: 'session' },
-      },
-      inject: (sessionId): ModelSelectInjected => {
-        const directory = models.directoryFor(sessionId)
-        const available = sessions.subagentAddress(sessionId) === undefined
-        return {
-          available,
-          sessionId,
-          hooks: { pickerRequest: pickerRequests },
-          clearPickerRequest,
-          directory: directory.store,
-          load: () => {
-            if (available) directory.load().catch(() => { /* surfaced on the store */ })
-          },
-          resolveText: text => ctx.locale.resolveText(text),
-          select: (selection: ModelSelection) => available
-            ? directory.select(selection)
-            : Promise.resolve(undefined),
-        }
-      },
-    }, ModelSelect))
+      ['primary', 'alt', 'shift'],
+      { 'web:macos': { code: 'Comma', modifiers: ['primary', 'shift'] },
+        'web:windows': { code: 'Comma', modifiers: ['primary', 'shift'] },
+        'web:linux': { code: 'Comma', modifiers: ['primary', 'shift'] } },
+      () => cycleEffort(-1))
   })
 }
