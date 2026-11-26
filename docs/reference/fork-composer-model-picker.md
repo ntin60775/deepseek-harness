@@ -32,7 +32,7 @@ This page records the one fork-local change that replaces an upstream interface 
 - [binding.ts](../../packages/client/shortcuts/src/binding.ts) — `fork-patch: web-alt-shortcuts` admits Ctrl/Cmd+Alt and any three-modifier gesture to the browser allowlist, so the same chords work in a tab and in the desktop shell; plain Alt stays rejected and the adapter's AltGraph guard still drops layout-composed input. [configuration.client.spec.ts](../../packages/client/shortcuts/tests/configuration.client.spec.ts) records the fork's expectation there.
 - [locale dictionaries](../../packages/client/ui-model-selection/src/client/locales.ts) — `menu.close`, `menu.current`, `menu.keyApply`, `menu.keyClose`, `menu.back`, and the `shortcut.*` labels, in every shipped language.
 
-The plugin slots keep their contracts: `conversation.input.model.options` now renders in the dialog footer (the agent-team switch moved there), and `conversation.input.model.pane` unfolds inside that footer, keeping the model list visible and returning focus to the entry that folded it. The options owner also carries `openPaneKey` so an entry can mark itself expanded.
+The plugin slots keep their contracts: `conversation.input.model.options` now renders in the dialog footer, and `conversation.input.model.pane` unfolds inside that footer, keeping the model list visible and returning focus to the entry that folded it; the options owner also carries `openPaneKey` so an entry can mark itself expanded. The agent-team contribution uses neither: it is a bare switch beside the key hints, with the name, state, and cost in its tooltip.
 
 ## Design record
 
@@ -44,7 +44,7 @@ The session that produced this patch started from the stock seat: a 240px card w
 - **Chips in the composer.** The current model's levels are visible at all times next to the model chip, so a common change costs one click. They sit to the right of the chip, matching the composer's trailing control cluster.
 - **A dialog, not a menu.** The card centres over the conversation column: a side panel moves that column's centre away from the window's, so a viewport-centred card reads as belonging to the wrong surface.
 - **Keyboard first, layout second.** The gesture matches `event.code`, so it survives a Cyrillic layout, and the fork admits `primary+alt` to the browser allowlist: the stock policy left three gestures usable in a tab, none of them the ones this seat needs.
-- **Plugin settings move to the footer.** The agent-team switch used to be the third router row; it reads better as a footer entry beside the key hints than as a nested menu. Selecting it unfolds the settings under that entry — the model list stays on screen, so the entry reads as an accordion rather than a second view.
+- **Plugin settings move to the footer.** The agent-team switch used to be the third router row; it reads better as a control beside the key hints than as a nested menu. A caption row was tried and rejected: the footer keeps the switch alone, and the hover tooltip carries the name, the saved state, and what the mode costs, so the list never loses a row to a heading.
 
 Two defects surfaced while the change was under test and are fixed here: the `conversation.input.model.options` slot was declared but never rendered (the agent-team switch would have vanished), and closing one seat's picker retired a picker request belonging to another Session in a split view.
 
