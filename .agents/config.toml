@@ -9,38 +9,28 @@ model = "qwen-token-plan-max/qwen4-max"
 level = "medium"
 
 [agents.reviewer-tests]
-model = "qwen-token-plan-max/qwen4-max"
-level = "medium"
+model = "qwen-token-plan-glm/glm-5.3"
+level = "high"
 
 [agents.reviewer-code]
-model = "qwen-token-plan-max/qwen4-max"
-level = "medium"
+model = "deepseek-account/deepseek-flash"
+level = "max"
 
 [agents.reviewer-kb]
-model = "qwen-token-plan-max/qwen4-max"
-level = "medium"
+model = "qwen-token-plan/qwen3.8-flash"
+level = "xhigh"
 
 [agents.critic]
 model = "qwen-token-plan-max/qwen4-max"
 level = "xhigh"
 
 [agents.curator]
-model = "qwen-token-plan/qwen3.8-flash"
-level = "medium"
-
-# Flash pool for critic projection slices (skill critic).
-# Routes verified against live list_subagent_models 2026-11-13; operator decision 2026-11-13.
-[[validation.pool]]
 model = "deepseek-account/deepseek-flash"
-level = "max"
-
-[[validation.pool]]
-model = "qwen-token-plan/qwen3.8-flash"
-level = "xhigh"
+level = "low"
 
 [validation]
 pool = [
-  { model = "qwen-token-plan-deepseek/deepseek-v4.1-flash-1017", level = "max" },
+  { model = "deepseek-account/deepseek-flash", level = "max" },
   { model = "qwen-token-plan/qwen3.8-flash", level = "xhigh" },
-  { model = "qwen-token-plan-glm/glm-5.3", level = "max" },
+  { model = "qwen-token-plan-glm/glm-5.3", level = "high" },
 ]
