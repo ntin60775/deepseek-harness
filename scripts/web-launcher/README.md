@@ -1,6 +1,6 @@
 # Web launcher window
 
-Small Qt window that starts and stops the local DeepSeek Harness Web server and opens the interface in a browser tab. It replaces the hand-written shell launcher that used to live in `~/.local/bin`: same runtime files, same behaviour, plus a visible server state and a stop action.
+Small Qt window that starts and stops the local DeepSeek Harness Web server and opens the interface in a browser tab. It replaces the hand-written shell launcher that used to live in `~/.local/bin`: same runtime files, same behaviour, plus a visible server state, a stop action, a crash record and an automatic restart.
 
 ## Install
 
@@ -17,9 +17,17 @@ The procedure below is packaged as the `dsh-web-launcher` skill (`.agents/skills
 ## Using the window
 
 - **Запуск** — starts the server when it is down and opens the interface; when the server is already up it only opens the interface. `Enter` presses it.
-- **Остановка** — stops the server. When the server still runs work (tool calls, subagents), the window asks first, because those runs are interrupted.
+- **Остановка** — stops the supervisor and the server it owns. When the server still runs work (tool calls, subagents), the window asks first, because those runs are interrupted.
 - **Пересборка** — runs `scripts/web-launcher/rebuild-web.sh` in the background: package `lib/`, client bundles and `apps/web/dist`. The server is not restarted and stays enabled state-wise; it polls the bundles it serves, so open tabs reload on their own. Closing the window while a build runs is refused, because killing a build leaves partially written artifacts. The window reports the script's exit code and output tail when it fails.
 - **×** on the window frame or `Esc` closes the window; the server keeps running, as before.
+
+## Crash record and restart
+
+The window starts `dsh-web-supervisor.py`, not the server directly, and the supervisor keeps the server alive. Every exit lands in `$XDG_RUNTIME_DIR/dsh-web.log` as `dsh web supervisor: server died (code N after Ns)`; a clean exit (code 0) ends supervision, and a stop signal ends it without a restart.
+
+An unexpected death restarts the server after 1, 2, 5, 10 and 20 seconds, in that order; a server that stayed up for a minute restores the full budget. After the fifth restart the supervisor gives up, prints `giving up after 5 restarts; start the server from the launcher` and exits, so a crash loop does not run forever. Open tabs reconnect on their own once the server answers again.
+
+The log is appended to, never truncated, and one oversized generation is kept as `dsh-web.log.1`; the record of the server that died stays readable after the next start.
 
 ## Environment
 
@@ -34,6 +42,6 @@ The desktop entry starts the window from a session whose `PATH` holds only the s
 
 ## How the state is detected
 
-The window looks for `node … apps/cli/src/bin.ts web` processes whose working directory is this checkout, using both the PID file and the process table, so a stale PID file cannot point it at an unrelated process. The access URL (with its token) comes from `dsh-web.log`, where the server prints it. A stop counts as finished only after the process is gone; SIGTERM is followed by SIGKILL after ten seconds.
+The PID file holds the supervisor, and the window accepts it only when the process runs this checkout's `dsh-web-supervisor.py` from this checkout's directory. Servers are found in the process table as `node … apps/cli/src/bin.ts web` processes whose working directory is this checkout, so a supervisor started elsewhere, a recycled PID and a stale PID file cannot point the window at an unrelated process. The access URL (with its token) comes from the newest `dsh web: http://…` line in `dsh-web.log`. A stop counts as finished only after every supervisor and server of this checkout is gone; SIGTERM is followed by SIGKILL after ten seconds.
 
-"Running work" means a child process of the server other than idle long-lived helpers (the tsx/esbuild service, MCP servers and similar): children below one CPU second after five minutes of life are treated as infrastructure, everything else as active work.
+"Running work" means a child process of a server rather than idle long-lived helpers (the tsx/esbuild service, MCP servers and similar): children below one CPU second after five minutes of life are treated as infrastructure, everything else as active work.

@@ -3,11 +3,12 @@ node_type: reference
 title: Web launcher window (fork-local)
 service: _platform
 status: active
-updated: 2026-11-10
+updated: 2026-11-27
 tags: [fork, launcher, desktop, linux]
 links:
   documents:
     - ../../scripts/web-launcher/dsh-web-launcher.py
+    - ../../scripts/web-launcher/dsh-web-supervisor.py
     - ../../scripts/web-launcher/install.sh
     - ../../scripts/web-launcher/dsh-icon.svg
     - ../../scripts/web-launcher/dsh-icon-256.png
@@ -26,12 +27,14 @@ links:
 ## What the window does
 
 - One start action (`Запуск`, the default button pressed by `Enter`) and one stop action (`Остановка`), with a status chip reading `запущен` or `остановлен` that refreshes once per second.
+- A server that dies is restarted by the supervisor the window starts, and every exit code lands in the log, so the interface recovers without the operator and the cause survives the next start.
 - When the server is down, `Запуск` starts it and opens the interface; when the server is already up, `Запуск` only opens the interface. Either way the window closes after the browser opens.
 - `Остановка` shows an inline confirmation first when the window sees running work, because stopping interrupts it. Closing the window with `Esc` or the frame close button leaves the server running.
 
 ## What it consists of
 
-- [dsh-web-launcher.py](../../scripts/web-launcher/dsh-web-launcher.py) is the window itself; it starts the server as `node --import tsx/esm apps/cli/src/bin.ts web --no-open` in the checkout root, reads and writes the runtime files `$XDG_RUNTIME_DIR/dsh-web.log` and `$XDG_RUNTIME_DIR/dsh-web.pid` (`/tmp` when `XDG_RUNTIME_DIR` is unset) and opens the access URL the server prints to the log. The full runtime contract is in the [skill](../../.agents/skills/dsh-web-launcher/SKILL.md).
+- [dsh-web-launcher.py](../../scripts/web-launcher/dsh-web-launcher.py) is the window itself; it starts [dsh-web-supervisor.py](../../scripts/web-launcher/dsh-web-supervisor.py), which runs the server as `node --import tsx/esm apps/cli/src/bin.ts web --no-open` in the checkout root. The window reads and writes the runtime files `$XDG_RUNTIME_DIR/dsh-web.log` and `$XDG_RUNTIME_DIR/dsh-web.pid` (`/tmp` when `XDG_RUNTIME_DIR` is unset) and opens the access URL the server prints to the log. The full runtime contract is in the [skill](../../.agents/skills/dsh-web-launcher/SKILL.md).
+- [dsh-web-supervisor.py](../../scripts/web-launcher/dsh-web-supervisor.py) owns the server process: it writes the PID file the window stops, logs `server died (code N after Ns)` for every unexpected exit, restarts after 1, 2, 5, 10 and 20 seconds, restores that budget after a minute of uptime and gives up after the fifth restart. Exit code 0 and a stop signal end supervision without a restart.
 - [install.sh](../../scripts/web-launcher/install.sh) installs the tool for the current user: it writes the application-menu entry `~/.local/share/applications/deepseek-harness.desktop` pointing at this checkout, links `~/.local/bin/dsh-web` to the window script, and is safe to re-run after `git pull`.
 - The icons: `dsh-icon.svg` is the menu entry's icon, and `dsh-icon-16.png` through `dsh-icon-256.png` form the window icon, with [dsh-icon-256.png](../../scripts/web-launcher/dsh-icon-256.png) also drawing the header logo.
 - [scripts/AGENTS.md](../../scripts/AGENTS.md) lists `web-launcher/` under local tooling and points at the README and the skill.
@@ -40,6 +43,10 @@ links:
 
 - It never builds. It does not run `build:artifacts` and does not rebuild the client bundles on edits; that loop remains the job of `pnpm run dev:web`, covered in [development.md](../development.md). The launcher starts and stops the same server `dsh web` starts from source.
 - It does not stop the server when the window closes, and it does not touch a server another checkout started: the state-detection rules that keep it to this checkout's processes are in the [skill](../../.agents/skills/dsh-web-launcher/SKILL.md).
+
+## Crash record
+
+The window appends to `dsh-web.log` and rotates one generation into `dsh-web.log.1` past 5 MiB, because the log is the only place that names the exit code of a server that is gone. A start writes a `=== launcher start …` banner and the supervisor writes `server died (code N after Ns)` before each restart, so a crash loop leaves one record per attempt.
 
 ## How the installation is checked and where the procedure lives
 

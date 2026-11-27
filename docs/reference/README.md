@@ -14,7 +14,7 @@ links:
 Each page here records one capability or adaptation this fork carries on top of `upstream/master`: what differs, where the owning contract lives, and which check proves it. Type definitions stay on [subsystems/](../subsystems/README.md) pages, package contracts on package READMEs, and decision rationale in [Agent Notes](../../.agents/notes/README.md); a page below links those owners instead of restating them.
 
 - [fork-web-search-zai.md](fork-web-search-zai.md) — the z.ai MCP web search and reader provider under `packages/fork/`, its credential, and how a profile selects it.
-- [fork-web-launcher.md](fork-web-launcher.md) — the Linux desktop window that starts and stops this checkout's `dsh web` server, and what it does not do.
+- [fork-web-launcher.md](fork-web-launcher.md) — the Linux desktop window that starts and stops this checkout's `dsh web` server, records why a server died, restarts it, and what it does not do.
 - [fork-session-permanent-deletion.md](fork-session-permanent-deletion.md) — one permanent Session deletion traced from the sidebar action through the Remote command, storage removal, and registry cleanup, with its irreversibility limits and tests.
 - [fork-merge-ritual.md](fork-merge-ritual.md) — the phase order of `scripts/fork-merge-ritual.sh`, what each upstream merge restores, and the script exceptions that keep fork-local surfaces alive.
 - [fork-composer-model-picker.md](fork-composer-model-picker.md) — the composer's model chip, reasoning chips, and dialog picker that replace upstream's two-level menu, with the markers an upstream merge has to keep.

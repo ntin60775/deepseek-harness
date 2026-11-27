@@ -24,6 +24,7 @@ REPO="$(cd "$HERE/../.." && pwd)"
 RUN_DIR="${XDG_RUNTIME_DIR:-/tmp}"
 LOG_PATH="$RUN_DIR/dsh-web.log"
 PID_PATH="$RUN_DIR/dsh-web.pid"
+SUPERVISOR_PATH="$HERE/dsh-web-supervisor.py"
 DIST_INDEX="$REPO/apps/web/dist/index.html"
 STOP_TIMEOUT_SECONDS=10
 START_TIMEOUT_SECONDS=90
@@ -141,24 +142,28 @@ fi
 # --- restart ------------------------------------------------------------------
 
 # Same state detection as dsh-web-launcher.py: a recycled PID must never be signalled, so
-# the candidate must run `apps/cli/src/bin.ts web`, live in this checkout, and be a node binary.
-server_pid() {
-  local pid cwd cmdline
+# the candidate must be this checkout's supervisor or its `dsh web` server. The PID file
+# holds the supervisor, which forwards SIGTERM to the server it owns.
+managed_pid() {
+  local pid cwd cmdline exe
   [ -e "$PID_PATH" ] || return 1
   pid="$(tr -dc '0-9' < "$PID_PATH" || true)"
   [ -n "$pid" ] && kill -0 "$pid" 2>/dev/null || return 1
   cwd="$(readlink "/proc/$pid/cwd" 2>/dev/null || true)"
   [ "$cwd" = "$REPO" ] || return 1
   cmdline="$(tr '\0' ' ' < "/proc/$pid/cmdline" 2>/dev/null || true)"
+  exe="$(basename "${cmdline%% *}")"
   case "$cmdline" in
-    *"apps/cli/src/bin.ts web"*) case "$(basename "${cmdline%% *}")" in node|node.*) return 0 ;; *) return 1 ;; esac ;;
-    *) return 1 ;;
+    *"$(basename "$SUPERVISOR_PATH")"*) case "$exe" in python*) return 0 ;; *) return 1 ;; esac ;;
+    *"apps/cli/src/bin.ts web"*) case "$exe" in node|node.*) return 0 ;; *) return 1 ;; esac ;;
   esac
+  return 1
 }
 
 if [ "$RESTART" = "1" ]; then
   printf '\n== перезапуск сервера ==\n'
-  if server_pid; then
+  PYTHON="$(command -v python3 2>/dev/null || true)"
+  if managed_pid; then
     PID="$(tr -dc '0-9' < "$PID_PATH")"
     printf '  stop pid=%s\n' "$PID"
     if [ "$DRY_RUN" != "1" ]; then
@@ -172,25 +177,29 @@ if [ "$RESTART" = "1" ]; then
   fi
 
   if [ "$DRY_RUN" != "1" ]; then
-    : > "$LOG_PATH"
-    # Same argv, cwd, detached session and log/pid contract as dsh-web-launcher.py.
-    setsid "$NODE" --import tsx/esm apps/cli/src/bin.ts web --no-open \
-      > "$LOG_PATH" 2>&1 < /dev/null &
+    [ -n "$PYTHON" ] || fail "python3 не найден — им запускается супервизор"
+    # The log is the only record of how a server died, so a restart appends.
+    printf '=== launcher start %s\n' "$(date +%Y-%m-%dT%H:%M:%S%z)" >> "$LOG_PATH"
+    LOG_LINES="$(wc -l < "$LOG_PATH")"
+    setsid "$PYTHON" "$SUPERVISOR_PATH" "$NODE" >> "$LOG_PATH" 2>&1 < /dev/null &
     NEW_PID=$!
     printf '%s\n' "$NEW_PID" > "$PID_PATH"
     deadline=$(( $(date +%s) + START_TIMEOUT_SECONDS ))
     URL=""
     while [ "$(date +%s)" -lt "$deadline" ]; do
-      URL="$(sed -n 's/^dsh web: \(http[^[:space:]]*\).*/\1/p' "$LOG_PATH" | tail -1 || true)"
+      URL="$(tail -n +"$((LOG_LINES + 1))" "$LOG_PATH" | sed -n 's/^dsh web: \(http[^[:space:]]*\).*/\1/p' | tail -1 || true)"
       [ -n "$URL" ] && break
-      kill -0 "$NEW_PID" 2>/dev/null || fail "сервер завершился, лог: $LOG_PATH"
+      kill -0 "$NEW_PID" 2>/dev/null || fail "супервизор завершился, лог: $LOG_PATH"
       sleep 1
     done
-    [ -n "$URL" ] || fail "URL не появился в $LOG_PATH за ${START_TIMEOUT_SECONDS}s"
+    if [ -z "$URL" ]; then
+      kill -TERM "$NEW_PID" 2>/dev/null || true
+      fail "URL не появился в $LOG_PATH за ${START_TIMEOUT_SECONDS}s"
+    fi
     printf '  pid=%s URL=%s\n' "$NEW_PID" "$URL"
     printf '  откройте %s в браузере (вкладки предыдущего процесса закрылись)\n' "$URL"
   else
-    printf '  (dry-run: сервер бы перезапущен через %s)\n' "$NODE"
+    printf '  (dry-run: сервер бы перезапущен через %s %s)\n' "$PYTHON" "$SUPERVISOR_PATH"
   fi
 else
   printf '\nСервер не перезапускался. Хост-плагины грузятся из src — для них нужен рестарт;\n'

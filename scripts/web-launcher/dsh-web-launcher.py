@@ -4,7 +4,9 @@ Web server and opens the interface in a browser tab.
 
 The window reads and writes the runtime files the shell launcher used before it:
 ``$XDG_RUNTIME_DIR/dsh-web.log`` (the server prints its access URL there) and
-``$XDG_RUNTIME_DIR/dsh-web.pid``.
+``$XDG_RUNTIME_DIR/dsh-web.pid`` (the supervisor, see ``dsh-web-supervisor.py``).
+The log is appended to and rotated, because the previous log holds the exit code of
+a server that died.
 
 Requirements: Python 3 with PyQt6, Node.js, and a browser. ``install.sh`` in this
 directory installs the application-menu entry and checks those requirements.
@@ -46,6 +48,12 @@ DSH_HOME = Path(os.environ.get("DSH_HOME") or (Path.home() / ".dsh"))
 DEFAULT_URL = "http://127.0.0.1:3080"
 URL_PATTERN = re.compile(r"^dsh web: (http\S+)", re.MULTILINE)
 SERVER_COMMAND = ("apps/cli/src/bin.ts", "web")
+SUPERVISOR_NAME = "dsh-web-supervisor.py"
+SUPERVISOR_SCRIPT = HERE / SUPERVISOR_NAME
+
+# The log is the only record of how a server died, so a start appends to it and
+# keeps one rotated generation once the file outgrows the cap.
+LOG_ROTATE_BYTES = 5 * 1024 * 1024
 
 # Rebuild runs the checkout's own script so the window and a terminal issue one and the
 # same build; the script resolves Node itself and refuses to run beside `pnpm run dev:web`.
@@ -145,14 +153,34 @@ def browser_command() -> list[str] | None:
     return None
 
 
-def url_from_log() -> str | None:
-    """Return the last access URL the server printed, token included."""
+def url_from_log(since: int = 0) -> str | None:
+    """Return the last access URL the server printed after character offset ``since``."""
     try:
         text = LOG_PATH.read_text(errors="replace")
     except OSError:
         return None
-    found = URL_PATTERN.findall(text)
+    found = URL_PATTERN.findall(text[since:])
     return found[-1] if found else None
+
+
+def prepare_log() -> int:
+    """Rotate an oversized log, append a start banner, and return the banner's offset.
+
+    Every start used to truncate the file, which destroyed the exit record of the
+    server that died before it; a rotated generation keeps that record reachable.
+    """
+    try:
+        if LOG_PATH.stat().st_size > LOG_ROTATE_BYTES:
+            os.replace(LOG_PATH, LOG_PATH.with_name(LOG_PATH.name + ".1"))
+    except OSError:
+        pass
+    try:
+        offset = len(LOG_PATH.read_text(errors="replace"))
+        with LOG_PATH.open("a", encoding="utf-8") as log:
+            log.write(f"=== launcher start {time.strftime('%Y-%m-%dT%H:%M:%S%z')}\n")
+        return offset
+    except OSError:
+        return 0
 
 
 def display_url(url: str | None) -> str:
@@ -211,7 +239,7 @@ def is_server_pid(pid: int) -> bool:
     if pid <= 0:
         return False
     cmd = _cmdline(pid)
-    if not cmd or "apps/cli/src/bin.ts web" not in cmd:
+    if not cmd or " ".join(SERVER_COMMAND) not in cmd:
         return False
     cwd = _cwd(pid)
     if not cwd:
@@ -224,30 +252,82 @@ def is_server_pid(pid: int) -> bool:
     return _exe_name(pid) == "node"
 
 
+def is_supervisor_pid(pid: int) -> bool:
+    """Return True when ``pid`` is this checkout's server supervisor."""
+    if pid <= 0:
+        return False
+    cmd = _cmdline(pid)
+    if not cmd or str(SUPERVISOR_SCRIPT) not in cmd:
+        return False
+    cwd = _cwd(pid)
+    if not cwd:
+        return False
+    try:
+        if Path(cwd).resolve() != REPO:
+            return False
+    except OSError:
+        return False
+    return _exe_name(pid).startswith("python")
+
+
+def _pgrep(pattern: str) -> list[int]:
+    try:
+        listing = subprocess.run(["pgrep", "-f", pattern], capture_output=True, text=True, timeout=5)
+    except (OSError, ValueError, subprocess.SubprocessError):
+        return []
+    return [int(entry) for entry in listing.stdout.split() if entry.isdigit()]
+
+
+def _pid_file_pid() -> int:
+    try:
+        return int(PID_PATH.read_text().strip())
+    except (OSError, ValueError):
+        return 0
+
+
+def supervisor_pids() -> list[int]:
+    """Return this checkout's supervisors, from the PID file and the process table."""
+    pids: list[int] = []
+
+    def add(pid: int) -> None:
+        if pid not in pids and is_supervisor_pid(pid):
+            pids.append(pid)
+
+    add(_pid_file_pid())
+    for entry in _pgrep(r"dsh-web-supervisor\.py"):
+        add(entry)
+    return sorted(pids)
+
+
 def server_pids() -> list[int]:
-    """Return this checkout's server processes, from the PID file and the process table."""
+    """Return this checkout's ``dsh web`` servers, supervised or started elsewhere."""
     pids: list[int] = []
 
     def add(pid: int) -> None:
         if pid not in pids and is_server_pid(pid):
             pids.append(pid)
 
-    try:
-        add(int(PID_PATH.read_text().strip()))
-    except (OSError, ValueError):
-        pass
-    try:
-        listing = subprocess.run(
-            ["pgrep", "-f", r"apps/cli/src/bin\.ts web"],
-            capture_output=True,
-            text=True,
-            timeout=5,
-        )
-        for entry in listing.stdout.split():
-            add(int(entry))
-    except (OSError, ValueError, subprocess.SubprocessError):
-        pass
+    add(_pid_file_pid())
+    for entry in _pgrep(r"apps/cli/src/bin\.ts web"):
+        add(entry)
     return sorted(pids)
+
+
+def running_pids() -> list[int]:
+    """Return every process the window manages: supervisors and the servers they own."""
+    return sorted({*supervisor_pids(), *server_pids()})
+
+
+def stop_targets() -> list[int]:
+    """Return the processes to signal: supervisors forward to their servers, bare servers take it directly."""
+    supervisors = supervisor_pids()
+    targets = list(supervisors)
+    for pid in server_pids():
+        fields = _stat_fields(pid)
+        parent = int(fields[1]) if len(fields) > 1 and fields[1].isdigit() else 0
+        if parent not in supervisors:
+            targets.append(pid)
+    return sorted(set(targets))
 
 
 def process_started_at(pid: int) -> float | None:
@@ -288,16 +368,17 @@ def child_pids(pid: int) -> list[int]:
     return children
 
 
-def active_work(pid: int) -> bool:
-    """Return True when the server runs child processes that look like live work."""
+def active_work(pids: list[int]) -> bool:
+    """Return True when any of the servers in ``pids`` runs child processes that look like live work."""
     now = time.time()
-    for child in child_pids(pid):
-        if "esbuild" in _cmdline(child):
-            continue
-        started = process_started_at(child)
-        if started and now - started > WORK_MAX_IDLE_SECONDS and process_cpu_seconds(child) < WORK_CPU_SECONDS:
-            continue
-        return True
+    for pid in pids:
+        for child in child_pids(pid):
+            if "esbuild" in _cmdline(child):
+                continue
+            started = process_started_at(child)
+            if started and now - started > WORK_MAX_IDLE_SECONDS and process_cpu_seconds(child) < WORK_CPU_SECONDS:
+                continue
+            return True
     return False
 
 
@@ -345,7 +426,7 @@ def log_tail(limit: int = 3000) -> str:
 
 
 class StartWorker(QThread):
-    """Boot the server and wait for the access URL to appear in the log."""
+    """Boot the supervisor and wait for the access URL to appear in the log."""
 
     started = pyqtSignal(str)
     failed = pyqtSignal(str)
@@ -356,10 +437,27 @@ class StartWorker(QThread):
         self._process: subprocess.Popen[bytes] | None = None
 
     def cancel(self) -> None:
+        """Ask the loop to stop; it terminates the supervisor and drops the PID file itself."""
         self._cancelled = True
         process = self._process
-        if process and process.poll() is None:
+        if process is not None and process.poll() is None:
             process.terminate()
+
+    def _kill(self) -> None:
+        """Stop a supervisor this thread started and drop its PID file."""
+        process = self._process
+        self._process = None
+        if process is not None and process.poll() is None:
+            process.terminate()
+            try:
+                process.wait(timeout=STOP_TIMEOUT_SECONDS)
+            except subprocess.TimeoutExpired:
+                process.kill()
+                process.wait()
+        try:
+            PID_PATH.unlink()
+        except OSError:
+            pass
 
     def run(self) -> None:
         node = node_binary()
@@ -368,40 +466,36 @@ class StartWorker(QThread):
             return
         try:
             LOG_PATH.parent.mkdir(parents=True, exist_ok=True)
-            LOG_PATH.write_text("")
-            log = open(LOG_PATH, "a", encoding="utf-8")
+            offset = prepare_log()
         except OSError as error:
             self.failed.emit(f"Не удалось подготовить файл лога: {error}")
             return
         try:
             self._process = subprocess.Popen(
-                [node, "--import", "tsx/esm", "apps/cli/src/bin.ts", "web", "--no-open"],
+                [sys.executable, str(SUPERVISOR_SCRIPT), node],
                 cwd=REPO,
                 env=server_env(),
                 stdin=subprocess.DEVNULL,
-                stdout=log,
-                stderr=subprocess.STDOUT,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
                 start_new_session=True,
             )
         except OSError as error:
-            log.close()
             self.failed.emit(f"Не удалось запустить сервер: {error}")
             return
-        try:
-            PID_PATH.write_text(f"{self._process.pid}\n")
-        except OSError:
-            pass
         deadline = time.time() + START_TIMEOUT_SECONDS
         while time.time() < deadline and not self._cancelled:
-            url = url_from_log()
+            url = url_from_log(offset)
             if url:
                 self._process = None
                 self.started.emit(url)
                 return
             if self._process.poll() is not None:
+                self._kill()
                 self.failed.emit("Сервер завершился при запуске:\n" + (log_tail() or "лог пуст"))
                 return
             time.sleep(0.25)
+        self._kill()
         if self._cancelled:
             return
         self.failed.emit(
@@ -410,13 +504,13 @@ class StartWorker(QThread):
 
 
 class StopWorker(QThread):
-    """Stop every server process of this checkout."""
+    """Stop this checkout's supervisor and every server process it owns."""
 
     finished_ok = pyqtSignal()
     failed = pyqtSignal(str)
 
     def run(self) -> None:
-        pids = server_pids()
+        pids = stop_targets()
         if not pids:
             self.finished_ok.emit()
             return
@@ -746,9 +840,11 @@ class Launcher(QWidget):
     def _refresh(self) -> None:
         if self._busy:
             return
-        pids = server_pids()
+        supervisors = supervisor_pids()
+        servers = server_pids()
+        pids = sorted({*supervisors, *servers})
         running = bool(pids)
-        pid = pids[0] if running else 0
+        pid = (servers or pids or [0])[0]
         url = url_from_log()
         if running:
             self._chip.setText("запущен")
@@ -829,7 +925,7 @@ class Launcher(QWidget):
         self._hide_error()
         self._hide_confirm()
         url = url_from_log()
-        running = bool(server_pids())
+        running = bool(running_pids())
         if running:
             if not url or not port_answers(url):
                 self._show_error(
@@ -859,11 +955,11 @@ class Launcher(QWidget):
         if self._busy:
             return
         self._hide_error()
-        pids = server_pids()
+        pids = running_pids()
         if not pids:
             self._refresh()
             return
-        if active_work(pids[0]):
+        if active_work(server_pids()):
             self._show_confirm()
             return
         self._stop_now()
